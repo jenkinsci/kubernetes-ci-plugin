@@ -1,0 +1,14 @@
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Working Directories #
+target/
+work/
+.idea/
+*.iml
+nbactions*.xml
+results/
