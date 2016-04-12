@@ -1,0 +1,6 @@
+<!-- This view is used to render the installed plugins page. -->
+<?jelly escape-by-default='true'?>
+<div>
+  This plugin allows project to be built on slave instances deployed and managed by
+  <a href="https://github.com/GoogleCloudPlatform/kubernetes">Kubernetes</a>.
+</div>
