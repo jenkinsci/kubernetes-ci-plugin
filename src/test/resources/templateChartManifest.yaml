@@ -1,0 +1,184 @@
+---
+apiVersion: "v1"
+kind: "Template"
+labels: {}
+metadata:
+  annotations:
+    description: "The AMQ Package provides the AMQ Broker and the Fabric8MQ Broker.\
+      \ \n"
+    fabric8.amqbroker/iconUrl: "img/icons/activemq.svg"
+    fabric8.amqbroker/summary: "ActiveMQ Broker"
+    fabric8.fabric8mq/summary: "Fabric8 MQ Broker"
+    fabric8.fabric8mq/iconUrl: "https://cdn.rawgit.com/fabric8io/fabric8-ipaas/master/fabric8mq/src/main/fabric8/icon.svg"
+    fabric8.amq/summary: "Sonatype helps open source projects to set up Maven repositories\
+      \ on https://oss.sonatype.org/"
+  labels: {}
+  name: "amq"
+objects:
+- apiVersion: "v1"
+  kind: "Service"
+  metadata:
+    annotations: {}
+    labels:
+      project: "amqbroker"
+      component: "amqbroker"
+      provider: "fabric8"
+      version: "2.2.95"
+      group: "amqbroker"
+      package: "amq"
+    name: "amqbroker"
+  spec:
+    deprecatedPublicIPs: []
+    externalIPs: []
+    ports:
+    - port: 6163
+      protocol: "TCP"
+      targetPort: 6194
+    selector:
+      project: "amqbroker"
+      component: "amqbroker"
+      provider: "fabric8"
+      group: "amqbroker"
+- apiVersion: "v1"
+  kind: "Service"
+  metadata:
+    annotations: {}
+    labels:
+      project: "fabric8mq"
+      component: "fabric8MQ"
+      provider: "fabric8"
+      version: "2.2.95"
+      group: "fabric8mq"
+      package: "amq"
+    name: "fabric8mq"
+  spec:
+    deprecatedPublicIPs: []
+    externalIPs: []
+    ports:
+    - port: 6163
+      protocol: "TCP"
+      targetPort: 6194
+    selector:
+      project: "fabric8mq"
+      component: "fabric8MQ"
+      provider: "fabric8"
+      group: "fabric8mq"
+    type: "LoadBalancer"
+- apiVersion: "v1"
+  kind: "ReplicationController"
+  metadata:
+    annotations:
+      fabric8.io/git-branch: "release-v2.2.95"
+      fabric8.io/git-commit: "9a124eeb7dafa0350f9b906fa8bceacb3c430763"
+      fabric8.io/git-url: "http://gogs.release.cd.fabric8.io/gogsadmin/oss-parent/commit/9a124eeb7dafa0350f9b906fa8bceacb3c430763"
+      fabric8.io/build-url: "http://jenkins.release.cd.fabric8.io/job/oss-parent/4"
+      fabric8.io/build-id: "4"
+    labels:
+      project: "amqbroker"
+      component: "amqbroker"
+      provider: "fabric8"
+      version: "2.2.95"
+      group: "amqbroker"
+      package: "amq"
+    name: "amqbroker"
+  spec:
+    replicas: 1
+    selector:
+      project: "amqbroker"
+      component: "amqbroker"
+      provider: "fabric8"
+      version: "2.2.95"
+      group: "amqbroker"
+    template:
+      metadata:
+        annotations: {}
+        labels:
+          project: "amqbroker"
+          component: "amqbroker"
+          provider: "fabric8"
+          version: "2.2.95"
+          group: "amqbroker"
+          package: "amq"
+      spec:
+        containers:
+        - args: []
+          command: []
+          env:
+          - name: "AB_JOLOKIA_AUTH_OPENSHIFT"
+            value: "true"
+          - name: "KUBERNETES_NAMESPACE"
+            valueFrom:
+              fieldRef:
+                fieldPath: "metadata.namespace"
+          image: "fabric8/amqbroker:2.2.95"
+          name: "amqbroker"
+          ports:
+          - containerPort: 6194
+            name: "amq"
+          - containerPort: 8778
+            name: "jolokia"
+          securityContext: {}
+          volumeMounts: []
+        imagePullSecrets: []
+        nodeSelector: {}
+        volumes: []
+- apiVersion: "v1"
+  kind: "ReplicationController"
+  metadata:
+    annotations:
+      fabric8.io/git-branch: "release-v2.2.95"
+      fabric8.io/git-commit: "9a124eeb7dafa0350f9b906fa8bceacb3c430763"
+      fabric8.io/git-url: "http://gogs.release.cd.fabric8.io/gogsadmin/oss-parent/commit/9a124eeb7dafa0350f9b906fa8bceacb3c430763"
+      fabric8.io/build-url: "http://jenkins.release.cd.fabric8.io/job/oss-parent/4"
+      fabric8.io/build-id: "4"
+    labels:
+      project: "fabric8mq"
+      component: "fabric8MQ"
+      provider: "fabric8"
+      version: "2.2.95"
+      group: "fabric8mq"
+      package: "amq"
+    name: "fabric8mq"
+  spec:
+    replicas: 1
+    selector:
+      project: "fabric8mq"
+      component: "fabric8MQ"
+      provider: "fabric8"
+      version: "2.2.95"
+      group: "fabric8mq"
+    template:
+      metadata:
+        annotations: {}
+        labels:
+          project: "fabric8mq"
+          component: "fabric8MQ"
+          provider: "fabric8"
+          version: "2.2.95"
+          group: "fabric8mq"
+          package: "amq"
+      spec:
+        containers:
+        - args: []
+          command: []
+          env:
+          - name: "KUBERNETES_TRUST_CERT"
+            value: "true"
+          - name: "KUBERNETES_NAMESPACE"
+            valueFrom:
+              fieldRef:
+                fieldPath: "metadata.namespace"
+          image: "fabric8/fabric8mq:2.2.95"
+          name: "fabric8mq"
+          ports:
+          - containerPort: 6194
+            name: "amq"
+          - containerPort: 8778
+            name: "jolokia"
+          securityContext: {}
+          volumeMounts: []
+        imagePullSecrets: []
+        nodeSelector: {}
+        serviceAccountName: "fabric8"
+        volumes: []
+parameters: []
