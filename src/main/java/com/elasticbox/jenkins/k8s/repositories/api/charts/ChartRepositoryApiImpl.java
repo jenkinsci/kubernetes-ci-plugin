@@ -56,53 +56,53 @@ public class ChartRepositoryApiImpl implements ChartRepository {
     }
 
     @Override
-    public List<String> chartNames(String repo, String ref) throws RepositoryException{
+    public List<String> chartNames(String repo, String ref) throws RepositoryException {
 
-            GithubUrl repoURL = new GithubUrl(repo);
+        GithubUrl repoUrl = new GithubUrl(repo);
 
-            final List<String> chartNames = new ArrayList<>();
+        final List<String> chartNames = new ArrayList<>();
 
-            String defaultRef = (ref == null || ref.equals("")) ? "master" : ref;
+        String defaultRef = (ref == null || ref.equals("")) ? "master" : ref;
 
-            githubService.contents(repoURL.owner(), repoURL.repo(), "", defaultRef)
-                .flatMap(new Func1<List<GithubContent>, Observable<GithubContent>>() {
-                    @Override
-                    public Observable<GithubContent> call(List<GithubContent> gitHubContents) {
-                        return Observable.from(gitHubContents);
-                    }
-                })
-                .filter(new Func1<GithubContent, Boolean>() {
-                    @Override
-                    public Boolean call(GithubContent gitHubContent) {
-                        return gitHubContent.getType().equals("dir");
-                    }
-                })
-                .subscribe(new Action1<GithubContent>() {
-                    @Override
-                    public void call(GithubContent gitHubContent) {
-                        chartNames.add(gitHubContent.getName());
-                    }
-                });
+        githubService.contents(repoUrl.owner(), repoUrl.repo(), "", defaultRef)
+            .flatMap(new Func1<List<GithubContent>, Observable<GithubContent>>() {
+                @Override
+                public Observable<GithubContent> call(List<GithubContent> gitHubContents) {
+                    return Observable.from(gitHubContents);
+                }
+            })
+            .filter(new Func1<GithubContent, Boolean>() {
+                @Override
+                public Boolean call(GithubContent gitHubContent) {
+                    return gitHubContent.getType().equals("dir");
+                }
+            })
+            .subscribe(new Action1<GithubContent>() {
+                @Override
+                public void call(GithubContent gitHubContent) {
+                    chartNames.add(gitHubContent.getName());
+                }
+            });
 
-            return chartNames;
+        return chartNames;
 
     }
 
-    public Chart chart(String repo, String name) throws RepositoryException{
+    public Chart chart(String repo, String name) throws RepositoryException {
         return chart(repo, name, null);
     }
 
     //TODO study how to do that using an specific worker
-    public Chart chart(String repo, String name, String ref) throws RepositoryException{
+    public Chart chart(String repo, String name, String ref) throws RepositoryException {
 
         final Chart.ChartBuilder chartBuilder = new Chart.ChartBuilder();
 
-        GithubUrl repoURL = new GithubUrl(repo);
+        GithubUrl repoUrl = new GithubUrl(repo);
 
         final String defaultRef = (ref == null || ref.equals("")) ? "master" : ref;
 
 
-        githubService.contents(repoURL.owner(), repoURL.repo(), name , defaultRef)
+        githubService.contents(repoUrl.owner(), repoUrl.repo(), name , defaultRef)
             .flatMap(new Func1<List<GithubContent>, Observable<GithubContent>>() {
                 @Override
                 public Observable<GithubContent> call(List<GithubContent> gitHubContents) {
@@ -117,8 +117,7 @@ public class ChartRepositoryApiImpl implements ChartRepository {
                         final String chartUrl = gitHubContent.getDownloadUrl();
                         //add the general details to the chart
                         chartDetails(chartUrl, chartBuilder);
-                    }
-                    else if (gitHubContent.getType().equals("dir")
+                    } else if (gitHubContent.getType().equals("dir")
                                 && gitHubContent.getName().equals("manifests")) {
                             //retrieve the contained yaml files
                             manifests(gitHubContent.getUrl(), chartBuilder);
@@ -126,11 +125,11 @@ public class ChartRepositoryApiImpl implements ChartRepository {
                 }
             });
 
-            return chartBuilder.build();
+        return chartBuilder.build();
 
     }
 
-    private void manifests(String url, final Chart.ChartBuilder chartBuilder){
+    private void manifests(String url, final Chart.ChartBuilder chartBuilder) {
 
         githubService.contentsFromUrl(url)
             .flatMap(new Func1<List<GithubContent>, Observable<GithubContent>>() {
@@ -174,8 +173,8 @@ public class ChartRepositoryApiImpl implements ChartRepository {
         final Observable<ChartDetails> observable = githubRawContentService.rawContentFromUrl(url)
             .map(new Func1<String, ChartDetails>() {
                 @Override
-                public ChartDetails call(String s) {
-                    final ChartDetails chartDetails = yaml.loadAs(s, ChartDetails.class);
+                public ChartDetails call(String yamlString) {
+                    final ChartDetails chartDetails = yaml.loadAs(yamlString, ChartDetails.class);
                     return chartDetails;
                 }
             });
