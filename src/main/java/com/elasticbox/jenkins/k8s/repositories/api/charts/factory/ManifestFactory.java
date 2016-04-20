@@ -23,7 +23,7 @@ import java.util.Iterator;
 public class ManifestFactory {
 
 
-    public static void addManifest(String yamlAsText, Chart.ChartBuilder chartBuilder) throws RepositoryException{
+    public static void addManifest(String yamlAsText, Chart.ChartBuilder chartBuilder) throws RepositoryException {
 
         final String manifestKind = findManifestKind(yamlAsText);
 
@@ -51,12 +51,14 @@ public class ManifestFactory {
                 chartBuilder.addService(service);
                 return;
 
+            default:
+
         }
 
         throw new RepositoryException("Manifest kind: " + manifestKind + " is not supported");
     }
 
-    private static String findManifestKind(String yamlAsText){
+    private static String findManifestKind(String yamlAsText) {
 
         final Yaml yaml = new Yaml();
         final StringReader stringReader = new StringReader(yamlAsText);
@@ -69,7 +71,7 @@ public class ManifestFactory {
             if (kindFound) {
                 countBetween++;
             }
-            if(event.is(Event.ID.Scalar)){
+            if (event.is(Event.ID.Scalar)) {
                 ScalarEvent scalarEvent = (ScalarEvent)event;
                 final String value = scalarEvent.getValue();
                 if (countBetween == 1) {

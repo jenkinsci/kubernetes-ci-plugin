@@ -109,22 +109,22 @@ public class Chart {
             return this;
         }
 
-        public ChartBuilder addService (Service service) {
+        public ChartBuilder addService(Service service) {
             this.services.add(service);
             return this;
         }
 
-        public ChartBuilder addPod (Pod pod) {
+        public ChartBuilder addPod(Pod pod) {
             this.pods.add(pod);
             return this;
         }
 
-        public ChartBuilder addReplicationController (ReplicationController controller) {
+        public ChartBuilder addReplicationController(ReplicationController controller) {
             this.replicationControllers.add(controller);
             return this;
         }
 
-        public Chart build () throws RepositoryException {
+        public Chart build() throws RepositoryException {
             if (errors.isEmpty()) {
                 return new Chart(this);
             }
@@ -132,8 +132,8 @@ public class Chart {
             throw errors.get(0);
         }
 
-        public ChartBuilder addError(RepositoryException e) {
-            this.errors.add(e);
+        public ChartBuilder addError(RepositoryException exception) {
+            this.errors.add(exception);
             return this;
         }
     }

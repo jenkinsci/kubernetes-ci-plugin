@@ -7,10 +7,10 @@ package com.elasticbox.jenkins.k8s.repositories.api.charts.factory;
  */
 public enum ManifestType {
 
-    POD ("Pod"),
-    REPLICATION_CONTROLLER ("ReplicationController"),
-    SERVICE ("Service"),
-    NOT_RECOGNIZED ("NotSupportedYet");
+    POD("Pod"),
+    REPLICATION_CONTROLLER("ReplicationController"),
+    SERVICE("Service"),
+    NOT_RECOGNIZED("NotSupportedYet");
 
     private String kind;
 
