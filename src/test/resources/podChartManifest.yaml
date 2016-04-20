@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: deis-tests
+  namespace: deis
+  labels:
+    heritage: deis
+spec:
+  containers:
+  - name: deis-e2e
+    image: quay.io/deisci/deis-e2e:canary
+    imagePullPolicy: Always
+    command: ["/bin/tests.test"]
+    args: ["-test.v", "-test.timeout=60m", "-ginkgo.v", "-ginkgo.slowSpecThreshold=120"]
+  restartPolicy: Never

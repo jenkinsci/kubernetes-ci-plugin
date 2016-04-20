@@ -1,5 +1,6 @@
 package com.elasticbox.jenkins.k8s.chart;
 
+import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.api.model.Service;
@@ -29,18 +30,27 @@ public class Chart {
         this.name = builder.chartDetails.getName();
         this.home = builder.chartDetails.getHome();
         this.source = builder.chartDetails.getSource();
-        this.version = builder.chartDetails.getDescription();
+        this.version = builder.chartDetails.getVersion();
         this.description = builder.chartDetails.getDescription();
 
-        final List<String> mantainers = builder.chartDetails.getMantainers();
-        this.maintainers = mantainers.toArray(new String[mantainers.size()]);
+        final List<String> mantainers = builder.chartDetails.getMaintainers();
+        if (!mantainers.isEmpty()) {
+            this.maintainers = mantainers.toArray(new String[mantainers.size()]);
+        }
 
-        this.pods = builder.pods.toArray(new Pod[builder.pods.size()]);
+        if (!builder.pods.isEmpty()) {
+            this.pods = builder.pods.toArray(new Pod[builder.pods.size()]);
+        }
 
-        this.services = builder.services.toArray(new Service[builder.services.size()]);
+        if (!builder.services.isEmpty()) {
+            this.services = builder.services.toArray(new Service[builder.services.size()]);
+        }
 
-        this.replicationControllers = builder.replicationControllers.toArray(
-            new ReplicationController[builder.replicationControllers.size()]);
+        if (!builder.replicationControllers.isEmpty()) {
+            this.replicationControllers = builder.replicationControllers.toArray(
+                new ReplicationController[builder.replicationControllers.size()]);
+        }
+
 
     }
 
@@ -86,6 +96,8 @@ public class Chart {
 
     public static class ChartBuilder {
 
+        private List<RepositoryException> errors = new ArrayList<>();
+
         ChartDetails chartDetails;
 
         private List<Service> services = new ArrayList<>();
@@ -112,10 +124,18 @@ public class Chart {
             return this;
         }
 
-        public Chart build () {
-            return new Chart(this);
+        public Chart build () throws RepositoryException {
+            if (errors.isEmpty()) {
+                return new Chart(this);
+            }
+
+            throw errors.get(0);
         }
 
+        public ChartBuilder addError(RepositoryException e) {
+            this.errors.add(e);
+            return this;
+        }
     }
 }
 
