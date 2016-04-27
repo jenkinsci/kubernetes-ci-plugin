@@ -1,24 +1,20 @@
 package com.elasticbox.jenkins.k8s.repositories.api.charts;
 
-import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.ReplicationController;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import rx.Observable;
-import rx.Subscription;
-import rx.exceptions.Exceptions;
-import rx.functions.Action0;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiContentsService;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubContent;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import rx.functions.Action1;
-import rx.functions.Func1;
+import sun.misc.BASE64Encoder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by serna on 4/18/16.
@@ -26,6 +22,84 @@ import java.util.Arrays;
 public class TestYamlParse {
 
 
+    public static void main(String[] args) throws IOException {
+
+        String baseUrl = "https:///git.elasticbox.com";
+        String contentUrl = "https://git.elasticbox.com/api/v3/user/repos";
+
+        String username = "serna@elasticbox.com";
+        String password = "osern@Elastic1";
+
+
+
+        if (username != null && password != null) {
+
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            // set your desired log level
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+
+            String credentials = username + ":" + password;
+            final String basic = "Basic " + new BASE64Encoder().encode(credentials.getBytes());
+            final OkHttpClient client = httpClient
+                .addInterceptor(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        final Request request = chain.request()
+                            .newBuilder()
+                            .addHeader("Authorization", basic)
+                            .build();
+
+                        final Response response = chain.proceed(request);
+                        return response;
+                    }
+                })
+                .addInterceptor(logging)
+                .build();
+
+
+            new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .client(client)
+                .build()
+                .create(GitHubApiContentsService.class)
+                .content(contentUrl)
+                .subscribe(new Action1<List<GitHubContent>>() {
+                    @Override
+                    public void call(List<GitHubContent> gitHubContents) {
+                        for (GitHubContent gitHubContent : gitHubContents) {
+                            System.out.println(gitHubContent.getName());
+                        }
+                    }
+                });
+        }
+
+        baseUrl = "https://api.github.com";
+        contentUrl = "https://api.github.com/repos/oserna/questions/contents";
+
+
+
+        new Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+            .build()
+            .create(GitHubApiContentsService.class)
+            .content(contentUrl)
+            .subscribe(new Action1<List<GitHubContent>>() {
+                @Override
+                public void call(List<GitHubContent> gitHubContents) {
+                    for (GitHubContent gitHubContent : gitHubContents) {
+                        System.out.println(gitHubContent.getName());
+                    }
+                }
+            });
+
+
+    }
 
 
 //    public static void main(String[] args) {

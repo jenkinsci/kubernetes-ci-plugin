@@ -1,20 +1,20 @@
 package com.elasticbox.jenkins.k8s.repositories.api;
 
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubContent;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.Links;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubContent;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubContentLinks;
 
 /**
  * Created by serna on 4/20/16.
  */
 public final class TestUtils {
 
-    public static GithubContent getFakeChartDetails(){
-        GithubContent chartDetail =  new GithubContent();
+    public static GitHubContent getFakeChartDetails(){
+        GitHubContent chartDetail =  new GitHubContent();
         chartDetail.setName("Chart.yaml");
         chartDetail.setDownloadUrl("https://raw.githubusercontent.com/helm/charts/master/rabbitmq/Chart.yaml");
         chartDetail.setGitUrl("https://api.github.com/repos/helm/charts/git/blobs/95ec050bd19616c09fbeca9ddabeff8e5824cbc4");
         chartDetail.setHtmlUrl("https://github.com/helm/charts/blob/master/rabbitmq/Chart.yaml");
-        chartDetail.setLinks(new Links());
+        chartDetail.setGitHubContentLinks(new GitHubContentLinks());
         chartDetail.setPath("rabbitmq/Chart.yaml");
         chartDetail.setSha("95ec050bd19616c09fbeca9ddabeff8e5824cbc4");
         chartDetail.setType("file");
@@ -23,8 +23,8 @@ public final class TestUtils {
         return chartDetail;
     }
 
-    public static GithubContent getFakeReadme(){
-        GithubContent readme =  new GithubContent();
+    public static GitHubContent getFakeReadme(){
+        GitHubContent readme =  new GitHubContent();
         readme.setName("README.md");
         readme.setPath("rabbitmq/README.md");
         readme.setSha("3405e06b74a677255c3ca3adae09a02450a5d5f5");
@@ -35,12 +35,12 @@ public final class TestUtils {
             "/3405e06b74a677255c3ca3adae09a02450a5d5f5");
         readme.setDownloadUrl("https://raw.githubusercontent.com/helm/charts/master/rabbitmq/README.md");
         readme.setType("file");
-        readme.setLinks(new Links());
+        readme.setGitHubContentLinks(new GitHubContentLinks());
         return readme;
     }
 
-    public static GithubContent getFakeManifestsFolder(){
-        GithubContent manifestsFolder =  new GithubContent();
+    public static GitHubContent getFakeManifestsFolder(){
+        GitHubContent manifestsFolder =  new GitHubContent();
         manifestsFolder.setName("manifests");
         manifestsFolder.setPath("rabbitmq/manifests");
         manifestsFolder.setSha("87c4ecb099308dc0c6058dbaf19f73f97f2c2282");
@@ -50,12 +50,12 @@ public final class TestUtils {
         manifestsFolder.setGitUrl("https://api.github.com/repos/helm/charts/git/trees/87c4ecb099308dc0c6058dbaf19f73f97f2c2282");
         manifestsFolder.setDownloadUrl(null);
         manifestsFolder.setType("dir");
-        manifestsFolder.setLinks(new Links());
+        manifestsFolder.setGitHubContentLinks(new GitHubContentLinks());
         return manifestsFolder;
     }
 
-    public static GithubContent getFakeServiceManifest(){
-        GithubContent service =  new GithubContent();
+    public static GitHubContent getFakeServiceManifest(){
+        GitHubContent service =  new GitHubContent();
         service.setName("rabbitmq-svc.yaml");
         service.setPath("rabbitmq/manifests/rabbitmq-svc.yaml");
         service.setSha("63bfbe4c5ce561a4fbc3a7e3f52111dee52d90a8");
@@ -65,12 +65,12 @@ public final class TestUtils {
         service.setGitUrl("https://api.github.com/repos/helm/charts/git/blobs/63bfbe4c5ce561a4fbc3a7e3f52111dee52d90a8");
         service.setDownloadUrl("https://raw.githubusercontent.com/helm/charts/master/rabbitmq/manifests/rabbitmq-svc.yaml");
         service.setType("file");
-        service.setLinks(new Links());
+        service.setGitHubContentLinks(new GitHubContentLinks());
         return service;
     }
 
-    public static GithubContent getFakeReplicationControllerManifest(){
-        GithubContent rc =  new GithubContent();
+    public static GitHubContent getFakeReplicationControllerManifest(){
+        GitHubContent rc =  new GitHubContent();
         rc.setName("rabbitmq-rc.yaml");
         rc.setPath("rabbitmq/manifests/rabbitmq-rc.yaml");
         rc.setSha("af5769570942320a8bd018ae054280028dd5f0c9");
@@ -80,7 +80,7 @@ public final class TestUtils {
         rc.setGitUrl("https://api.github.com/repos/helm/charts/git/blobs/af5769570942320a8bd018ae054280028dd5f0c9");
         rc.setDownloadUrl("https://raw.githubusercontent.com/helm/charts/master/rabbitmq/manifests/rabbitmq-rc.yaml");
         rc.setType("file");
-        rc.setLinks(new Links());
+        rc.setGitHubContentLinks(new GitHubContentLinks());
         return rc;
     }
 

@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import javax.annotation.Generated;
 
 @Generated("org.jsonschema2pojo")
-public class GithubContent {
+public class GitHubContent {
 
     @SerializedName("name")
     @Expose
@@ -37,7 +37,7 @@ public class GithubContent {
     private String type;
     @SerializedName("_links")
     @Expose
-    private com.elasticbox.jenkins.k8s.repositories.api.charts.github.Links links;
+    private GitHubContentLinks gitHubContentLinks;
 
     public String getName() {
         return name;
@@ -111,12 +111,12 @@ public class GithubContent {
         this.type = type;
     }
 
-    public com.elasticbox.jenkins.k8s.repositories.api.charts.github.Links getLinks() {
-        return links;
+    public GitHubContentLinks getGitHubContentLinks() {
+        return gitHubContentLinks;
     }
 
-    public void setLinks(com.elasticbox.jenkins.k8s.repositories.api.charts.github.Links links) {
-        this.links = links;
+    public void setGitHubContentLinks(GitHubContentLinks gitHubContentLinks) {
+        this.gitHubContentLinks = gitHubContentLinks;
     }
 
 }

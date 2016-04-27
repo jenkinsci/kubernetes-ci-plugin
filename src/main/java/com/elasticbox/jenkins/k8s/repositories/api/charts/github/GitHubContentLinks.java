@@ -6,7 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import javax.annotation.Generated;
 
 @Generated("org.jsonschema2pojo")
-public class Links {
+public class GitHubContentLinks {
 
     @SerializedName("self")
     @Expose

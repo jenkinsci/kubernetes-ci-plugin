@@ -2,25 +2,21 @@ package com.elasticbox.jenkins.k8s.repositories.api.charts;
 
 import com.elasticbox.jenkins.k8s.chart.Chart;
 import com.elasticbox.jenkins.k8s.chart.ChartDetails;
+import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.factory.ManifestFactory;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubContent;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubRawContentService;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubService;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubUrl;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiContentsService;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiRawContentDownloadService;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiResponseContentType;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubClientsFactory;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubContent;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
-
+import com.google.inject.Inject;
 import hudson.Extension;
-
 import org.yaml.snakeyaml.Yaml;
-
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
-
 import rx.Observable;
 import rx.Subscription;
+import rx.exceptions.Exceptions;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
@@ -33,53 +29,40 @@ import java.util.List;
 @Extension
 public class ChartRepositoryApiImpl implements ChartRepository {
 
-    private GithubService githubService;
-    private GithubRawContentService githubRawContentService;
+    @Inject
+    GitHubClientsFactory clientsFactory;
 
-    public ChartRepositoryApiImpl() {
-
-        githubService = new Retrofit.Builder()
-            .baseUrl("https://api.github.com")
-            .addConverterFactory(GsonConverterFactory.create())
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .build()
-            .create(GithubService.class);
-
-
-        githubRawContentService = new Retrofit.Builder()
-            .baseUrl("https://raw.githubusercontent.com")
-            .addConverterFactory(ScalarsConverterFactory.create())
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .build()
-            .create(GithubRawContentService.class);
-
+    @Override
+    public List<String> chartNames(final ChartRepo repo) throws RepositoryException {
+        return  chartNames(repo, null);
     }
 
     @Override
-    public List<String> chartNames(String repo, String ref) throws RepositoryException {
-
-        GithubUrl repoUrl = new GithubUrl(repo);
+    public List<String> chartNames(final ChartRepo repo, String ref) throws RepositoryException {
 
         final List<String> chartNames = new ArrayList<>();
 
         String defaultRef = (ref == null || ref.equals("")) ? "master" : ref;
 
-        githubService.contents(repoUrl.owner(), repoUrl.repo(), "", defaultRef)
-            .flatMap(new Func1<List<GithubContent>, Observable<GithubContent>>() {
+        final GitHubApiContentsService client = getClient(repo, repo.getUrl().toString(), GitHubApiContentsService
+            .class, GitHubApiResponseContentType.JSON);
+
+        client.content(repo.getUrl().owner(), repo.getUrl().repo(), "", defaultRef)
+            .flatMap(new Func1<List<GitHubContent>, Observable<GitHubContent>>() {
                 @Override
-                public Observable<GithubContent> call(List<GithubContent> gitHubContents) {
+                public Observable<GitHubContent> call(List<GitHubContent> gitHubContents) {
                     return Observable.from(gitHubContents);
                 }
             })
-            .filter(new Func1<GithubContent, Boolean>() {
+            .filter(new Func1<GitHubContent, Boolean>() {
                 @Override
-                public Boolean call(GithubContent gitHubContent) {
+                public Boolean call(GitHubContent gitHubContent) {
                     return gitHubContent.getType().equals("dir");
                 }
             })
-            .subscribe(new Action1<GithubContent>() {
+            .subscribe(new Action1<GitHubContent>() {
                 @Override
-                public void call(GithubContent gitHubContent) {
+                public void call(GitHubContent gitHubContent) {
                     chartNames.add(gitHubContent.getName());
                 }
             });
@@ -88,40 +71,51 @@ public class ChartRepositoryApiImpl implements ChartRepository {
 
     }
 
-    public Chart chart(String repo, String name) throws RepositoryException {
-        return chart(repo, name, null);
+    @Override
+    public Chart chart(final ChartRepo repo, String chartName) throws RepositoryException {
+        return chart(repo, chartName, null);
     }
 
     //TODO study how to do that using an specific worker
-    public Chart chart(String repo, String name, String ref) throws RepositoryException {
+    @Override
+    public Chart chart(final ChartRepo repo, String chartName, String ref) throws RepositoryException {
 
         final Chart.ChartBuilder chartBuilder = new Chart.ChartBuilder();
 
-        GithubUrl repoUrl = new GithubUrl(repo);
-
         final String defaultRef = (ref == null || ref.equals("")) ? "master" : ref;
 
+        final GitHubApiContentsService client = getClient(repo, repo.getUrl().toString(), GitHubApiContentsService
+            .class, GitHubApiResponseContentType.JSON);
 
-        githubService.contents(repoUrl.owner(), repoUrl.repo(), name , defaultRef)
-            .flatMap(new Func1<List<GithubContent>, Observable<GithubContent>>() {
+        client.content(repo.getUrl().owner(), repo.getUrl().repo(), chartName, defaultRef)
+            .flatMap(new Func1<List<GitHubContent>, Observable<GitHubContent>>() {
                 @Override
-                public Observable<GithubContent> call(List<GithubContent> gitHubContents) {
+                public Observable<GitHubContent> call(List<GitHubContent> gitHubContents) {
                     return Observable.from(gitHubContents);
                 }
             })
-            .subscribe(new Action1<GithubContent>() {
+            .subscribe(new Action1<GitHubContent>() {
                 @Override
-                public void call(GithubContent gitHubContent) {
+                public void call(GitHubContent gitHubContent) {
 
                     if (gitHubContent.getName().equals("Chart.yaml")) {
                         final String chartUrl = gitHubContent.getDownloadUrl();
                         //add the general details to the chart
-                        chartDetails(chartUrl, chartBuilder);
+                        try {
+                            chartDetails(repo, chartUrl, chartBuilder);
+                        } catch (RepositoryException e) {
+                            Exceptions.propagate(e);
+                        }
                     } else if (gitHubContent.getType().equals("dir")
                                 && gitHubContent.getName().equals("manifests")) {
                             //retrieve the contained yaml files
-                            manifests(gitHubContent.getUrl(), chartBuilder);
+
+                        try {
+                            manifests(repo, gitHubContent.getUrl(), chartBuilder);
+                        } catch (RepositoryException e) {
+                            Exceptions.propagate(e);
                         }
+                    }
                 }
             });
 
@@ -129,29 +123,40 @@ public class ChartRepositoryApiImpl implements ChartRepository {
 
     }
 
-    private void manifests(String url, final Chart.ChartBuilder chartBuilder) {
+    private void manifests(final ChartRepo repo, String manifestsListUrl, final Chart.ChartBuilder chartBuilder) throws
+        RepositoryException {
 
-        githubService.contentsFromUrl(url)
-            .flatMap(new Func1<List<GithubContent>, Observable<GithubContent>>() {
+        final GitHubApiContentsService client = getClient(repo, manifestsListUrl, GitHubApiContentsService
+            .class, GitHubApiResponseContentType.JSON);
+
+        client.content(manifestsListUrl)
+            .flatMap(new Func1<List<GitHubContent>, Observable<GitHubContent>>() {
                 @Override
-                public Observable<GithubContent> call(List<GithubContent> gitHubContents) {
+                public Observable<GitHubContent> call(List<GitHubContent> gitHubContents) {
                     return Observable.from(gitHubContents);
                 }
             })
-            .subscribe(new Action1<GithubContent>() {
+            .subscribe(new Action1<GitHubContent>() {
                 @Override
-                public void call(GithubContent githubContent) {
-                    final String manifestUrl = githubContent.getDownloadUrl();
-                    manifest(manifestUrl, chartBuilder);
+                public void call(GitHubContent gitHubContent) {
+                    final String manifestUrl = gitHubContent.getDownloadUrl();
+                    try {
+                        manifest(repo, manifestUrl, chartBuilder);
+                    } catch (RepositoryException e) {
+                        Exceptions.propagate(e);
+                    }
                 }
             });
 
 
     }
 
-    private void manifest(String url, final Chart.ChartBuilder chartBuilder) {
+    private void manifest(ChartRepo repo, String manifestContentUrl, final Chart.ChartBuilder chartBuilder) throws RepositoryException {
 
-        githubRawContentService.rawContentFromUrl(url).subscribe(
+        final GitHubApiRawContentDownloadService client = getClient(repo, manifestContentUrl,
+            GitHubApiRawContentDownloadService.class, GitHubApiResponseContentType.RAW_STRING);
+
+        client.rawContent(manifestContentUrl).subscribe(
             new Action1<String>() {
                 @Override
                 public void call(String yaml) {
@@ -166,11 +171,14 @@ public class ChartRepositoryApiImpl implements ChartRepository {
 
     }
 
+    private <T> void chartDetails(ChartRepo repo, String chartDetailsContentUrl, final Chart.ChartBuilder chartBuilder) throws RepositoryException {
 
-    private <T> void chartDetails(String url, final Chart.ChartBuilder chartBuilder) {
+
+        final GitHubApiRawContentDownloadService client = getClient(repo, chartDetailsContentUrl,
+            GitHubApiRawContentDownloadService.class, GitHubApiResponseContentType.RAW_STRING);
 
         final Yaml yaml = new Yaml();
-        final Observable<ChartDetails> observable = githubRawContentService.rawContentFromUrl(url)
+        final Observable<ChartDetails> observable = client.rawContent(chartDetailsContentUrl)
             .map(new Func1<String, ChartDetails>() {
                 @Override
                 public ChartDetails call(String yamlString) {
@@ -178,6 +186,7 @@ public class ChartRepositoryApiImpl implements ChartRepository {
                     return chartDetails;
                 }
             });
+
         final Subscription subscription = observable.subscribe(new Action1<ChartDetails>() {
             @Override
             public void call(ChartDetails details) {
@@ -187,19 +196,30 @@ public class ChartRepositoryApiImpl implements ChartRepository {
 
     }
 
-    public GithubService getGithubService() {
-        return githubService;
+    private <T> T getClient(ChartRepo repo, String url, Class<T> serviceClass, GitHubApiResponseContentType resType)
+        throws RepositoryException {
+
+        T client = null;
+        if (repo.needsAthentication()) {
+            client = clientsFactory.getClient(
+                url,
+                repo.getAuthentication(),
+                serviceClass,
+                resType);
+        } else {
+            client = clientsFactory.getClient(
+                url,
+                serviceClass,
+                resType);
+        }
+        return client;
     }
 
-    public void setGithubService(GithubService githubService) {
-        this.githubService = githubService;
+    public GitHubClientsFactory getClientsFactory() {
+        return clientsFactory;
     }
 
-    public GithubRawContentService getGithubRawContentService() {
-        return githubRawContentService;
-    }
-
-    public void setGithubRawContentService(GithubRawContentService githubRawContentService) {
-        this.githubRawContentService = githubRawContentService;
+    public void setClientsFactory(GitHubClientsFactory clientsFactory) {
+        this.clientsFactory = clientsFactory;
     }
 }

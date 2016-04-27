@@ -2,22 +2,25 @@ package com.elasticbox.jenkins.k8s.repositories.api.charts.github;
 
 import org.apache.commons.lang.StringUtils;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Arrays;
 
 /**
  * Created by serna on 4/14/16.
  */
-public class GithubUrl {
+public class GitHubUrl {
 
     private String baseUrl;
-    private URI parsedUrl;
+    private URL parsedUrl;
 
-    public GithubUrl(String url)  {
+    public GitHubUrl(String url)  {
         this.baseUrl =  normalize(url);
         try {
-            this.parsedUrl = new URI(baseUrl);
-        } catch (URISyntaxException e) {
+            this.parsedUrl = new URL(baseUrl);
+        } catch (MalformedURLException e) {
             throw  new RuntimeException("Malformed URL: " + url);
         }
     }
@@ -36,6 +39,15 @@ public class GithubUrl {
         }
         return url;
     }
+
+    public String protocol() {
+        return parsedUrl.getProtocol();
+    }
+
+    public String host() {
+        return parsedUrl.getHost();
+    }
+
 
     public String owner() {
         final String[] split = parsedUrl.getPath().split("/");
@@ -59,6 +71,11 @@ public class GithubUrl {
             return path.substring(1,path.length() - 1);
         }
         return path.substring(1);
+    }
+
+    public String [] pathAsArray() {
+        final String[] split = parsedUrl.getPath().split("/");
+        return Arrays.copyOfRange(split,1,split.length - 1);
     }
 
     public String query() {

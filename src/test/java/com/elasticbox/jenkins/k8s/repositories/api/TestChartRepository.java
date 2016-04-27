@@ -1,79 +1,38 @@
 package com.elasticbox.jenkins.k8s.repositories.api;
 
 import com.elasticbox.jenkins.k8s.chart.Chart;
-import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
+import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.ChartRepositoryApiImpl;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubContent;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubRawContentService;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubService;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GithubUrl;
-import com.elasticbox.jenkins.k8s.repositories.api.charts.github.Links;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiContentsService;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiRawContentDownloadService;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubClientsFactoryImpl;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubContent;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerPort;
 import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.api.model.Service;
 import org.apache.commons.io.IOUtils;
-import org.codehaus.groovy.vmplugin.v5.TestNgUtils;
 import org.junit.Test;
 import org.mockito.Mockito;
 import rx.Observable;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by serna on 4/13/16.
  */
 public class TestChartRepository {
-
-
-    @Test
-    public void testRepoUrlSlashEnding() throws MalformedURLException {
-
-        String urlString = "https://raw.githubusercontent.com/helm/charts/master/rabbitmq/Chart.yaml";
-
-        GithubUrl url = new GithubUrl(urlString);
-
-        assertTrue(url.path().equals("helm/charts/master/rabbitmq/Chart.yaml"));
-        assertTrue(url.owner().equals("helm"));
-        assertTrue(url.repo().equals("charts"));
-
-        final String[] split = url.path().split("/");
-        assertTrue(split.length == 5);
-
-    }
-
-    @Test
-    public void testRepoUrl() throws MalformedURLException {
-
-        String url = "https://api.github.com/repos/helm/charts/git/blobs/af5769570942320a8bd018ae054280028dd5f0c9";
-
-        URL parsedUrl =  new URL(url);
-
-        assertTrue(parsedUrl.getProtocol().equals("https"));
-        assertTrue(parsedUrl.getHost().equals("api.github.com"));
-        assertTrue(parsedUrl.getQuery() == null);
-        assertTrue(parsedUrl.getPath().equals("/repos/helm/charts/git/blobs/af5769570942320a8bd018ae054280028dd5f0c9"));
-
-        final String[] split = parsedUrl.getPath().split("/");
-        assertTrue(split.length == 7);
-
-    }
-
 
     @Test
     public void testGetChart() throws RepositoryException, IOException {
@@ -87,35 +46,36 @@ public class TestChartRepository {
         final String rc = IOUtils.toString(new FileInputStream(new File
             ("src/test/resources/replicationControllerChartManifest.yaml")));
 
-        final GithubRawContentService githubRawContentService = Mockito.mock(GithubRawContentService.class);
-        when(githubRawContentService.rawContentFromUrl(any(String.class)))
-            .thenReturn(Observable.just(chart))
-            .thenReturn(Observable.just(rc))
-            .thenReturn(Observable.just(service));
-
-        final List<GithubContent> rootChartContent = Arrays.asList(
+        // fake content of: https://api.github.com/repositories/44991456/contents/rabbitmq
+        final List<GitHubContent> rootChartContent = Arrays.asList(
             TestUtils.getFakeChartDetails(),
             TestUtils.getFakeReadme(),
             TestUtils.getFakeManifestsFolder()
         );
 
-        final List<GithubContent> manifestsContent = Arrays.asList(
+        // fake content of: https://api.github.com/repos/helm/charts/contents/rabbitmq/manifests
+        final List<GitHubContent> manifestsContent = Arrays.asList(
             TestUtils.getFakeReplicationControllerManifest(),
             TestUtils.getFakeServiceManifest()
         );
 
-        final GithubService githubService = Mockito.mock(GithubService.class);
-        when(githubService.contents(any(String.class),any(String.class),any(String.class),any(String.class)))
-            .thenReturn(Observable.just(rootChartContent));
-        when(githubService.contentsFromUrl(any(String.class)))
+        final GitHubApiContentsService githubService = Mockito.mock(GitHubApiContentsService.class);
+        when(githubService.content(any(String.class), any(String.class), any(String.class), any(String.class)))
+            .thenReturn(Observable.just(rootChartContent))
             .thenReturn(Observable.just(manifestsContent));
 
+        final GitHubApiRawContentDownloadService gitHubApiRawContentDownloadService = Mockito.mock(GitHubApiRawContentDownloadService.class);
+        when(gitHubApiRawContentDownloadService.rawContent(any(String.class)))
+            .thenReturn(Observable.just(chart))
+            .thenReturn(Observable.just(rc))
+            .thenReturn(Observable.just(service));
 
         ChartRepositoryApiImpl repository = new ChartRepositoryApiImpl();
-        repository.setGithubRawContentService(githubRawContentService);
-        repository.setGithubService(githubService);
+        repository.setClientsFactory(new GitHubClientsFactoryImpl());
 
-        final Chart chartModel = repository.chart("https://github.com/helm/charts", "fakeChartName");
+        ChartRepo fakeRepo = new ChartRepo("https://github.com/helm/charts");
+
+        final Chart chartModel = repository.chart(fakeRepo, "rabbitmq");
 
         assertTrue(chartModel.getName().equals("rabbitmq"));
         assertTrue(chartModel.getHome().equals("https://www.rabbitmq.com/"));
