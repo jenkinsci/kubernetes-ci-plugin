@@ -1,5 +1,7 @@
 package com.elasticbox.jenkins.k8s.repositories.api.charts;
 
+import com.google.inject.Inject;
+
 import com.elasticbox.jenkins.k8s.chart.Chart;
 import com.elasticbox.jenkins.k8s.chart.ChartDetails;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
@@ -11,8 +13,9 @@ import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiRespon
 import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubClientsFactory;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubContent;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
-import com.google.inject.Inject;
+
 import hudson.Extension;
+
 import org.yaml.snakeyaml.Yaml;
 import rx.Observable;
 import rx.Subscription;
@@ -47,7 +50,7 @@ public class ChartRepositoryApiImpl implements ChartRepository {
         final GitHubApiContentsService client = getClient(repo, repo.getUrl().toString(), GitHubApiContentsService
             .class, GitHubApiResponseContentType.JSON);
 
-        client.content(repo.getUrl().owner(), repo.getUrl().repo(), "", defaultRef)
+        client.content(repo.getUrl().ownerInCaseOfRepoUrl(), repo.getUrl().repoInCaseOfRepoUrl(), "", defaultRef)
             .flatMap(new Func1<List<GitHubContent>, Observable<GitHubContent>>() {
                 @Override
                 public Observable<GitHubContent> call(List<GitHubContent> gitHubContents) {
@@ -87,7 +90,7 @@ public class ChartRepositoryApiImpl implements ChartRepository {
         final GitHubApiContentsService client = getClient(repo, repo.getUrl().toString(), GitHubApiContentsService
             .class, GitHubApiResponseContentType.JSON);
 
-        client.content(repo.getUrl().owner(), repo.getUrl().repo(), chartName, defaultRef)
+        client.content(repo.getUrl().ownerInCaseOfRepoUrl(), repo.getUrl().repoInCaseOfRepoUrl(), chartName, defaultRef)
             .flatMap(new Func1<List<GitHubContent>, Observable<GitHubContent>>() {
                 @Override
                 public Observable<GitHubContent> call(List<GitHubContent> gitHubContents) {
@@ -151,7 +154,8 @@ public class ChartRepositoryApiImpl implements ChartRepository {
 
     }
 
-    private void manifest(ChartRepo repo, String manifestContentUrl, final Chart.ChartBuilder chartBuilder) throws RepositoryException {
+    private void manifest(ChartRepo repo, String manifestContentUrl, final Chart.ChartBuilder chartBuilder)
+        throws RepositoryException {
 
         final GitHubApiRawContentDownloadService client = getClient(repo, manifestContentUrl,
             GitHubApiRawContentDownloadService.class, GitHubApiResponseContentType.RAW_STRING);
@@ -171,7 +175,8 @@ public class ChartRepositoryApiImpl implements ChartRepository {
 
     }
 
-    private <T> void chartDetails(ChartRepo repo, String chartDetailsContentUrl, final Chart.ChartBuilder chartBuilder) throws RepositoryException {
+    private <T> void chartDetails(ChartRepo repo, String chartDetailsContentUrl, final Chart.ChartBuilder chartBuilder)
+        throws RepositoryException {
 
 
         final GitHubApiRawContentDownloadService client = getClient(repo, chartDetailsContentUrl,

@@ -14,13 +14,13 @@ import java.util.Arrays;
 public class GitHubUrl {
 
     private String baseUrl;
-    private URL parsedUrl;
+    private URI parsedUrl;
 
     public GitHubUrl(String url)  {
         this.baseUrl =  normalize(url);
         try {
-            this.parsedUrl = new URL(baseUrl);
-        } catch (MalformedURLException e) {
+            this.parsedUrl = new URI(baseUrl);
+        } catch (URISyntaxException e) {
             throw  new RuntimeException("Malformed URL: " + url);
         }
     }
@@ -41,15 +41,31 @@ public class GitHubUrl {
     }
 
     public String protocol() {
-        return parsedUrl.getProtocol();
+        return parsedUrl.getScheme();
     }
 
     public String host() {
         return parsedUrl.getHost();
     }
 
+    public int port() {
+        return parsedUrl.getPort();
+    }
 
-    public String owner() {
+    public String getHostAndPortTogether() {
+        StringBuilder builder = new StringBuilder(this.parsedUrl.getScheme());
+        builder.append("://");
+        builder.append(this.parsedUrl.getHost());
+        if (this.parsedUrl.getPort() > 0) {
+            builder.append(":");
+            builder.append(this.parsedUrl.getPort());
+        }
+        builder.append("/");
+        return builder.toString();
+    }
+
+
+    public String ownerInCaseOfRepoUrl() {
         final String[] split = parsedUrl.getPath().split("/");
         if (split.length >= 1 ) {
             return split[1];
@@ -57,7 +73,7 @@ public class GitHubUrl {
         return null;
     }
 
-    public String repo() {
+    public String repoInCaseOfRepoUrl() {
         final String[] split = parsedUrl.getPath().split("/");
         if (split.length >= 2 ) {
             return split[2];

@@ -1,7 +1,5 @@
 package com.elasticbox.jenkins.k8s.repositories.api.charts.github;
 
-import com.elasticbox.jenkins.k8s.chart.ChartRepo;
-
 import java.text.MessageFormat;
 import java.util.EnumSet;
 
@@ -12,9 +10,10 @@ import java.util.EnumSet;
  * https://raw.githubusercontent.com
  * http(s)://hostname/api/v3/
  */
-public enum GitHubApiType implements GitHubApi{
+public enum GitHubApiType implements GitHubApi {
 
-    PUBLIC_API{
+    PUBLIC_API {
+
         @Override
         public boolean isApplicableFor(GitHubUrl url) {
             if (getUrlType().endsWith(url.host() + "/")) {
@@ -22,12 +21,14 @@ public enum GitHubApiType implements GitHubApi{
             }
             return false;
         }
+
         @Override
         public String getUrlType() {
             return "https://api.github.com/";
         }
     },
-    PUBLIC_RAW_CONTENT{
+    PUBLIC_RAW_CONTENT {
+
         @Override
         public boolean isApplicableFor(GitHubUrl url) {
             if (getUrlType().equals(url.protocol() + "://" + url.host() + "/")) {
@@ -35,12 +36,14 @@ public enum GitHubApiType implements GitHubApi{
             }
             return false;
         }
+
         @Override
         public String getUrlType() {
             return "https://raw.githubusercontent.com/";
         }
     },
-    OTHER_RAW{
+    ENTERPRISE_RAW {
+
         @Override
         public boolean isApplicableFor(GitHubUrl url) {
             final String[] pathTokens = url.pathAsArray();
@@ -49,10 +52,12 @@ public enum GitHubApiType implements GitHubApi{
 
         @Override
         public String getUrlType() {
-            return "{0}://{1}/raw/";
+
+            return "{0}raw/";
         }
     },
-    OTHER{
+    ENTERPRISE {
+
         @Override
         public boolean isApplicableFor(GitHubUrl url) {
             return false;
@@ -60,7 +65,7 @@ public enum GitHubApiType implements GitHubApi{
 
         @Override
         public String getUrlType() {
-            return "{0}://{1}/api/v3/";
+            return "{0}api/v3/";
         }
     };
 
@@ -74,16 +79,6 @@ public enum GitHubApiType implements GitHubApi{
     }
 
 
-    public static GitHubApiType findBy(GitHubUrl url) {
-        final EnumSet<GitHubApiType> apiSet = EnumSet.of(PUBLIC_API, PUBLIC_RAW_CONTENT, OTHER_RAW, OTHER);
-        for (GitHubApiType gitHubApiType : apiSet) {
-            if (gitHubApiType.isApplicableFor(url)) {
-                return gitHubApiType;
-            }
-        }
-        return OTHER;
-    }
-
     private static String findOrComposeApiBaseUrl(GitHubApiType gitHubApiType, GitHubUrl url) {
         switch (gitHubApiType) {
             case PUBLIC_API:
@@ -92,12 +87,21 @@ public enum GitHubApiType implements GitHubApi{
             case PUBLIC_RAW_CONTENT:
                 return PUBLIC_RAW_CONTENT.getUrlType();
 
-            case OTHER_RAW:
-                return MessageFormat.format(OTHER_RAW.getUrlType(), url.protocol(), url.host());
+            case ENTERPRISE_RAW:
+                return MessageFormat.format(ENTERPRISE_RAW.getUrlType(), url.getHostAndPortTogether());
 
             default:
-                return MessageFormat.format(OTHER.getUrlType(), url.protocol(), url.host());
+                return MessageFormat.format(ENTERPRISE.getUrlType(), url.getHostAndPortTogether());
         }
     }
 
+    public static GitHubApiType findBy(GitHubUrl url) {
+        final EnumSet<GitHubApiType> apiSet = EnumSet.of(PUBLIC_API, PUBLIC_RAW_CONTENT, ENTERPRISE_RAW, ENTERPRISE);
+        for (GitHubApiType gitHubApiType : apiSet) {
+            if (gitHubApiType.isApplicableFor(url)) {
+                return gitHubApiType;
+            }
+        }
+        return ENTERPRISE;
+    }
 }

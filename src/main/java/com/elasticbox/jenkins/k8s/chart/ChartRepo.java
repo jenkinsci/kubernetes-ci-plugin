@@ -30,7 +30,7 @@ public class ChartRepo {
         return authentication;
     }
 
-    public boolean needsAthentication () {
+    public boolean needsAthentication() {
         return authentication != null;
     }
 

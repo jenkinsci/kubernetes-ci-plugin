@@ -16,10 +16,10 @@ public interface GitHubApiContentsService {
     @GET
     Observable<List<GitHubContent>> content(@Url String url);
 
-    @GET("/repos/{owner}/{repo}/contents/{path}")
+    @GET("/repos/{ownerInCaseOfRepoUrl}/{repoInCaseOfRepoUrl}/contents/{path}")
     Observable<List<GitHubContent>> content(
-                                            @Path("owner") String owner,
-                                            @Path("repo") String repo,
+                                            @Path("ownerInCaseOfRepoUrl") String owner,
+                                            @Path("repoInCaseOfRepoUrl") String repo,
                                             @Path("path") String relativeToRepoPath,
                                             @Query("ref") String ref);
 

@@ -20,8 +20,8 @@ public class TestGitHubUrl {
         GitHubUrl url = new GitHubUrl(urlString);
 
         assertTrue(url.path().equals("helm/charts/master/rabbitmq/Chart.yaml"));
-        assertTrue(url.owner().equals("helm"));
-        assertTrue(url.repo().equals("charts"));
+        assertTrue(url.ownerInCaseOfRepoUrl().equals("helm"));
+        assertTrue(url.repoInCaseOfRepoUrl().equals("charts"));
 
         final String[] split = url.path().split("/");
         assertTrue(split.length == 5);
@@ -64,7 +64,6 @@ public class TestGitHubUrl {
         String enterpriseRawContentUrl = "https://git.elasticbox.com/raw/serna/jenkins-plugin-kubernetes/master/pom.xml?token=AAAAL7xdKEfxQtVtXnmabhzDNdA-d-rrks5XHzQIwA%3D%3D";
         apiBaseUrl = GitHubApiType.findOrComposeApiBaseUrl(enterpriseRawContentUrl);
         assertTrue(apiBaseUrl.equals("https://git.elasticbox.com/raw/"));
-
 
     }
 

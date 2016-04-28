@@ -14,6 +14,7 @@ public interface GitHubClientsFactory {
                     Class<T> serviceTypeInterface,
                     GitHubApiResponseContentType responseType) throws RepositoryException;
 
-    <T> T getClient(String baseUrl, Class<T> serviceTypeInterface, GitHubApiResponseContentType responseType)
-        throws RepositoryException;
+    <T> T getClient(String baseUrl,
+                    Class<T> serviceTypeInterface,
+                    GitHubApiResponseContentType responseType) throws RepositoryException;
 }
