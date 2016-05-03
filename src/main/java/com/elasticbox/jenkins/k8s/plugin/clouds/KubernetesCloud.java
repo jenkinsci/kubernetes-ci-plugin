@@ -44,7 +44,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
                            String maxContainers, String credentialsId, boolean disableCertCheck, String serverCert,
                            List<ChartRepositoryConfig> chartRepositoryConfigurations) {
 
-        super( (name != null) ? name : NAME_PREFIX + UUID.randomUUID().toString(), maxContainers );
+        super( (StringUtils.isNotEmpty(name) ) ? name : NAME_PREFIX + UUID.randomUUID().toString(), maxContainers );
         this.description = description;
         this.credentialsId = credentialsId;
         // Passing !disableCertCheck because it is with 'negative' property in jelly (opposite behaviour)

@@ -1,7 +1,25 @@
 package com.elasticbox.jenkins.k8s.repositories.api;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiContentsService;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiRawContentDownloadService;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiResponseContentType;
+import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubClientsFactory;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubContent;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubContentLinks;
+import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
+import org.apache.commons.io.IOUtils;
+import org.mockito.Mockito;
+import rx.Observable;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by serna on 4/20/16.
@@ -82,6 +100,51 @@ public final class TestUtils {
         rc.setType("file");
         rc.setGitHubContentLinks(new GitHubContentLinks());
         return rc;
+    }
+
+    public static GitHubClientsFactory getGitHubClientsFactoryMock() throws IOException, RepositoryException {
+        final String chart = IOUtils.toString(new FileInputStream(new File
+                ("src/test/resources/chartYaml.yaml")));
+
+        final String service = IOUtils.toString(new FileInputStream(new File
+                ("src/test/resources/serviceChartManifest.yaml")));
+
+        final String rc = IOUtils.toString(new FileInputStream(new File
+                ("src/test/resources/replicationControllerChartManifest.yaml")));
+
+        // fake content of: https://api.github.com/repositories/44991456/contents/rabbitmq
+        final List<GitHubContent> rootChartContent = Arrays.asList(
+                TestUtils.getFakeChartDetails(),
+                TestUtils.getFakeReadme(),
+                TestUtils.getFakeManifestsFolder()
+        );
+
+        // fake content of: https://api.github.com/repos/helm/charts/contents/rabbitmq/manifests
+        final List<GitHubContent> manifestsContent = Arrays.asList(
+                TestUtils.getFakeReplicationControllerManifest(),
+                TestUtils.getFakeServiceManifest()
+        );
+
+        final GitHubApiRawContentDownloadService gitHubApiRawContentDownloadService = Mockito.mock(GitHubApiRawContentDownloadService.class);
+        when(gitHubApiRawContentDownloadService.rawContent(any(String.class)))
+                .thenReturn(Observable.just(chart))
+                .thenReturn(Observable.just(rc))
+                .thenReturn(Observable.just(service));
+
+        final GitHubApiContentsService gitHubApiContentsService = Mockito.mock(GitHubApiContentsService.class);
+        when(gitHubApiContentsService.content(any(String.class), any(String.class), any(String.class), any(String.class)))
+                .thenReturn(Observable.just(rootChartContent));
+        when(gitHubApiContentsService.content(any(String.class)))
+                .thenReturn(Observable.just(manifestsContent));
+
+        final GitHubClientsFactory mockedClientFactory = Mockito.mock(GitHubClientsFactory.class);
+        when(mockedClientFactory.getClient(any(String.class), eq(GitHubApiContentsService.class), eq
+                (GitHubApiResponseContentType.JSON)))
+                .thenReturn(gitHubApiContentsService);
+        when(mockedClientFactory.getClient(any(String.class), eq(GitHubApiRawContentDownloadService.class), eq
+                (GitHubApiResponseContentType.RAW_STRING)))
+                .thenReturn(gitHubApiRawContentDownloadService);
+        return mockedClientFactory;
     }
 
 }

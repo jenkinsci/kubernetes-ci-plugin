@@ -23,11 +23,11 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
 
     private static final Logger LOGGER = Logger.getLogger(ChartDeploymentServiceImpl.class.getName() );
 
-    KubernetesRepository kubernetesRepository;
-    ChartRepository chartRepository;
-    ServiceRepository serviceRepository;
-    PodRepository podRepository;
-    ReplicationControllerRepository replicationControllerRepository;
+    private final KubernetesRepository kubernetesRepository;
+    private final ChartRepository chartRepository;
+    private final ServiceRepository serviceRepository;
+    private final PodRepository podRepository;
+    private final ReplicationControllerRepository replicationControllerRepository;
 
     @Inject
     public ChartDeploymentServiceImpl(KubernetesRepository kubernetesRepository, ChartRepository chartRepository,
