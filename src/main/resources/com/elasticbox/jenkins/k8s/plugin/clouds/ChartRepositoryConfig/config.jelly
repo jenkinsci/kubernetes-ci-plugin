@@ -3,6 +3,10 @@
          xmlns:f="/lib/form" xmlns:c="/lib/credentials" >
 
     <table width="100%">
+        <f:invisibleEntry>
+            <f:readOnlyTextbox field="id" />
+        </f:invisibleEntry>
+
         <f:entry title="${%Description}" field="description">
             <f:textbox clazz="required" />
         </f:entry>

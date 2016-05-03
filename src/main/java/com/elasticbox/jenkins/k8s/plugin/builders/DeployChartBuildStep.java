@@ -1,6 +1,7 @@
 package com.elasticbox.jenkins.k8s.plugin.builders;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
@@ -33,10 +34,12 @@ import org.kohsuke.stapler.QueryParameter;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
     private static final Logger LOGGER = Logger.getLogger(DeployChartBuildStep.class.getName() );
+    private static final String NAME_PREFIX = "DeployChartBS-";
 
     private final String id;
     private final String cloudName;
@@ -49,10 +52,11 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
     @DataBoundConstructor
     public DeployChartBuildStep(String id, String cloudName, String chartsRepo, String chartName) {
         super();
-        this.id = id;
+        this.id = StringUtils.isNotEmpty(id)  ? id : NAME_PREFIX + UUID.randomUUID().toString();
         this.cloudName = cloudName;
         this.chartsRepo = chartsRepo;
         this.chartName = chartName;
+        ( (DescriptorImpl)getDescriptor() ).injector.injectMembers(this);
     }
 
     @Override
@@ -90,7 +94,9 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
     }
 
     protected Object readResolve() {
-        PluginHelper.ensureIsInitialized(this, deploymentService);
+        if (deploymentService == null) {
+            ((DescriptorImpl) getDescriptor()).injector.injectMembers(this);
+        }
         return this;
     }
 
@@ -114,6 +120,9 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         private static final String KUBERNETES_DEPLOY_CHART = "Kubernetes - Deploy Chart";
+
+        @Inject
+        private Injector injector;
 
         @Inject
         private transient KubernetesRepository kubeRepository;

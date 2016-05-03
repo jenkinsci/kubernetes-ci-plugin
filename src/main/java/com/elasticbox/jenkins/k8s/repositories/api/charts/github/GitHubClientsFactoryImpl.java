@@ -16,7 +16,6 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
-import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
