@@ -19,11 +19,11 @@ public class Chart {
     private String source;
     private String version;
     private String description;
-    private String [] maintainers;
+    private List<String> maintainers;
 
-    private Service [] services;
-    private ReplicationController [] replicationControllers;
-    private Pod [] pods;
+    private List<Service> services;
+    private List<ReplicationController> replicationControllers;
+    private List<Pod> pods;
 
     private Chart(ChartBuilder builder) {
         this.details = builder.chartDetails.getDetails();
@@ -33,24 +33,10 @@ public class Chart {
         this.version = builder.chartDetails.getVersion();
         this.description = builder.chartDetails.getDescription();
 
-        final List<String> mantainers = builder.chartDetails.getMaintainers();
-        if (!mantainers.isEmpty()) {
-            this.maintainers = mantainers.toArray(new String[mantainers.size()]);
-        }
-
-        if (!builder.pods.isEmpty()) {
-            this.pods = builder.pods.toArray(new Pod[builder.pods.size()]);
-        }
-
-        if (!builder.services.isEmpty()) {
-            this.services = builder.services.toArray(new Service[builder.services.size()]);
-        }
-
-        if (!builder.replicationControllers.isEmpty()) {
-            this.replicationControllers = builder.replicationControllers.toArray(
-                new ReplicationController[builder.replicationControllers.size()]);
-        }
-
+        this.maintainers = builder.chartDetails.getMaintainers();
+        this.pods = builder.pods;
+        this.replicationControllers = builder.replicationControllers;
+        this.services = builder.services;
 
     }
 
@@ -78,19 +64,19 @@ public class Chart {
         return description;
     }
 
-    public String[] getMaintainers() {
+    public List<String> getMaintainers() {
         return maintainers;
     }
 
-    public Service[] getServices() {
+    public List<Service> getServices() {
         return services;
     }
 
-    public ReplicationController[] getReplicationControllers() {
+    public List<ReplicationController> getReplicationControllers() {
         return replicationControllers;
     }
 
-    public Pod[] getPods() {
+    public List<Pod> getPods() {
         return pods;
     }
 

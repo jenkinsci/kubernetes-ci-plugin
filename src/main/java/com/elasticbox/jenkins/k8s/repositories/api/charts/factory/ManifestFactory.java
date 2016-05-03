@@ -63,7 +63,6 @@ public class ManifestFactory {
         final Yaml yaml = new Yaml();
         final StringReader stringReader = new StringReader(yamlAsText);
         final Iterable<Event> parse = yaml.parse(stringReader);
-        final Iterator<Event> iterator = parse.iterator();
         boolean kindFound = false;
         int countBetween = 0;
         String kind = null;

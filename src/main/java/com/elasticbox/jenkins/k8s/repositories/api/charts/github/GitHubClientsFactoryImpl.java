@@ -19,6 +19,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 import sun.misc.BASE64Encoder;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -255,7 +256,8 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
 
                         final String credentials = username + ":" + password;
                         final String basic =
-                            BASIC_AUTH_TOKEN + " " + new Base64().encodeToString(credentials.getBytes());
+                            BASIC_AUTH_TOKEN + " " + new Base64()
+                                .encodeToString(credentials.getBytes(Charset.forName("UTF-8")));
 
                         final OkHttpClient.Builder okBuilder = new OkHttpClient.Builder()
                             .addInterceptor(new Interceptor() {

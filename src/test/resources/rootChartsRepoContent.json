@@ -1,0 +1,499 @@
+
+[
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "e3efa93d8157d9b42bf3a39ccedb9f2d065069b2",
+    "size": 28,
+    "url": "https://api.github.com/repos/helm/charts/contents/.gitignore?ref=master",
+    "html_url": "https://github.com/helm/charts/blob/master/.gitignore",
+    "git_url": "https://api.github.com/repos/helm/charts/git/blobs/e3efa93d8157d9b42bf3a39ccedb9f2d065069b2",
+    "download_url": "https://raw.githubusercontent.com/helm/charts/master/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/.gitignore?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/blobs/e3efa93d8157d9b42bf3a39ccedb9f2d065069b2",
+      "html": "https://github.com/helm/charts/blob/master/.gitignore"
+    }
+  },
+  {
+    "name": ".travis.yml",
+    "path": ".travis.yml",
+    "sha": "6bbba75c42f5f3fafd129e4bea100b55276e7982",
+    "size": 43,
+    "url": "https://api.github.com/repos/helm/charts/contents/.travis.yml?ref=master",
+    "html_url": "https://github.com/helm/charts/blob/master/.travis.yml",
+    "git_url": "https://api.github.com/repos/helm/charts/git/blobs/6bbba75c42f5f3fafd129e4bea100b55276e7982",
+    "download_url": "https://raw.githubusercontent.com/helm/charts/master/.travis.yml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/.travis.yml?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/blobs/6bbba75c42f5f3fafd129e4bea100b55276e7982",
+      "html": "https://github.com/helm/charts/blob/master/.travis.yml"
+    }
+  },
+  {
+    "name": "Makefile",
+    "path": "Makefile",
+    "sha": "ce4aa0a189528dbae070a8dba4dda5a1266dbc54",
+    "size": 109,
+    "url": "https://api.github.com/repos/helm/charts/contents/Makefile?ref=master",
+    "html_url": "https://github.com/helm/charts/blob/master/Makefile",
+    "git_url": "https://api.github.com/repos/helm/charts/git/blobs/ce4aa0a189528dbae070a8dba4dda5a1266dbc54",
+    "download_url": "https://raw.githubusercontent.com/helm/charts/master/Makefile",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/Makefile?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/blobs/ce4aa0a189528dbae070a8dba4dda5a1266dbc54",
+      "html": "https://github.com/helm/charts/blob/master/Makefile"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "README.md",
+    "sha": "dadda78e3ef310d2e063755280bb01f1b3a38ccf",
+    "size": 1499,
+    "url": "https://api.github.com/repos/helm/charts/contents/README.md?ref=master",
+    "html_url": "https://github.com/helm/charts/blob/master/README.md",
+    "git_url": "https://api.github.com/repos/helm/charts/git/blobs/dadda78e3ef310d2e063755280bb01f1b3a38ccf",
+    "download_url": "https://raw.githubusercontent.com/helm/charts/master/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/README.md?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/blobs/dadda78e3ef310d2e063755280bb01f1b3a38ccf",
+      "html": "https://github.com/helm/charts/blob/master/README.md"
+    }
+  },
+  {
+    "name": "_test",
+    "path": "_test",
+    "sha": "b8c39155c96cf1800541f1dad97eae0d4de132fe",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/_test?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/_test",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/b8c39155c96cf1800541f1dad97eae0d4de132fe",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/_test?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/b8c39155c96cf1800541f1dad97eae0d4de132fe",
+      "html": "https://github.com/helm/charts/tree/master/_test"
+    }
+  },
+  {
+    "name": "alpine",
+    "path": "alpine",
+    "sha": "71b05ce0a121336e87b14873ba2edbeb9d43e42b",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/alpine?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/alpine",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/71b05ce0a121336e87b14873ba2edbeb9d43e42b",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/alpine?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/71b05ce0a121336e87b14873ba2edbeb9d43e42b",
+      "html": "https://github.com/helm/charts/tree/master/alpine"
+    }
+  },
+  {
+    "name": "cassandra",
+    "path": "cassandra",
+    "sha": "e27240d1a09d59050af3ec4985105905b1b689c6",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/cassandra?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/cassandra",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/e27240d1a09d59050af3ec4985105905b1b689c6",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/cassandra?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/e27240d1a09d59050af3ec4985105905b1b689c6",
+      "html": "https://github.com/helm/charts/tree/master/cassandra"
+    }
+  },
+  {
+    "name": "docker-registry",
+    "path": "docker-registry",
+    "sha": "2510fec1a78e22f78a1dbdb59dcd799fb9db7e50",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/docker-registry?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/docker-registry",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/2510fec1a78e22f78a1dbdb59dcd799fb9db7e50",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/docker-registry?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/2510fec1a78e22f78a1dbdb59dcd799fb9db7e50",
+      "html": "https://github.com/helm/charts/tree/master/docker-registry"
+    }
+  },
+  {
+    "name": "elasticsearch-1",
+    "path": "elasticsearch-1",
+    "sha": "695377d8325b1341bbeb23a1d3c1b5bc16b80155",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/elasticsearch-1?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/elasticsearch-1",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/695377d8325b1341bbeb23a1d3c1b5bc16b80155",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/elasticsearch-1?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/695377d8325b1341bbeb23a1d3c1b5bc16b80155",
+      "html": "https://github.com/helm/charts/tree/master/elasticsearch-1"
+    }
+  },
+  {
+    "name": "elasticsearch",
+    "path": "elasticsearch",
+    "sha": "1a430c5d6a8a3a51c4e51d90d406c5a2221c3caa",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/elasticsearch?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/elasticsearch",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/1a430c5d6a8a3a51c4e51d90d406c5a2221c3caa",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/elasticsearch?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/1a430c5d6a8a3a51c4e51d90d406c5a2221c3caa",
+      "html": "https://github.com/helm/charts/tree/master/elasticsearch"
+    }
+  },
+  {
+    "name": "example-nginx",
+    "path": "example-nginx",
+    "sha": "9c19eb11c37a321cc322d6a1e893a571572ef4f7",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/example-nginx?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/example-nginx",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/9c19eb11c37a321cc322d6a1e893a571572ef4f7",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/example-nginx?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/9c19eb11c37a321cc322d6a1e893a571572ef4f7",
+      "html": "https://github.com/helm/charts/tree/master/example-nginx"
+    }
+  },
+  {
+    "name": "example-todo",
+    "path": "example-todo",
+    "sha": "0a53a4bf212da590250f2b9ec08896e42de7f3ee",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/example-todo?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/example-todo",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/0a53a4bf212da590250f2b9ec08896e42de7f3ee",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/example-todo?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/0a53a4bf212da590250f2b9ec08896e42de7f3ee",
+      "html": "https://github.com/helm/charts/tree/master/example-todo"
+    }
+  },
+  {
+    "name": "jenkins",
+    "path": "jenkins",
+    "sha": "7e84aa4354b149482b8dfe804f70d48227d9f6a6",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/jenkins?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/jenkins",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/7e84aa4354b149482b8dfe804f70d48227d9f6a6",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/jenkins?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/7e84aa4354b149482b8dfe804f70d48227d9f6a6",
+      "html": "https://github.com/helm/charts/tree/master/jenkins"
+    }
+  },
+  {
+    "name": "memcached",
+    "path": "memcached",
+    "sha": "e3560f06ac53ed3e52b2e47f95acaa0afa458fac",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/memcached?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/memcached",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/e3560f06ac53ed3e52b2e47f95acaa0afa458fac",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/memcached?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/e3560f06ac53ed3e52b2e47f95acaa0afa458fac",
+      "html": "https://github.com/helm/charts/tree/master/memcached"
+    }
+  },
+  {
+    "name": "minecraft",
+    "path": "minecraft",
+    "sha": "3c15236a1909e92d501cd7103ede3271162a14e2",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/minecraft?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/minecraft",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/3c15236a1909e92d501cd7103ede3271162a14e2",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/minecraft?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/3c15236a1909e92d501cd7103ede3271162a14e2",
+      "html": "https://github.com/helm/charts/tree/master/minecraft"
+    }
+  },
+  {
+    "name": "mysql",
+    "path": "mysql",
+    "sha": "c1536288e14642991b394785df790afd87e2398e",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/mysql?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/mysql",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/c1536288e14642991b394785df790afd87e2398e",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/mysql?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/c1536288e14642991b394785df790afd87e2398e",
+      "html": "https://github.com/helm/charts/tree/master/mysql"
+    }
+  },
+  {
+    "name": "nginx-alpine",
+    "path": "nginx-alpine",
+    "sha": "e9089314fe00d758145974ba335717157b9dc43f",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/nginx-alpine?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/nginx-alpine",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/e9089314fe00d758145974ba335717157b9dc43f",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/nginx-alpine?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/e9089314fe00d758145974ba335717157b9dc43f",
+      "html": "https://github.com/helm/charts/tree/master/nginx-alpine"
+    }
+  },
+  {
+    "name": "nginx",
+    "path": "nginx",
+    "sha": "1866688baad6adf703cad5284c87956d576ab0c5",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/nginx?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/nginx",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/1866688baad6adf703cad5284c87956d576ab0c5",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/nginx?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/1866688baad6adf703cad5284c87956d576ab0c5",
+      "html": "https://github.com/helm/charts/tree/master/nginx"
+    }
+  },
+  {
+    "name": "owncloud",
+    "path": "owncloud",
+    "sha": "fdb027ff478d29b4e9888a9b62a843588ade744b",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/owncloud?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/owncloud",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/fdb027ff478d29b4e9888a9b62a843588ade744b",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/owncloud?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/fdb027ff478d29b4e9888a9b62a843588ade744b",
+      "html": "https://github.com/helm/charts/tree/master/owncloud"
+    }
+  },
+  {
+    "name": "postgresql",
+    "path": "postgresql",
+    "sha": "5644c7ac617cc961cc1501321293f5959a1247fa",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/postgresql?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/postgresql",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/5644c7ac617cc961cc1501321293f5959a1247fa",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/postgresql?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/5644c7ac617cc961cc1501321293f5959a1247fa",
+      "html": "https://github.com/helm/charts/tree/master/postgresql"
+    }
+  },
+  {
+    "name": "proxy-2-service",
+    "path": "proxy-2-service",
+    "sha": "5b76c55dc56661ffc61a165460952e7d8cd5784c",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/proxy-2-service?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/proxy-2-service",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/5b76c55dc56661ffc61a165460952e7d8cd5784c",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/proxy-2-service?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/5b76c55dc56661ffc61a165460952e7d8cd5784c",
+      "html": "https://github.com/helm/charts/tree/master/proxy-2-service"
+    }
+  },
+  {
+    "name": "rabbitmq",
+    "path": "rabbitmq",
+    "sha": "9fc47f28d19013c8ded350beb7254477b1eb6058",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/rabbitmq?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/rabbitmq",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/9fc47f28d19013c8ded350beb7254477b1eb6058",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/rabbitmq?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/9fc47f28d19013c8ded350beb7254477b1eb6058",
+      "html": "https://github.com/helm/charts/tree/master/rabbitmq"
+    }
+  },
+  {
+    "name": "redis-cluster",
+    "path": "redis-cluster",
+    "sha": "66f01a2954c21def7b36875c370943a4d9bbcff0",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/redis-cluster?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/redis-cluster",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/66f01a2954c21def7b36875c370943a4d9bbcff0",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/redis-cluster?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/66f01a2954c21def7b36875c370943a4d9bbcff0",
+      "html": "https://github.com/helm/charts/tree/master/redis-cluster"
+    }
+  },
+  {
+    "name": "redis-standalone",
+    "path": "redis-standalone",
+    "sha": "52c222bbb69e80a9c0e3e5869384ce36eae65880",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/redis-standalone?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/redis-standalone",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/52c222bbb69e80a9c0e3e5869384ce36eae65880",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/redis-standalone?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/52c222bbb69e80a9c0e3e5869384ce36eae65880",
+      "html": "https://github.com/helm/charts/tree/master/redis-standalone"
+    }
+  },
+  {
+    "name": "redmine",
+    "path": "redmine",
+    "sha": "043834391ec2d6e015564fd271e260edfe3f2897",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/redmine?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/redmine",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/043834391ec2d6e015564fd271e260edfe3f2897",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/redmine?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/043834391ec2d6e015564fd271e260edfe3f2897",
+      "html": "https://github.com/helm/charts/tree/master/redmine"
+    }
+  },
+  {
+    "name": "riak",
+    "path": "riak",
+    "sha": "f6c0fe9a84abc8bc90a867da89e48aff58602483",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/riak?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/riak",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/f6c0fe9a84abc8bc90a867da89e48aff58602483",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/riak?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/f6c0fe9a84abc8bc90a867da89e48aff58602483",
+      "html": "https://github.com/helm/charts/tree/master/riak"
+    }
+  },
+  {
+    "name": "selenium-hub",
+    "path": "selenium-hub",
+    "sha": "5883c41237c125ac207b4d584fb0539d947dba86",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/selenium-hub?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/selenium-hub",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/5883c41237c125ac207b4d584fb0539d947dba86",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/selenium-hub?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/5883c41237c125ac207b4d584fb0539d947dba86",
+      "html": "https://github.com/helm/charts/tree/master/selenium-hub"
+    }
+  },
+  {
+    "name": "spark",
+    "path": "spark",
+    "sha": "176494bd7629358263ea6ef8a575d3af5f3fdbf7",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/spark?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/spark",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/176494bd7629358263ea6ef8a575d3af5f3fdbf7",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/spark?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/176494bd7629358263ea6ef8a575d3af5f3fdbf7",
+      "html": "https://github.com/helm/charts/tree/master/spark"
+    }
+  },
+  {
+    "name": "storm",
+    "path": "storm",
+    "sha": "6db5a9e5e244cd7682298f19251ffb18cfc260b8",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/storm?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/storm",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/6db5a9e5e244cd7682298f19251ffb18cfc260b8",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/storm?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/6db5a9e5e244cd7682298f19251ffb18cfc260b8",
+      "html": "https://github.com/helm/charts/tree/master/storm"
+    }
+  },
+  {
+    "name": "ubuntu-debootstrap",
+    "path": "ubuntu-debootstrap",
+    "sha": "d27a0565a8f3eaa33082bac92b8845f47b19ac91",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/ubuntu-debootstrap?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/ubuntu-debootstrap",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/d27a0565a8f3eaa33082bac92b8845f47b19ac91",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/ubuntu-debootstrap?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/d27a0565a8f3eaa33082bac92b8845f47b19ac91",
+      "html": "https://github.com/helm/charts/tree/master/ubuntu-debootstrap"
+    }
+  },
+  {
+    "name": "weavescope",
+    "path": "weavescope",
+    "sha": "be3193953073a858e81e64e447677910774f5c4c",
+    "size": 0,
+    "url": "https://api.github.com/repos/helm/charts/contents/weavescope?ref=master",
+    "html_url": "https://github.com/helm/charts/tree/master/weavescope",
+    "git_url": "https://api.github.com/repos/helm/charts/git/trees/be3193953073a858e81e64e447677910774f5c4c",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/helm/charts/contents/weavescope?ref=master",
+      "git": "https://api.github.com/repos/helm/charts/git/trees/be3193953073a858e81e64e447677910774f5c4c",
+      "html": "https://github.com/helm/charts/tree/master/weavescope"
+    }
+  }
+]
