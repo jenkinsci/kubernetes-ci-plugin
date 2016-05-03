@@ -205,7 +205,7 @@ public class ChartRepositoryApiImpl implements ChartRepository {
         throws RepositoryException {
 
         T client = null;
-        if (repo.needsAthentication()) {
+        if (repo.needsAuthentication()) {
             client = clientsFactory.getClient(
                 url,
                 repo.getAuthentication(),

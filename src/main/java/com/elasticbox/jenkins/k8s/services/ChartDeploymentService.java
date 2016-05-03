@@ -1,7 +1,9 @@
 package com.elasticbox.jenkins.k8s.services;
 
-/**
- * Created by serna on 4/13/16.
- */
+import com.elasticbox.jenkins.k8s.chart.ChartRepo;
+import com.elasticbox.jenkins.k8s.services.error.ServiceException;
+
 public interface ChartDeploymentService {
+
+    void deployChart(String kubeName, String namespace, ChartRepo chartRepo, String chartName) throws ServiceException;
 }

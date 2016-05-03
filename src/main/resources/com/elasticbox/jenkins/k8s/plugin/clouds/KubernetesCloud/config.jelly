@@ -1,0 +1,45 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+         xmlns:f="/lib/form" xmlns:c="/lib/credentials" >
+
+    <f:invisibleEntry>
+        <f:readOnlyTextbox field="name" />
+    </f:invisibleEntry>
+
+    <f:entry title="${%Description}" field="description">
+        <f:textbox clazz="required" />
+    </f:entry>
+
+    <f:entry title="${%Endpoint URL}" field="endpointUrl">
+        <f:textbox clazz="required" />
+    </f:entry>
+
+    <f:entry title="${%Credentials}" field="credentialsId">
+        <c:select />
+    </f:entry>
+
+    <f:optionalBlock title="${%Disable server certificate check}" negative="true"
+                     inline="true" name="disableCertCheck" checked="${instance.disableCertCheck}">
+        <f:entry title="${%Kubernetes server certificate}" field="serverCert">
+            <f:textarea/>
+        </f:entry>
+    </f:optionalBlock>
+
+    <f:entry title="${%Namespace}" field="namespace">
+        <f:select clazz="required"/>
+    </f:entry>
+
+    <f:entry title="${%Max. No. of containers}" field="maxContainers">
+        <f:textbox clazz="required number" default="10" />
+    </f:entry>
+
+    <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
+                      with="endpointUrl,credentialsId,disableCertCheck,serverCert,namespace" />
+
+    <f:entry title="${%Chart Repository Configurations}" description="${%Configuration of chart repositories}">
+        <f:repeatable field="chartRepositoryConfigurations">
+            <st:include page="config.jelly" class="${descriptor.clazz}" />
+        </f:repeatable>
+    </f:entry>
+
+</j:jelly>

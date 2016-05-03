@@ -1,0 +1,22 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+         xmlns:f="/lib/form" xmlns:c="/lib/credentials" >
+
+    <table width="100%">
+        <f:entry title="${%Description}" field="description">
+            <f:textbox clazz="required" />
+        </f:entry>
+
+        <f:entry title="${%Charts repository URL}" field="chartsRepoUrl">
+            <f:textbox clazz="required" />
+        </f:entry>
+
+        <f:entry title="${%Credentials}" field="credentialsId">
+            <c:select />
+        </f:entry>
+
+        <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
+                          with="chartsRepoUrl,credentialsId" />
+    </table>
+
+</j:jelly>
