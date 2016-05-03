@@ -1,5 +1,6 @@
 package com.elasticbox.jenkins.k8s.chart;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -68,7 +69,7 @@ public class ChartDetails {
     }
 
     public List<String> getMaintainers() {
-        return maintainers;
+        return Collections.unmodifiableList(this.maintainers);
     }
 
     public void setMaintainers(List<String> maintainers) {

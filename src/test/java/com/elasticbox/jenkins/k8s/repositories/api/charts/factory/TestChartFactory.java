@@ -34,7 +34,7 @@ public class TestChartFactory {
 
         final Chart build = builder.build();
 
-        assertTrue("At least it should contains one rc", 1 == build.getPods().length );
+        assertTrue("At least it should contains one rc", 1 == build.getPods().size() );
 
     }
 
@@ -52,14 +52,14 @@ public class TestChartFactory {
 
         final Chart build = builder.build();
 
-        assertTrue("At least it should contains one rc", 1 == build.getReplicationControllers().length );
+        assertTrue("At least it should contains one rc", 1 == build.getReplicationControllers().size() );
 
     }
 
     @Test
     public void testServiceCreationFromYaml() throws IOException, RepositoryException {
 
-            final String yaml = IOUtils.toString(new FileInputStream(new File
+        final String yaml = IOUtils.toString(new FileInputStream(new File
             ("src/test/resources/serviceChartManifest.yaml")));
 
         ChartDetails fakeDetails = getFakeChartDetails();
@@ -72,20 +72,19 @@ public class TestChartFactory {
         final Chart build = builder.build();
 
 
-        assertTrue("At least it should contains one service", 1 == build.getServices().length );
+        assertTrue("At least it should contains one service", 1 == build.getServices().size() );
 
-        assertTrue("At least it should contains one service", build.getServices()[0].getKind().equals("Service") );
-        final Service.ApiVersion apiVersion = build.getServices()[0].getApiVersion();
+        assertTrue("At least it should contains one service", build.getServices().get(0).getKind().equals("Service"));
+        final Service.ApiVersion apiVersion = build.getServices().get(0).getApiVersion();
         assertTrue("At least it should contains one service", apiVersion.toString().equals("v1"));
 
-        final ServiceSpec spec = build.getServices()[0].getSpec();
-        assertTrue("At least it should contains one service", spec.getPorts().get(0).getName().equals("http") );
-        assertTrue("At least it should contains one service", spec.getPorts().get(0).getProtocol().equals("TCP") );
-        assertTrue("At least it should contains one service", spec.getPorts().get(0).getPort() == 80 );
+        final ServiceSpec spec = build.getServices().get(0).getSpec();
+        assertTrue("At least it should contains one service", spec.getPorts().get(0).getPort() == 5672 );
 
-        assertTrue("At least it should contains one service", build.getServices()[0].getSpec().getSelector().containsKey("name"));
-        assertTrue("At least it should contains one service", build.getServices()[0].getSpec().getSelector().get
-            ("name").equals("nginx"));
+        assertTrue("At least it should contains one service", build.getServices().get(0).getSpec().getSelector()
+            .containsKey("provider"));
+        assertTrue("At least it should contains one service", build.getServices().get(0).getSpec().getSelector().get
+            ("provider").equals("rabbitmq"));
 
     }
 

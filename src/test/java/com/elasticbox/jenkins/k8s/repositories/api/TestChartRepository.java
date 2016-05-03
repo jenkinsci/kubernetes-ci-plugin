@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -101,16 +102,17 @@ public class TestChartRepository {
         assertTrue(chartModel.getHome().equals("https://www.rabbitmq.com/"));
         assertTrue(chartModel.getVersion().equals("0.2.0"));
         assertTrue(chartModel.getDescription().equals("Chart running RabbitMQ."));
-        assertTrue(chartModel.getMaintainers().length==1);
+        assertTrue(chartModel.getMaintainers().size()==1);
         assertTrue(chartModel.getDetails().equals("This package provides RabbitMQ (a message broker) for development purposes."));
 
-        final ReplicationController[] replicationControllers = chartModel.getReplicationControllers();
-        final Service[] services = chartModel.getServices();
 
-        assertTrue(replicationControllers.length == 1);
-        assertTrue(services.length == 1);
+        final List<ReplicationController> replicationControllers = chartModel.getReplicationControllers();
+        final List<Service> services = chartModel.getServices();
 
-        ReplicationController rcModel = replicationControllers[0];
+        assertTrue(replicationControllers.size() == 1);
+        assertTrue(services.size() == 1);
+
+        ReplicationController rcModel = replicationControllers.get(0);
         assertTrue(rcModel.getApiVersion().toString().equals("v1"));
         assertTrue(rcModel.getKind().equals("ReplicationController"));
 
@@ -140,8 +142,7 @@ public class TestChartRepository {
     public void testGetChartFromRepoRequiringUserAndPassword() throws IOException, RepositoryException,
         InterruptedException {
 
-        final String rootChartsRepoContent = IOUtils.toString(new FileInputStream(new File
-            ("src/test/resources/rootChartsRepoContent.json")));
+        final String rootChartsRepoContent = IOUtils.toString(new FileInputStream(new File("src/test/resources/rootChartsRepoContent.json")));
 
         MockWebServer server = new MockWebServer();
         server.start(9999);

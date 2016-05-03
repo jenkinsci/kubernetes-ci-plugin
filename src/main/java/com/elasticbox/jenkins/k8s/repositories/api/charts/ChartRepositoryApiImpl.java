@@ -183,21 +183,19 @@ public class ChartRepositoryApiImpl implements ChartRepository {
             GitHubApiRawContentDownloadService.class, GitHubApiResponseContentType.RAW_STRING);
 
         final Yaml yaml = new Yaml();
-        final Observable<ChartDetails> observable = client.rawContent(chartDetailsContentUrl)
+        client.rawContent(chartDetailsContentUrl)
             .map(new Func1<String, ChartDetails>() {
                 @Override
                 public ChartDetails call(String yamlString) {
                     final ChartDetails chartDetails = yaml.loadAs(yamlString, ChartDetails.class);
                     return chartDetails;
                 }
+            }).subscribe(new Action1<ChartDetails>() {
+                @Override
+                public void call(ChartDetails details) {
+                    chartBuilder.chartDetails(details);
+                }
             });
-
-        final Subscription subscription = observable.subscribe(new Action1<ChartDetails>() {
-            @Override
-            public void call(ChartDetails details) {
-                chartBuilder.chartDetails(details);
-            }
-        });
 
     }
 
