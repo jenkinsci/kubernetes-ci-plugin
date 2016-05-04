@@ -289,9 +289,10 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
                        GitHubApiResponseContentType responseType) throws RepositoryException {
 
         final String apiBaseUrl = GitHubApiType.findOrComposeApiBaseUrl(baseUrl);
+        final String clientKey = generateKey(authentication, apiBaseUrl);
 
-        if (clients.containsKey(apiBaseUrl)) {
-            return (T) clients.get(apiBaseUrl).getClient();
+        if (clients.containsKey(clientKey)) {
+            return (T) clients.get(clientKey).getClient();
         }
 
         ClientsFactoryBuilderContext<T> context =
@@ -338,11 +339,14 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
             .create(context.getServiceTypeInterfaceClass());
 
         if (service != null) {
-            clients.put(context.getApiBaseUrl(), new GitHubClient(context.getApiBaseUrl(), service));
+            clients.put(generateKey(context.getAuthentication(), context.getApiBaseUrl() ),
+                        new GitHubClient(context.getApiBaseUrl(), service) );
         }
 
         return service;
     }
 
-
+    private String generateKey(Authentication authentication, String apiBaseUrl) {
+        return (authentication != null) ? authentication.getKey() + "@" + apiBaseUrl : apiBaseUrl;
+    }
 }

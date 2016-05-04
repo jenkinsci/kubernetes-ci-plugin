@@ -48,7 +48,8 @@ public class ChartRepositoryConfig implements Describable<ChartRepositoryConfig>
 
     @Override
     public Descriptor<ChartRepositoryConfig> getDescriptor() {
-        return Jenkins.getInstance().getDescriptor(getClass() );
+        final Jenkins instance = Jenkins.getInstance();
+        return (instance != null) ? instance.getDescriptor(getClass() ) : null;
     }
 
     @Override

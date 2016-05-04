@@ -9,4 +9,6 @@ public interface KubernetesClientFactory {
     KubernetesClient getKubernetesClient(String kubeName) throws RepositoryException;
 
     KubernetesClient createKubernetesClient(KubernetesCloudParams kubeCloudParams);
+
+    void resetKubernetesClient(String kubeName);
 }

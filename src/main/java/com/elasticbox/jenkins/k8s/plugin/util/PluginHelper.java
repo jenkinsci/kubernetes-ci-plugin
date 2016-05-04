@@ -60,12 +60,6 @@ public class PluginHelper {
         return listBoxItems;
     }
 
-    public static void ensureIsInitialized(Object scopeObject, Object injectableObject) {
-        if (injectableObject == null) {
-            Jenkins.getInstance().getInjector().injectMembers(scopeObject);
-        }
-    }
-
     public static ListBoxModel doFillChartItems(List<String> chartsList) {
         ListBoxModel items = new ListBoxModel(OPTION_CHOOSE_CHART);
         if ( chartsList != null ) {

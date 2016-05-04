@@ -13,4 +13,9 @@ public class TokenAuthentication implements Authentication {
     public String getAuthToken() {
         return authToken;
     }
+
+    @Override
+    public String getKey() {
+        return "Token:" + authToken;
+    }
 }

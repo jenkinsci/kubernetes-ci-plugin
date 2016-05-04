@@ -31,7 +31,7 @@ public class KubernetesRepositoryApiImpl implements KubernetesRepository {
     public boolean testConnection(KubernetesCloudParams kubeCloudParams) throws RepositoryException {
         try {
             final KubernetesClient kubeClient = kubeFactory.createKubernetesClient(kubeCloudParams);
-            return getNamespacesInternal(kubeClient) != null;
+            return getNamespacesInternal(kubeClient).size() > 0;
         }  catch (KubernetesClientException excep) {
             throw new RepositoryException(excep);
         }

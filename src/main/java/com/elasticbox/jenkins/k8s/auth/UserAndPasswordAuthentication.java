@@ -16,4 +16,9 @@ public  class UserAndPasswordAuthentication implements Authentication {
     public String getPassword() {
         return password;
     }
+
+    @Override
+    public String getKey() {
+        return "User:" + user;
+    }
 }

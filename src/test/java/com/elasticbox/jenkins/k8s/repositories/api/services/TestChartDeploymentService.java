@@ -1,4 +1,4 @@
-package services;
+package com.elasticbox.jenkins.k8s.repositories.api.services;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;

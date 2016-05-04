@@ -41,13 +41,15 @@ public class KubernetesClientFactoryImpl implements KubernetesClientFactory {
     }
 
     private KubernetesClient createKubernetesClient(String kubeName) throws RepositoryException {
+        final Jenkins instance = Jenkins.getInstance();
+        final Cloud cloud = (instance != null) ? instance.getCloud(kubeName) : null;
 
-        final Cloud cloud = Jenkins.getInstance().getCloud(kubeName);
-        if (cloud instanceof KubernetesCloud) {
+        if (cloud != null && cloud instanceof KubernetesCloud) {
             KubernetesCloud kubeCloud = (KubernetesCloud) cloud;
 
             return createKubernetesClient(kubeCloud.getKubernetesCloudParams() );
         }
+
         String msg = "There is no KubernetesCloud with name: " + kubeName;
         LOGGER.severe(msg);
         throw new RepositoryException(msg);
@@ -57,14 +59,17 @@ public class KubernetesClientFactoryImpl implements KubernetesClientFactory {
     public KubernetesClient createKubernetesClient(KubernetesCloudParams kubeCloudParams) {
         ConfigBuilder builder = new ConfigBuilder().withMasterUrl(kubeCloudParams.getEndpointUrl() );
         Authentication authData = kubeCloudParams.getAuthData();
+
         if (authData != null) {
             if (authData instanceof TokenAuthentication) {
                 builder.withOauthToken( ((TokenAuthentication)authData).getAuthToken() );
+
             } else if (authData instanceof UserAndPasswordAuthentication) {
                 builder.withUsername( ((UserAndPasswordAuthentication) authData).getUser() );
                 builder.withPassword( ((UserAndPasswordAuthentication) authData).getPassword() );
             }
         }
+
         if (kubeCloudParams.isDisableCertCheck() ) {
             builder.withTrustCerts(true);
         } else if (StringUtils.isNotEmpty(kubeCloudParams.getServerCert() )) {
@@ -77,5 +82,8 @@ public class KubernetesClientFactoryImpl implements KubernetesClientFactory {
         return new DefaultKubernetesClient(builder.build() );
     }
 
-
+    @Override
+    public void resetKubernetesClient(String kubeName) {
+        cloudClients.remove(kubeName);
+    }
 }
