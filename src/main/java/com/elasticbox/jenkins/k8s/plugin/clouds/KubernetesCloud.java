@@ -1,11 +1,12 @@
 package com.elasticbox.jenkins.k8s.plugin.clouds;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
-import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
+import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFactory;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.Extension;
 import hudson.model.Descriptor;
@@ -39,6 +40,9 @@ public class KubernetesCloud extends AbstractCloudImpl {
     private final KubernetesCloudParams kubeCloudParams;
     private final List<ChartRepositoryConfig> chartRepositoryConfigurations;
 
+    @Inject
+    private transient KubernetesClientFactory kubeFactory;
+
     @DataBoundConstructor
     public KubernetesCloud(String name, String description, String endpointUrl, String namespace,
                            String maxContainers, String credentialsId, boolean disableCertCheck, String serverCert,
@@ -51,20 +55,34 @@ public class KubernetesCloud extends AbstractCloudImpl {
         this.kubeCloudParams = new KubernetesCloudParams(endpointUrl, namespace,
                 PluginHelper.getAuthenticationData(credentialsId), !disableCertCheck, serverCert);
         this.chartRepositoryConfigurations = chartRepositoryConfigurations;
+
+        injectMembers();
+        if (StringUtils.isNotEmpty(name) ) {
+            kubeFactory.resetKubernetesClient(name);
+        }
     }
 
     public static List<KubernetesCloud> getKubernetesClouds() {
         List<KubernetesCloud> clouds = new ArrayList<>();
-        for (Cloud cloud : Jenkins.getInstance().clouds) {
-            if (cloud instanceof KubernetesCloud) {
-                clouds.add( (KubernetesCloud) cloud);
+
+        final Jenkins instance = Jenkins.getInstance();
+        if (instance != null) {
+            for (Cloud cloud : instance.clouds) {
+                if (cloud instanceof KubernetesCloud) {
+                    clouds.add( (KubernetesCloud) cloud);
+                }
             }
         }
         return clouds;
     }
 
     public static KubernetesCloud getKubernetesCloud(String kubeName) {
-        final Cloud cloud = Jenkins.getInstance().getCloud(kubeName);
+        final Jenkins instance = Jenkins.getInstance();
+
+        if (instance == null) {
+            return null;
+        }
+        final Cloud cloud = instance.getCloud(kubeName);
         return (cloud != null && cloud instanceof KubernetesCloud) ? (KubernetesCloud)cloud : null;
     }
 
@@ -142,16 +160,26 @@ public class KubernetesCloud extends AbstractCloudImpl {
         return "KubernetesCloud [" + getDescription() + "@" + kubeCloudParams.getEndpointUrl() + "]";
     }
 
+    protected Object readResolve() {
+        injectMembers();
+        return this;
+    }
+
+    private void injectMembers() {
+        if (kubeFactory == null) {
+            ((DescriptorImpl) getDescriptor()).injector.injectMembers(this);
+        }
+    }
 
     @Extension
     public static class DescriptorImpl extends Descriptor<Cloud> {
         private static final String KUBERNETES_CLOUD = "Kubernetes cloud";
 
         @Inject
-        private transient KubernetesRepository kubeRepository;
+        private Injector injector;
 
         @Inject
-        private transient ChartRepository chartRepository;
+        private transient KubernetesRepository kubeRepository;
 
         @Override
         public String getDisplayName() {

@@ -44,12 +44,11 @@ public class TaskLogger {
 
     public void error(String msg) {
         logger.severe(msg);
-        taskListener.error(PREFIX + msg);
+        taskListener.error(PREFIX + msg + "\n");
     }
 
     public void error(String format, Object... args) {
         logger.log(Level.SEVERE, format, args);
-        taskListener.error(PREFIX + MessageFormat.format(format, args) );
+        taskListener.error(PREFIX + MessageFormat.format(format, args) + "\n");
     }
-
 }

@@ -25,6 +25,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
@@ -56,7 +57,7 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
         this.cloudName = cloudName;
         this.chartsRepo = chartsRepo;
         this.chartName = chartName;
-        ( (DescriptorImpl)getDescriptor() ).injector.injectMembers(this);
+        injectMembers();
     }
 
     @Override
@@ -67,8 +68,6 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
         taskLogger.info("Executing Deploy Chart build step: " + run);
 
         try {
-            PluginHelper.ensureIsInitialized(this, deploymentService);
-
             KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(cloudName);
             taskLogger.info("Using Kubernetes cloud config: " + kubeCloud);
 
@@ -82,9 +81,8 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
             deploymentService.deployChart(cloudName, kubeCloud.getNamespace(), chartRepo, chartName);
 
         } catch (ServiceException exception) {
-            final String message = "Cannot find Kubernetes cloud: " + cloudName;
-            taskLogger.error(message);
-            throw new IOException(message, exception);
+            taskLogger.error(exception.getCausedByMessages() );
+            throw new IOException(exception);
 
         } catch (NullPointerException exception) {
             final String message = "Cannot initialize resources: " + exception.getMessage();
@@ -94,10 +92,12 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
     }
 
     protected Object readResolve() {
-        if (deploymentService == null) {
-            ((DescriptorImpl) getDescriptor()).injector.injectMembers(this);
-        }
+        injectMembers();
         return this;
+    }
+
+    private void injectMembers() {
+        ((DescriptorImpl) getDescriptor()).injector.injectMembers(this);
     }
 
     public String getId() {

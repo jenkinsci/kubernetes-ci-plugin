@@ -15,6 +15,7 @@ import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 
 import java.util.logging.Logger;
 
@@ -72,11 +73,14 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
             }
 
         } catch (RepositoryException exception) {
-            LOGGER.severe("Error accessing/creating namespace [" + namespace + "]: " + exception.getMessage() );
-            throw  new ServiceException(exception);
+            final String message = "Error accessing/creating namespace [" + namespace + "]. ";
+            LOGGER.severe(message + exception.getMessage() );
+            throw new ServiceException(message, exception);
+
+        } catch (KubernetesClientException exception) {
+            final String message = "Error in Kubernetes client trying to deploy chart [" + chartName + "]. ";
+            LOGGER.severe(message + exception.getMessage() );
+            throw new ServiceException(message, exception);
         }
-
     }
-
-
 }
