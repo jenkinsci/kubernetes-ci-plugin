@@ -17,7 +17,7 @@ public class GitHubClient<T> {
         return apiBaseUrl;
     }
 
-    public T getClient() {
+    public  T getClient() {
         return client;
     }
 }

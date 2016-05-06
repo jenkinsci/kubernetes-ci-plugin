@@ -1,5 +1,9 @@
 package com.elasticbox.jenkins.k8s.repositories.api.charts.github;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.auth.TokenAuthentication;
 import com.elasticbox.jenkins.k8s.auth.UserAndPasswordAuthentication;
@@ -19,14 +23,26 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 @Extension
 public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
 
-    Map<String, GitHubClient> clients = new HashMap<>();
+    private static final Logger LOGGER = Logger.getLogger(GitHubClientsFactoryImpl.class.getName() );
+
+    public static final int MAX_NUM_GITHUB_CLIENTS_CACHED = 100;
+    public static final int CACHED_HOURS = 24;
+
+
+    private LoadingCache<ClientsFactoryBuilderContext, GitHubClient> cache = CacheBuilder.newBuilder()
+        .maximumSize(MAX_NUM_GITHUB_CLIENTS_CACHED)
+        .expireAfterAccess(CACHED_HOURS, TimeUnit.HOURS)
+        .build(new GithubClientCacheLoader());
+
 
     private static GitHubClientsFactoryPartBuilder [] partBuilders = new GitHubClientsFactoryPartBuilder[] {
         new AddBaseUrl(),
@@ -42,12 +58,12 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
         private String apiBaseUrl;
         private GitHubApiResponseContentType responseContentType;
         private Authentication authentication;
+        private boolean debug = false;
+
 
         private Retrofit.Builder clientBuilder = new Retrofit.Builder();
         private OkHttpClient.Builder okHttpClientBuilder;
-
         private boolean atLeastOneAuthenticationMethodProvided = false;
-        private boolean debug = false;
 
         public ClientsFactoryBuilderContext(String apiBaseUrl,
                                             Class<T> serviceTypeInterfaceClass,
@@ -114,6 +130,46 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
         public void setDebug(boolean debug) {
             this.debug = debug;
         }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+
+            ClientsFactoryBuilderContext<?> that = (ClientsFactoryBuilderContext<?>) object;
+
+            if (debug != that.debug) {
+                return false;
+            }
+            if (serviceTypeInterfaceClass != null ? !serviceTypeInterfaceClass.equals(that.serviceTypeInterfaceClass)
+                : that.serviceTypeInterfaceClass != null) {
+                return false;
+            }
+            if (apiBaseUrl != null ? !apiBaseUrl.equals(that.apiBaseUrl) : that.apiBaseUrl != null) {
+                return false;
+            }
+            if (responseContentType != that.responseContentType) {
+                return false;
+            }
+            return !(authentication != null
+                ? !authentication.equals(that.authentication)
+                : that.authentication != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = serviceTypeInterfaceClass != null ? serviceTypeInterfaceClass.hashCode() : 0;
+            result = 31 * result + (apiBaseUrl != null ? apiBaseUrl.hashCode() : 0);
+            result = 31 * result + (responseContentType != null ? responseContentType.hashCode() : 0);
+            result = 31 * result + (authentication != null ? authentication.hashCode() : 0);
+            result = 31 * result + (debug ? 1 : 0);
+            return result;
+        }
     }
 
     public interface GitHubClientsFactoryPartBuilder {
@@ -122,7 +178,7 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
 
     }
 
-    public static class AddBaseUrl implements GitHubClientsFactoryPartBuilder {
+    private static class AddBaseUrl implements GitHubClientsFactoryPartBuilder {
 
         @Override
         public void buildPart(ClientsFactoryBuilderContext context) {
@@ -131,7 +187,7 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
         }
     }
 
-    public static class AddResponseConverters implements GitHubClientsFactoryPartBuilder {
+    private static class AddResponseConverters implements GitHubClientsFactoryPartBuilder {
 
         @Override
         public void buildPart(ClientsFactoryBuilderContext context) {
@@ -152,7 +208,7 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
     }
 
 
-    public static class AddAuthenticationTokenInterceptor implements GitHubClientsFactoryPartBuilder {
+    private static class AddAuthenticationTokenInterceptor implements GitHubClientsFactoryPartBuilder {
 
         public static final String TOKEN = "token";
         public static final String BASIC_AUTH_HEADER = "Authorization";
@@ -202,7 +258,7 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
     }
 
 
-    public static class AddLoggingInterceptor implements GitHubClientsFactoryPartBuilder {
+    private static class AddLoggingInterceptor implements GitHubClientsFactoryPartBuilder {
 
         @Override
         public void buildPart(ClientsFactoryBuilderContext context) {
@@ -229,7 +285,7 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
 
 
 
-    public static class AddClientAndPasswordAuthenticationInterceptor implements GitHubClientsFactoryPartBuilder {
+    private static class AddClientAndPasswordAuthenticationInterceptor implements GitHubClientsFactoryPartBuilder {
 
         public static final String BASIC_AUTH_TOKEN = "Basic";
         public static final String BASIC_AUTH_HEADER = "Authorization";
@@ -282,6 +338,34 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
         }
     }
 
+
+    private static class GithubClientCacheLoader extends CacheLoader<ClientsFactoryBuilderContext, GitHubClient> {
+
+        @Override
+        public GitHubClient load(ClientsFactoryBuilderContext context) throws Exception {
+
+            for (GitHubClientsFactoryPartBuilder partBuilder : partBuilders) {
+                partBuilder.buildPart(context);
+            }
+
+            Retrofit.Builder clientBuilder = context.getClientBuilder();
+
+            if (context.getOkHttpClientBuilder() != null) {
+                final OkHttpClient.Builder okHttpClientBuilder = context.getOkHttpClientBuilder();
+                final OkHttpClient okHttpClient = okHttpClientBuilder.build();
+                clientBuilder = clientBuilder.client(okHttpClient);
+            }
+
+
+            return new GitHubClient<>(context.getApiBaseUrl(), clientBuilder
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .build()
+                .create(context.getServiceTypeInterfaceClass()));
+
+        }
+    }
+
+
     @Override
     public <T> T getClient(String baseUrl,
                        Authentication authentication,
@@ -289,64 +373,46 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
                        GitHubApiResponseContentType responseType) throws RepositoryException {
 
         final String apiBaseUrl = GitHubApiType.findOrComposeApiBaseUrl(baseUrl);
-        final String clientKey = generateKey(authentication, apiBaseUrl);
-
-        if (clients.containsKey(clientKey)) {
-            return (T) clients.get(clientKey).getClient();
-        }
 
         ClientsFactoryBuilderContext<T> context =
             new ClientsFactoryBuilderContext<>(apiBaseUrl, serviceTypeInterface, responseType, authentication);
 
-        return getClient(context);
+
+        final GitHubClient<T> client;
+        try {
+            client = cache.get(context);
+        } catch (ExecutionException e) {
+            LOGGER.log(Level.SEVERE, "Error getting the GitHub client object", e);
+            throw new RepositoryException(e);
+        }
+
+        return client.getClient();
+
     }
 
     @Override
-    public <T> T getClient(String baseUrl,
-                           Class<T> serviceTypeInterface,
-                           GitHubApiResponseContentType responseType) throws RepositoryException {
+    public <T> T getClient(String baseUrl, Class<T> serviceTypeInterface, GitHubApiResponseContentType responseType)
+        throws RepositoryException {
 
         final String apiBaseUrl = GitHubApiType.findOrComposeApiBaseUrl(baseUrl);
-
-        if (clients.containsKey(apiBaseUrl)) {
-            return (T) clients.get(apiBaseUrl).getClient();
-        }
 
         ClientsFactoryBuilderContext<T> context =
             new ClientsFactoryBuilderContext<>(apiBaseUrl, serviceTypeInterface, responseType);
 
-        return getClient(context);
+
+        final GitHubClient<T> client;
+        try {
+            client = cache.get(context);
+        } catch (ExecutionException e) {
+            LOGGER.log(Level.SEVERE, "Error getting the GitHub client object", e);
+            throw new RepositoryException(e);
+        }
+
+        return client.getClient();
+
     }
 
-    private <T> T getClient(ClientsFactoryBuilderContext<T> context) {
-
-
-        for (GitHubClientsFactoryPartBuilder partBuilder : partBuilders) {
-            partBuilder.buildPart(context);
-        }
-
-        Retrofit.Builder clientBuilder = context.getClientBuilder();
-
-        if (context.getOkHttpClientBuilder() != null) {
-            final OkHttpClient.Builder okHttpClientBuilder = context.getOkHttpClientBuilder();
-            final OkHttpClient okHttpClient = okHttpClientBuilder.build();
-            clientBuilder = clientBuilder.client(okHttpClient);
-        }
-
-        final T service = clientBuilder
-            .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-            .build()
-            .create(context.getServiceTypeInterfaceClass());
-
-        if (service != null) {
-            clients.put(generateKey(context.getAuthentication(), context.getApiBaseUrl() ),
-                        new GitHubClient(context.getApiBaseUrl(), service) );
-        }
-
-        return service;
-    }
-
-    private String generateKey(Authentication authentication, String apiBaseUrl) {
-        return (authentication != null) ? authentication.getKey() + "@" + apiBaseUrl : apiBaseUrl;
+    LoadingCache<ClientsFactoryBuilderContext, GitHubClient> getCache() {
+        return cache;
     }
 }
