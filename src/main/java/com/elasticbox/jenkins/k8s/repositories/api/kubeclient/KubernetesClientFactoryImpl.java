@@ -1,5 +1,8 @@
 package com.elasticbox.jenkins.k8s.repositories.api.kubeclient;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.inject.Singleton;
 
 import com.elasticbox.jenkins.k8s.auth.Authentication;
@@ -15,32 +18,37 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Singleton
-public class KubernetesClientFactoryImpl implements KubernetesClientFactory {
+public class KubernetesClientFactoryImpl
+        extends CacheLoader<String, KubernetesClient>
+        implements KubernetesClientFactory {
 
     private static final Logger LOGGER = Logger.getLogger(KubernetesClientFactoryImpl.class.getName() );
 
-    private Map<String, KubernetesClient> cloudClients = new HashMap<>();
+    public static final int MAX_NUM_CLIENTS_CACHED = 100;
+    public static final int MAX_IDLE_HOURS = 24;
+
+    private LoadingCache<String, KubernetesClient> cache = CacheBuilder.newBuilder()
+            .maximumSize(MAX_NUM_CLIENTS_CACHED)
+            .expireAfterAccess(MAX_IDLE_HOURS, TimeUnit.HOURS)
+            .build(this);
 
     @Override
-    public synchronized KubernetesClient getKubernetesClient(String kubeName) throws RepositoryException {
-
-        if (cloudClients.containsKey(kubeName)) {
-            return cloudClients.get(kubeName);
+    public KubernetesClient getKubernetesClient(String kubeName) throws RepositoryException {
+        try {
+            return cache.get(kubeName);
+        } catch (ExecutionException exception) {
+            throw new RepositoryException("Error while creating client", exception);
         }
-
-        final KubernetesClient kubernetesClient = createKubernetesClient(kubeName);
-        cloudClients.put(kubeName, kubernetesClient);
-
-        return kubernetesClient;
     }
 
-    private KubernetesClient createKubernetesClient(String kubeName) throws RepositoryException {
+    @Override
+    public KubernetesClient load(String kubeName) throws Exception {
         final Jenkins instance = Jenkins.getInstance();
         final Cloud cloud = (instance != null) ? instance.getCloud(kubeName) : null;
 
@@ -84,6 +92,6 @@ public class KubernetesClientFactoryImpl implements KubernetesClientFactory {
 
     @Override
     public void resetKubernetesClient(String kubeName) {
-        cloudClients.remove(kubeName);
+        cache.invalidate(kubeName);
     }
 }

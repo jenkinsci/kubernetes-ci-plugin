@@ -41,7 +41,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
     private final List<ChartRepositoryConfig> chartRepositoryConfigurations;
 
     @Inject
-    private transient KubernetesClientFactory kubeFactory;
+    transient KubernetesClientFactory kubeFactory;
 
     @DataBoundConstructor
     public KubernetesCloud(String name, String description, String endpointUrl, String namespace,
@@ -167,23 +167,27 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     private void injectMembers() {
         if (kubeFactory == null) {
-            ((DescriptorImpl) getDescriptor()).injector.injectMembers(this);
+            ( (DescriptorImpl) getDescriptor() ).injector.injectMembers(this);
         }
     }
 
     @Extension
     public static class DescriptorImpl extends Descriptor<Cloud> {
-        private static final String KUBERNETES_CLOUD = "Kubernetes cloud";
+        private static final String KUBERNETES_CLOUD = "Kubernetes clouds";
 
         @Inject
         private Injector injector;
 
         @Inject
-        private transient KubernetesRepository kubeRepository;
+        KubernetesRepository kubeRepository;
 
         @Override
         public String getDisplayName() {
             return KUBERNETES_CLOUD;
+        }
+
+        public Injector getInjector() {
+            return injector;
         }
 
         public ListBoxModel doFillNamespaceItems(@QueryParameter String endpointUrl,
@@ -223,7 +227,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
                     }
                     return FormValidation.ok("Connection successful");
                 } else {
-                    LOGGER.severe("Unable to connect to Kubernetes cloud at: " + endpointUrl);
+                    LOGGER.severe("Unable to connect to Kubernetes clouds at: " + endpointUrl);
                     return FormValidation.error("Connection error");
                 }
             } catch (RepositoryException excep) {

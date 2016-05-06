@@ -1,4 +1,4 @@
-package com.elasticbox.jenkins.k8s.repositories.api.services;
+package com.elasticbox.jenkins.k8s.services;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -11,6 +11,7 @@ import com.elasticbox.jenkins.k8s.repositories.ReplicationControllerRepository;
 import com.elasticbox.jenkins.k8s.repositories.ServiceRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.TestUtils;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.ChartRepositoryApiImpl;
+import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import com.elasticbox.jenkins.k8s.services.ChartDeploymentService;
 import com.elasticbox.jenkins.k8s.services.ChartDeploymentServiceImpl;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -21,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -47,7 +49,7 @@ public class TestChartDeploymentService {
     private ReplicationControllerRepository rcRepositoryMock = Mockito.mock(ReplicationControllerRepository.class);
 
     @Before
-    public void setUpMocks() throws Exception {
+    public void setUpMocks() throws IOException, RepositoryException {
         chartRepositoryMock.setClientsFactory(TestUtils.getGitHubClientsFactoryMock() );
 
         Mockito.when(kubernetesRepositoryMock.namespaceExists(anyString(), anyString() )).thenReturn(Boolean.TRUE);

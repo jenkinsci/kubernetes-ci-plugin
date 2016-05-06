@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <com.elasticbox.jenkins.k8s.plugin.builders.DeployChartBuildStep plugin="jenkins-plugin-kubernetes@1.0-SNAPSHOT">
+      <id>FakeDeployChartBS</id>
+      <cloudName>FakeKubeCloudName</cloudName>
+      <chartsRepo>FakeChartsRepo</chartsRepo>
+      <chartName>FakeChartName</chartName>
+    </com.elasticbox.jenkins.k8s.plugin.builders.DeployChartBuildStep>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

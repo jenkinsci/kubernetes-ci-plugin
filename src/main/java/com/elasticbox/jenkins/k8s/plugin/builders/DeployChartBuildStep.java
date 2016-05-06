@@ -48,7 +48,7 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
     private final String chartName;
 
     @Inject
-    private transient ChartDeploymentService deploymentService;
+    transient ChartDeploymentService deploymentService;
 
     @DataBoundConstructor
     public DeployChartBuildStep(String id, String cloudName, String chartsRepo, String chartName) {
@@ -69,7 +69,7 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
 
         try {
             KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(cloudName);
-            taskLogger.info("Using Kubernetes cloud config: " + kubeCloud);
+            taskLogger.info("Using Kubernetes clouds config: " + kubeCloud);
 
             ChartRepositoryConfig config = kubeCloud.getChartRepositoryConfiguration(chartsRepo);
             taskLogger.info("Using Chart repository config: " + config);
@@ -125,10 +125,7 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
         private Injector injector;
 
         @Inject
-        private transient KubernetesRepository kubeRepository;
-
-        @Inject
-        private transient ChartRepository chartRepository;
+        ChartRepository chartRepository;
 
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
@@ -138,6 +135,10 @@ public class DeployChartBuildStep extends Builder implements SimpleBuildStep {
         @Override
         public String getDisplayName() {
             return KUBERNETES_DEPLOY_CHART;
+        }
+
+        public Injector getInjector() {
+            return injector;
         }
 
         public ListBoxModel doFillCloudNameItems() {
