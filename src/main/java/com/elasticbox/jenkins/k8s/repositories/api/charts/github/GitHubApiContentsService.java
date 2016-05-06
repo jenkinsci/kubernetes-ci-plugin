@@ -8,17 +8,13 @@ import rx.Observable;
 
 import java.util.List;
 
-/**
- * Created by serna on 4/14/16.
- */
 public interface GitHubApiContentsService {
 
     @GET
     Observable<List<GitHubContent>> content(@Url String url);
 
     @GET("/repos/{ownerInCaseOfRepoUrl}/{repoInCaseOfRepoUrl}/contents/{path}")
-    Observable<List<GitHubContent>> content(
-                                            @Path("ownerInCaseOfRepoUrl") String owner,
+    Observable<List<GitHubContent>> content(@Path("ownerInCaseOfRepoUrl") String owner,
                                             @Path("repoInCaseOfRepoUrl") String repo,
                                             @Path("path") String relativeToRepoPath,
                                             @Query("ref") String ref);
