@@ -48,6 +48,7 @@ public class KubernetesRepositoryApiImpl implements KubernetesRepository {
 
     private boolean namespaceExistsInternal(KubernetesClient kubeClient, String namespace) throws RepositoryException {
         Namespace existingNamespace = null;
+
         try {
             existingNamespace = kubeClient.namespaces().withName(namespace).get();
         } catch (KubernetesClientException kce) {

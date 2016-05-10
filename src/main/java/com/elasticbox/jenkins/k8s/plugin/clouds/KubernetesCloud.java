@@ -1,5 +1,7 @@
 package com.elasticbox.jenkins.k8s.plugin.clouds;
 
+import static hudson.init.InitMilestone.PLUGINS_STARTED;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -9,6 +11,7 @@ import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFactory;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.Extension;
+import hudson.init.Initializer;
 import hudson.model.Descriptor;
 import hudson.model.Label;
 import hudson.slaves.AbstractCloudImpl;
@@ -16,12 +19,16 @@ import hudson.slaves.Cloud;
 import hudson.slaves.NodeProvisioner;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +46,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
     private final String credentialsId;
     private final KubernetesCloudParams kubeCloudParams;
     private final List<ChartRepositoryConfig> chartRepositoryConfigurations;
+    private final List<PodSlaveConfig> podSlaveConfigurations;
 
     @Inject
     transient KubernetesClientFactory kubeFactory;
@@ -46,7 +54,8 @@ public class KubernetesCloud extends AbstractCloudImpl {
     @DataBoundConstructor
     public KubernetesCloud(String name, String description, String endpointUrl, String namespace,
                            String maxContainers, String credentialsId, boolean disableCertCheck, String serverCert,
-                           List<ChartRepositoryConfig> chartRepositoryConfigurations) {
+                           List<ChartRepositoryConfig> chartRepositoryConfigurations,
+                           List<PodSlaveConfig> podSlaveConfigurations) {
 
         super( (StringUtils.isNotEmpty(name) ) ? name : NAME_PREFIX + UUID.randomUUID().toString(), maxContainers );
         this.description = description;
@@ -55,6 +64,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
         this.kubeCloudParams = new KubernetesCloudParams(endpointUrl, namespace,
                 PluginHelper.getAuthenticationData(credentialsId), !disableCertCheck, serverCert);
         this.chartRepositoryConfigurations = chartRepositoryConfigurations;
+        this.podSlaveConfigurations = podSlaveConfigurations;
 
         injectMembers();
         if (StringUtils.isNotEmpty(name) ) {
@@ -86,6 +96,24 @@ public class KubernetesCloud extends AbstractCloudImpl {
         return (cloud != null && cloud instanceof KubernetesCloud) ? (KubernetesCloud)cloud : null;
     }
 
+    @Initializer (after = PLUGINS_STARTED)
+    public static void checkLocalKubernetesCloud() throws IOException {
+        LOGGER.info(NAME_PREFIX + "Checking if running inside a Kubernetes Cloud (Auto-discovery)...");
+        KubernetesClient client = new DefaultKubernetesClient();
+        try {
+            client.namespaces().withName("default").get();
+            LOGGER.info(NAME_PREFIX + "Kubernetes Cloud found! Local Kubernetes cloud will be configured");
+            final String name = NAME_PREFIX + "Local";
+            if (Jenkins.getInstance().getCloud(name) == null) {
+                final KubernetesCloud cloud = new KubernetesCloud(name, name, client.getMasterUrl().toExternalForm(),
+                        "default", "30", "", true, "", Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+                Jenkins.getInstance().clouds.add(cloud);
+            }
+        } catch (KubernetesClientException exception) {
+            LOGGER.info(NAME_PREFIX + "No Kubernetes Cloud found");
+        }
+    }
+
     public String getDescription() {
         return description;
     }
@@ -112,6 +140,10 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     public List<ChartRepositoryConfig> getChartRepositoryConfigurations() {
         return chartRepositoryConfigurations;
+    }
+
+    public List<PodSlaveConfig> getPodSlaveConfigurations() {
+        return podSlaveConfigurations;
     }
 
     public ChartRepositoryConfig getChartRepositoryConfiguration(String chartsRepo) {
@@ -173,7 +205,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     @Extension
     public static class DescriptorImpl extends Descriptor<Cloud> {
-        private static final String KUBERNETES_CLOUD = "Kubernetes clouds";
+        private static final String KUBERNETES_CLOUD = "Kubernetes cloud";
 
         @Inject
         private Injector injector;

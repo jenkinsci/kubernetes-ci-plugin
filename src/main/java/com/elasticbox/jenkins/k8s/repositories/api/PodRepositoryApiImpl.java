@@ -7,9 +7,17 @@ import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import org.apache.commons.io.Charsets;
+import org.apache.commons.io.IOUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Logger;
 
 @Singleton
 public class PodRepositoryApiImpl implements PodRepository {
+    private static final Logger LOGGER = Logger.getLogger(PodRepositoryApiImpl.class.getName() );
 
     @Inject
     KubernetesRepository kubeRepository;
@@ -22,6 +30,19 @@ public class PodRepositoryApiImpl implements PodRepository {
     @Override
     public void delete(String kubeName, String namespace, Pod pod) throws RepositoryException {
         kubeRepository.getClient(kubeName).pods().inNamespace(namespace).delete(pod);
+    }
+
+    @Override
+    public boolean testYaml(String kubeName, String namespace, String yaml) throws RepositoryException {
+        try {
+            kubeRepository.getClient(kubeName).pods().inNamespace(namespace).load(IOUtils.toInputStream(yaml) );
+
+        } catch (KubernetesClientException exception) {
+            final RepositoryException repoException = new RepositoryException("Error while parsing Yaml", exception);
+            LOGGER.warning("Yaml definition not valid: " + repoException.getCausedByMessages() );
+            throw repoException;
+        }
+        return true;
     }
 }
 
