@@ -1,8 +1,13 @@
-package com.elasticbox.jenkins.k8s.repositories;
+package com.elasticbox.jenkins.k8s.cfg;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 
+import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
+import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
+import com.elasticbox.jenkins.k8s.repositories.PodRepository;
+import com.elasticbox.jenkins.k8s.repositories.ReplicationControllerRepository;
+import com.elasticbox.jenkins.k8s.repositories.ServiceRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.KubernetesRepositoryApiImpl;
 import com.elasticbox.jenkins.k8s.repositories.api.PodRepositoryApiImpl;
 import com.elasticbox.jenkins.k8s.repositories.api.ReplicationControllerRepositoryApiImpl;

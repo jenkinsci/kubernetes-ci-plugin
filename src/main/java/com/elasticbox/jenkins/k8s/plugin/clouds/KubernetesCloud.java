@@ -1,7 +1,5 @@
 package com.elasticbox.jenkins.k8s.plugin.clouds;
 
-import static hudson.init.InitMilestone.PLUGINS_STARTED;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -19,16 +17,12 @@ import hudson.slaves.Cloud;
 import hudson.slaves.NodeProvisioner;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,7 +34,7 @@ import java.util.logging.Logger;
 public class KubernetesCloud extends AbstractCloudImpl {
 
     private static final Logger LOGGER = Logger.getLogger(KubernetesCloud.class.getName() );
-    private static final String NAME_PREFIX = "KubeCloud-";
+    public static final String NAME_PREFIX = "KubeCloud-";
 
     private final String description;
     private final String credentialsId;
@@ -60,9 +54,11 @@ public class KubernetesCloud extends AbstractCloudImpl {
         super( (StringUtils.isNotEmpty(name) ) ? name : NAME_PREFIX + UUID.randomUUID().toString(), maxContainers );
         this.description = description;
         this.credentialsId = credentialsId;
+
         // Passing !disableCertCheck because it is with 'negative' property in jelly (opposite behaviour)
         this.kubeCloudParams = new KubernetesCloudParams(endpointUrl, namespace,
                 PluginHelper.getAuthenticationData(credentialsId), !disableCertCheck, serverCert);
+
         this.chartRepositoryConfigurations = chartRepositoryConfigurations;
         this.podSlaveConfigurations = podSlaveConfigurations;
 
@@ -94,24 +90,6 @@ public class KubernetesCloud extends AbstractCloudImpl {
         }
         final Cloud cloud = instance.getCloud(kubeName);
         return (cloud != null && cloud instanceof KubernetesCloud) ? (KubernetesCloud)cloud : null;
-    }
-
-    @Initializer (after = PLUGINS_STARTED)
-    public static void checkLocalKubernetesCloud() throws IOException {
-        LOGGER.info(NAME_PREFIX + "Checking if running inside a Kubernetes Cloud (Auto-discovery)...");
-        KubernetesClient client = new DefaultKubernetesClient();
-        try {
-            client.namespaces().withName("default").get();
-            LOGGER.info(NAME_PREFIX + "Kubernetes Cloud found! Local Kubernetes cloud will be configured");
-            final String name = NAME_PREFIX + "Local";
-            if (Jenkins.getInstance().getCloud(name) == null) {
-                final KubernetesCloud cloud = new KubernetesCloud(name, name, client.getMasterUrl().toExternalForm(),
-                        "default", "30", "", true, "", Collections.EMPTY_LIST, Collections.EMPTY_LIST);
-                Jenkins.getInstance().clouds.add(cloud);
-            }
-        } catch (KubernetesClientException exception) {
-            LOGGER.info(NAME_PREFIX + "No Kubernetes Cloud found");
-        }
     }
 
     public String getDescription() {
