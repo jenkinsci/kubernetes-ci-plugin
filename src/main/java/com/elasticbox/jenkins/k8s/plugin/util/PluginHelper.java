@@ -16,6 +16,10 @@ import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 
@@ -24,7 +28,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class PluginHelper {
-    private static final Logger LOGGER = Logger.getLogger(PluginHelper.class.getName() );
+
+    public static final String DEFAULT_NAMESPACE = "default";
 
     private static final ListBoxModel.Option OPTION_CHOOSE_CHART =
             new ListBoxModel.Option("--Please choose the chart to deploy--", StringUtils.EMPTY);
@@ -108,5 +113,19 @@ public class PluginHelper {
                                 Jenkins.getInstance(),
                                 ACL.SYSTEM,
                                 URIRequirementBuilder.fromUri(endpointUrl).build()));
+    }
+
+    public static boolean checkKubernetesClientConnection(String kubernetesUri) throws RepositoryException {
+
+        final ConfigBuilder builder = new ConfigBuilder().withMasterUrl(kubernetesUri).withTrustCerts(true);
+        KubernetesClient client = new DefaultKubernetesClient(builder.build() );
+
+        try {
+
+            return (client.namespaces().withName(DEFAULT_NAMESPACE).get() != null);
+
+        } catch (KubernetesClientException exception) {
+            throw new RepositoryException("Error checking Kubernetes cloud connection: ", exception);
+        }
     }
 }

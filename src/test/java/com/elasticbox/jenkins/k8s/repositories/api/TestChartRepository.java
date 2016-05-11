@@ -2,6 +2,7 @@ package com.elasticbox.jenkins.k8s.repositories.api;
 
 import static org.junit.Assert.assertTrue;
 
+import com.elasticbox.jenkins.k8s.util.TestUtils;
 import com.elasticbox.jenkins.k8s.auth.TokenAuthentication;
 import com.elasticbox.jenkins.k8s.auth.UserAndPasswordAuthentication;
 import com.elasticbox.jenkins.k8s.chart.Chart;
