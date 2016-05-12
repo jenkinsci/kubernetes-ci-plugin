@@ -36,16 +36,14 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
     }
 
     @Test
-    public void testGetChartRepoCfgs() {
+    public void testGetttersChartRepoCfgsAndCloudParams() {
         final List<ChartRepositoryConfig> chartRepositoryConfigurations = cloud.getChartRepositoryConfigurations();
         Assert.assertEquals("Chart repository configuration not found", 1, chartRepositoryConfigurations.size() );
 
         ChartRepositoryConfig chartRepoCfg = cloud.getChartRepositoryConfiguration(fakeChartRepoCfg.getDescription());
         Assert.assertNotNull("Chart repository configuration not found", chartRepoCfg);
-    }
 
-    @Test
-    public void testGetKubernetesCloudParams() {
+        // Now testing getKubernetesCloudParams:
         final KubernetesCloudParams kubernetesCloudParams = cloud.getKubernetesCloudParams();
         Assert.assertNotNull("Kubernetes clouds parameteres not found", kubernetesCloudParams);
         Assert.assertEquals(FAKE_URL, kubernetesCloudParams.getEndpointUrl() );

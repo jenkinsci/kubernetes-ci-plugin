@@ -9,6 +9,7 @@ import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFactory;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.Extension;
+import hudson.init.Initializer;
 import hudson.model.Descriptor;
 import hudson.model.Label;
 import hudson.slaves.AbstractCloudImpl;
@@ -33,12 +34,13 @@ import java.util.logging.Logger;
 public class KubernetesCloud extends AbstractCloudImpl {
 
     private static final Logger LOGGER = Logger.getLogger(KubernetesCloud.class.getName() );
-    private static final String NAME_PREFIX = "KubeCloud-";
+    public static final String NAME_PREFIX = "KubeCloud-";
 
     private final String description;
     private final String credentialsId;
     private final KubernetesCloudParams kubeCloudParams;
     private final List<ChartRepositoryConfig> chartRepositoryConfigurations;
+    private final List<PodSlaveConfig> podSlaveConfigurations;
 
     @Inject
     transient KubernetesClientFactory kubeFactory;
@@ -46,15 +48,19 @@ public class KubernetesCloud extends AbstractCloudImpl {
     @DataBoundConstructor
     public KubernetesCloud(String name, String description, String endpointUrl, String namespace,
                            String maxContainers, String credentialsId, boolean disableCertCheck, String serverCert,
-                           List<ChartRepositoryConfig> chartRepositoryConfigurations) {
+                           List<ChartRepositoryConfig> chartRepositoryConfigurations,
+                           List<PodSlaveConfig> podSlaveConfigurations) {
 
         super( (StringUtils.isNotEmpty(name) ) ? name : NAME_PREFIX + UUID.randomUUID().toString(), maxContainers );
         this.description = description;
         this.credentialsId = credentialsId;
+
         // Passing !disableCertCheck because it is with 'negative' property in jelly (opposite behaviour)
         this.kubeCloudParams = new KubernetesCloudParams(endpointUrl, namespace,
                 PluginHelper.getAuthenticationData(credentialsId), !disableCertCheck, serverCert);
+
         this.chartRepositoryConfigurations = chartRepositoryConfigurations;
+        this.podSlaveConfigurations = podSlaveConfigurations;
 
         injectMembers();
         if (StringUtils.isNotEmpty(name) ) {
@@ -112,6 +118,10 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     public List<ChartRepositoryConfig> getChartRepositoryConfigurations() {
         return chartRepositoryConfigurations;
+    }
+
+    public List<PodSlaveConfig> getPodSlaveConfigurations() {
+        return podSlaveConfigurations;
     }
 
     public ChartRepositoryConfig getChartRepositoryConfiguration(String chartsRepo) {
@@ -173,7 +183,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     @Extension
     public static class DescriptorImpl extends Descriptor<Cloud> {
-        private static final String KUBERNETES_CLOUD = "Kubernetes clouds";
+        private static final String KUBERNETES_CLOUD = "Kubernetes cloud";
 
         @Inject
         private Injector injector;

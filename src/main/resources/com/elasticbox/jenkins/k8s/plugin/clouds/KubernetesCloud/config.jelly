@@ -42,4 +42,10 @@
         </f:repeatable>
     </f:entry>
 
+    <f:entry title="${%Pod Slave Configurations}" description="${%Configuration of Pod slave nodes}">
+        <f:repeatable field="podSlaveConfigurations">
+            <st:include page="config.jelly" class="${descriptor.clazz}" />
+        </f:repeatable>
+    </f:entry>
+
 </j:jelly>

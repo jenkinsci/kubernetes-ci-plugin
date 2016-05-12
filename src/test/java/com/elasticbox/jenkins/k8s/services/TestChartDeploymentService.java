@@ -9,11 +9,9 @@ import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.ReplicationControllerRepository;
 import com.elasticbox.jenkins.k8s.repositories.ServiceRepository;
-import com.elasticbox.jenkins.k8s.repositories.api.TestUtils;
+import com.elasticbox.jenkins.k8s.util.TestUtils;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.ChartRepositoryApiImpl;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
-import com.elasticbox.jenkins.k8s.services.ChartDeploymentService;
-import com.elasticbox.jenkins.k8s.services.ChartDeploymentServiceImpl;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.api.model.Service;
@@ -25,9 +23,6 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Created by guillermo on 20/4/16.
- */
 public class TestChartDeploymentService {
 
     private static final String TEST_NAMESPACE = "test-chart";

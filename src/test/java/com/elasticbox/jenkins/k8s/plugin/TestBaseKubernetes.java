@@ -40,7 +40,7 @@ public class TestBaseKubernetes {
     public void setupCloud() throws Exception {
         fakeChartRepoCfg = new ChartRepositoryConfig(FAKE_CHARTS_REPO, FAKE_URL, EMPTY);
         cloud = new KubernetesCloud(EMPTY, "FakeKubeCloud", FAKE_URL, FAKE_NS, "10", EMPTY, true, EMPTY,
-                                    Collections.singletonList(fakeChartRepoCfg) );
+                                    Collections.singletonList(fakeChartRepoCfg), null);
 
         jenkins.getInstance().clouds.add(cloud);
     }
