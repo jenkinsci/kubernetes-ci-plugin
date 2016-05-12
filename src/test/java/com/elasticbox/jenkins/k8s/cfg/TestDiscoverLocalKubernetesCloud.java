@@ -1,34 +1,22 @@
-package com.elasticbox.jenkins.k8s.plugin.clouds;
+package com.elasticbox.jenkins.k8s.cfg;
 
-import static com.elasticbox.jenkins.k8s.plugin.util.PluginHelper.checkKubernetesClientConnection;
-import static jnr.ffi.provider.jffi.CodegenUtils.p;
-
-import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
-import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
+import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.util.TestLogHandler;
 import com.elasticbox.jenkins.k8s.util.TestUtils;
-import com.elasticbox.jenkins.k8s.cfg.PluginInitializer;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.slaves.Cloud;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(PluginHelper.class)
 public class TestDiscoverLocalKubernetesCloud {
 
     private static final String FAKE_IP = "FAKE_IP";
@@ -38,11 +26,12 @@ public class TestDiscoverLocalKubernetesCloud {
 
     private static final String LOG_MESSAGE_NOT_FOUND = " <-- Log message not found";
 
+    private static KubernetesRepository kubernetesRepositoryMock = Mockito.mock(KubernetesRepository.class);
+
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 
     private static TestLogHandler testLogHandler = new TestLogHandler();
-    private static int testRunning = 0;
 
     @BeforeClass
     public static void initEnv() {
@@ -61,14 +50,14 @@ public class TestDiscoverLocalKubernetesCloud {
         logger.setUseParentHandlers(false);
         logger.addHandler(testLogHandler);
 
-        PowerMockito.mockStatic(PluginHelper.class);
-        PowerMockito.when(PluginHelper.checkKubernetesClientConnection(Mockito.anyString() )).thenReturn(true);
+        Mockito.when(kubernetesRepositoryMock.testConnection(Mockito.anyString() )).thenReturn(true);
+        PluginInitializer.kubeRepository = kubernetesRepositoryMock;
     }
 
     @Test
     public void testAutoDiscoverCloud() {
-        System.out.println("-- Testing first PluginInitializer run that should detect and add the local cloud --");
 
+        // Testing first PluginInitializer run that should detect and add the local cloud:
         Cloud cloud = jenkins.getInstance().getCloud(PluginInitializer.LOCAL_CLOUD_NAME);
         Assert.assertNotNull("Local Kubernetes cloud not found", cloud);
 
@@ -77,9 +66,7 @@ public class TestDiscoverLocalKubernetesCloud {
 
         testLogHandler.clear();
 
-        System.out.println(
-                "-- Testing second PluginInitializer run that should detect the local cloud already configured --");
-
+        // Testing second PluginInitializer run that should detect the local cloud already configured:
         PluginInitializer.checkLocalKubernetesCloud();
 
         assertLoggedMessage("Kubernetes Cloud found!");

@@ -5,6 +5,8 @@ import static com.elasticbox.jenkins.k8s.plugin.util.PluginHelper.DEFAULT_NAMESP
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
+import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
+import com.elasticbox.jenkins.k8s.repositories.api.KubernetesRepositoryApiImpl;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
@@ -20,7 +22,10 @@ public class PluginInitializer {
     private static final Logger LOGGER = Logger.getLogger(PluginInitializer.class.getName() );
 
     private static final String MAX_SLAVES = "30";
+
     public static final String LOCAL_CLOUD_NAME = NAME_PREFIX + "Local";
+
+    static KubernetesRepository kubeRepository = new KubernetesRepositoryApiImpl();
 
     @Initializer(after = InitMilestone.JOB_LOADED)
     public static void checkLocalKubernetesCloud() {
@@ -47,7 +52,7 @@ public class PluginInitializer {
         }
 
         try {
-            if ( !PluginHelper.checkKubernetesClientConnection(kubernetesUri) ) {
+            if ( !kubeRepository.testConnection(kubernetesUri) ) {
                 LOGGER.warning(NAME_PREFIX + "No valid Local Kubernetes Cloud connection obtained.");
                 return;
             }

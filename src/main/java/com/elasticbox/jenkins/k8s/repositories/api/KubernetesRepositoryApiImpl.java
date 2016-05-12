@@ -10,6 +10,8 @@ import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFa
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
+import io.fabric8.kubernetes.client.ConfigBuilder;
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
@@ -32,8 +34,23 @@ public class KubernetesRepositoryApiImpl implements KubernetesRepository {
         try {
             final KubernetesClient kubeClient = kubeFactory.createKubernetesClient(kubeCloudParams);
             return getNamespacesInternal(kubeClient).size() > 0;
+
         }  catch (KubernetesClientException excep) {
             throw new RepositoryException(excep);
+        }
+    }
+
+    @Override
+    public boolean testConnection(String kubernetesUri) throws RepositoryException {
+
+        final ConfigBuilder builder = new ConfigBuilder().withMasterUrl(kubernetesUri).withTrustCerts(true);
+        final KubernetesClient kubeClient = new DefaultKubernetesClient(builder.build() );
+
+        try {
+            return getNamespacesInternal(kubeClient).size() > 0;
+
+        } catch (KubernetesClientException exception) {
+            throw new RepositoryException("Error checking Kubernetes cloud connection: ", exception);
         }
     }
 

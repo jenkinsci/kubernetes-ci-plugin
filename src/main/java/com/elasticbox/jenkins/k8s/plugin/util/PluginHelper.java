@@ -114,18 +114,4 @@ public class PluginHelper {
                                 ACL.SYSTEM,
                                 URIRequirementBuilder.fromUri(endpointUrl).build()));
     }
-
-    public static boolean checkKubernetesClientConnection(String kubernetesUri) throws RepositoryException {
-
-        final ConfigBuilder builder = new ConfigBuilder().withMasterUrl(kubernetesUri).withTrustCerts(true);
-        KubernetesClient client = new DefaultKubernetesClient(builder.build() );
-
-        try {
-
-            return (client.namespaces().withName(DEFAULT_NAMESPACE).get() != null);
-
-        } catch (KubernetesClientException exception) {
-            throw new RepositoryException("Error checking Kubernetes cloud connection: ", exception);
-        }
-    }
 }

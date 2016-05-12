@@ -1,5 +1,6 @@
 package com.elasticbox.jenkins.k8s.plugin.auth;
 
+import com.cloudbees.plugins.credentials.CredentialsDescriptor;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
 import com.elasticbox.jenkins.k8s.plugin.auth.TokenCredentials;
@@ -27,7 +28,7 @@ public class TokenCredentialsImpl extends BaseStandardCredentials implements Tok
     }
 
     @Extension
-    public static class DescriptorImpl extends BaseStandardCredentialsDescriptor {
+    public static class DescriptorImpl extends CredentialsDescriptor {
 
         private static final String DISPLAY_NAME = "Authentication Token";
 

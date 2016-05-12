@@ -10,9 +10,11 @@ import java.util.List;
 
 public interface KubernetesRepository {
 
-    KubernetesClient getClient(String kubeName) throws RepositoryException;
-
     boolean testConnection(KubernetesCloudParams kubeCloudParams) throws RepositoryException;
+
+    boolean testConnection(String kubernetesUri) throws RepositoryException;
+
+    KubernetesClient getClient(String kubeName) throws RepositoryException;
 
     boolean namespaceExists(String kubeName, String namespace) throws RepositoryException;
 
