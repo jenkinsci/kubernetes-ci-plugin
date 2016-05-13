@@ -1,18 +1,10 @@
 package com.elasticbox.jenkins.k8s.plugin.builders;
 
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
-import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
-import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloudParams;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
-import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import com.elasticbox.jenkins.k8s.services.ChartDeploymentService;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
-import hudson.model.Cause;
-import hudson.model.FreeStyleProject;
-import hudson.model.ItemGroup;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.LogTaskListener;
 import org.junit.Assert;
@@ -23,13 +15,10 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.c;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 

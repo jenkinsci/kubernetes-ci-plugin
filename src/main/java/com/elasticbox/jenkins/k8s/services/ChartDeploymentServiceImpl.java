@@ -49,25 +49,25 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
         try {
             final Chart chart = chartRepository.chart(chartRepo, chartName);
 
-            if (!kubernetesRepository.namespaceExists(kubeName, namespace)) {
+            if ( !kubernetesRepository.namespaceExists(kubeName, namespace)) {
                 LOGGER.warning("Namespace not found, creating it: " + namespace);
                 kubernetesRepository.createNamespece(kubeName, namespace);
             }
 
             if (chart.getServices() != null) {
-                for (Service service : chart.getServices()) {
+                for (Service service : chart.getServices() ) {
                     serviceRepository.create(kubeName, namespace, service);
                 }
             }
 
             if (chart.getReplicationControllers() != null) {
-                for (ReplicationController replicationController : chart.getReplicationControllers()) {
+                for (ReplicationController replicationController : chart.getReplicationControllers() ) {
                     replicationControllerRepository.create(kubeName, namespace, replicationController);
                 }
             }
 
             if (chart.getPods() != null) {
-                for (Pod pod : chart.getPods()) {
+                for (Pod pod : chart.getPods() ) {
                     podRepository.create(kubeName, namespace, pod);
                 }
             }
@@ -79,6 +79,48 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
 
         } catch (KubernetesClientException exception) {
             final String message = "Error in Kubernetes client trying to deploy chart [" + chartName + "]. ";
+            LOGGER.severe(message + exception.getMessage() );
+            throw new ServiceException(message, exception);
+        }
+    }
+
+    @Override
+    public void deleteChart(String kubeName, String namespace, ChartRepo chartRepo, String chartName)
+            throws ServiceException {
+
+        try {
+            final Chart chart = chartRepository.chart(chartRepo, chartName);
+
+            if ( !kubernetesRepository.namespaceExists(kubeName, namespace)) {
+                LOGGER.warning("Namespace not found. Unable to delete chart.");
+                return;
+            }
+
+            if (chart.getServices() != null) {
+                for (Service service : chart.getServices() ) {
+                    serviceRepository.delete(kubeName, namespace, service);
+                }
+            }
+
+            if (chart.getReplicationControllers() != null) {
+                for (ReplicationController replicationController : chart.getReplicationControllers() ) {
+                    replicationControllerRepository.delete(kubeName, namespace, replicationController);
+                }
+            }
+
+            if (chart.getPods() != null) {
+                for (Pod pod : chart.getPods() ) {
+                    podRepository.delete(kubeName, namespace, pod);
+                }
+            }
+
+        } catch (RepositoryException exception) {
+            final String message = "Error accessing namespace [" + namespace + "]. ";
+            LOGGER.severe(message + exception.getMessage() );
+            throw new ServiceException(message, exception);
+
+        } catch (KubernetesClientException exception) {
+            final String message = "Error in Kubernetes client trying to delete chart [" + chartName + "]. ";
             LOGGER.severe(message + exception.getMessage() );
             throw new ServiceException(message, exception);
         }
