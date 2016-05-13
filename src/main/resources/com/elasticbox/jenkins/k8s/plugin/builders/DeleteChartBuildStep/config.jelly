@@ -14,7 +14,7 @@
         <f:select clazz="required"/>
     </f:entry>
 
-    <f:entry title="${%Chart to deploy}" field="chartName">
+    <f:entry title="${%Chart to delete}" field="chartName">
         <f:select clazz="required" />
     </f:entry>
 

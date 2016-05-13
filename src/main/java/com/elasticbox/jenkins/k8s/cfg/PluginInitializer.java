@@ -3,6 +3,7 @@ package com.elasticbox.jenkins.k8s.cfg;
 import static com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud.NAME_PREFIX;
 import static com.elasticbox.jenkins.k8s.plugin.util.PluginHelper.DEFAULT_NAMESPACE;
 
+import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
@@ -22,6 +23,8 @@ public class PluginInitializer {
     private static final Logger LOGGER = Logger.getLogger(PluginInitializer.class.getName() );
 
     private static final String MAX_SLAVES = "30";
+    private static final String DEFAULT_HELM_CHART_REPO = "Default Helm charts repository";
+    private static final String DEFAULT_HELM_CHART_REPO_URL = "https://github.com/helm/charts";
 
     public static final String LOCAL_CLOUD_NAME = NAME_PREFIX + "Local";
 
@@ -57,9 +60,12 @@ public class PluginInitializer {
                 return;
             }
 
+            final ChartRepositoryConfig chartRepositoryConfig =
+                    new ChartRepositoryConfig(DEFAULT_HELM_CHART_REPO, DEFAULT_HELM_CHART_REPO_URL, StringUtils.EMPTY);
+
             final KubernetesCloud cloud = new KubernetesCloud(LOCAL_CLOUD_NAME, LOCAL_CLOUD_NAME, kubernetesUri,
                     DEFAULT_NAMESPACE, MAX_SLAVES, StringUtils.EMPTY, false, StringUtils.EMPTY,
-                    Collections.EMPTY_LIST, Collections.EMPTY_LIST);
+                    Collections.singletonList(chartRepositoryConfig), Collections.EMPTY_LIST);
 
             LOGGER.info(NAME_PREFIX + "Adding local Kubernetes Cloud configuration: " + cloud);
 

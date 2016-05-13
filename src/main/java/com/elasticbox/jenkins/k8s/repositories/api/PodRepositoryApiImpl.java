@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Singleton
@@ -24,25 +25,33 @@ public class PodRepositoryApiImpl implements PodRepository {
 
     @Override
     public void create(String kubeName, String namespace, Pod pod) throws RepositoryException {
+        if (LOGGER.isLoggable(Level.CONFIG) ) {
+            LOGGER.config("Creating Pod: " + pod.getMetadata().getName() );
+        }
         kubeRepository.getClient(kubeName).pods().inNamespace(namespace).create(pod);
     }
 
     @Override
     public void delete(String kubeName, String namespace, Pod pod) throws RepositoryException {
+        if (LOGGER.isLoggable(Level.CONFIG) ) {
+            LOGGER.config("Deleting Pod: " + pod.getMetadata().getName() );
+        }
         kubeRepository.getClient(kubeName).pods().inNamespace(namespace).delete(pod);
     }
 
     @Override
     public boolean testYaml(String kubeName, String namespace, String yaml) throws RepositoryException {
+        Pod pod;
         try {
-            kubeRepository.getClient(kubeName).pods().inNamespace(namespace).load(IOUtils.toInputStream(yaml) );
+            pod = kubeRepository.getClient(kubeName).pods().inNamespace(namespace)
+                    .load(IOUtils.toInputStream(yaml) ).get();
 
         } catch (KubernetesClientException exception) {
             final RepositoryException repoException = new RepositoryException("Error while parsing Yaml", exception);
-            LOGGER.warning("Yaml definition not valid: " + repoException.getCausedByMessages() );
+            LOGGER.warning("Yaml definition not valid: " + repoException.getCausedByMessages());
             throw repoException;
         }
-        return true;
+        return pod != null;
     }
 }
 
