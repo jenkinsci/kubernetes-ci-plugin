@@ -17,6 +17,7 @@ import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 @Singleton
@@ -43,7 +44,8 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
     }
 
     @Override
-    public void deployChart(String kubeName, String namespace, ChartRepo chartRepo, String chartName)
+    public void deployChart(String kubeName, String namespace, ChartRepo chartRepo, String chartName,
+                            Map<String, String> label)
             throws ServiceException {
 
         try {
@@ -56,19 +58,19 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
 
             if (chart.getServices() != null) {
                 for (Service service : chart.getServices() ) {
-                    serviceRepository.create(kubeName, namespace, service);
+                    serviceRepository.create(kubeName, namespace, service, label);
                 }
             }
 
             if (chart.getReplicationControllers() != null) {
                 for (ReplicationController replicationController : chart.getReplicationControllers() ) {
-                    replicationControllerRepository.create(kubeName, namespace, replicationController);
+                    replicationControllerRepository.create(kubeName, namespace, replicationController, label);
                 }
             }
 
             if (chart.getPods() != null) {
                 for (Pod pod : chart.getPods() ) {
-                    podRepository.create(kubeName, namespace, pod);
+                    podRepository.create(kubeName, namespace, pod, label);
                 }
             }
 

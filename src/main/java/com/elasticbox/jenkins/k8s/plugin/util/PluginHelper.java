@@ -32,7 +32,7 @@ public class PluginHelper {
     public static final String DEFAULT_NAMESPACE = "default";
 
     private static final ListBoxModel.Option OPTION_CHOOSE_CHART =
-            new ListBoxModel.Option("--Please choose the chart to deploy--", StringUtils.EMPTY);
+            new ListBoxModel.Option("--Please choose the chart to use--", StringUtils.EMPTY);
 
     private static final ListBoxModel.Option OPTION_CHOOSE_NAMESPACE =
             new ListBoxModel.Option("--Please choose the namespace--", StringUtils.EMPTY);
@@ -41,7 +41,7 @@ public class PluginHelper {
             new ListBoxModel.Option("--Please choose your cloud--", StringUtils.EMPTY);
 
     public static final ListBoxModel.Option OPTION_CHOOSE_CHART_REPO_CONFIG =
-            new ListBoxModel.Option("--Please choose your Chart repository configuration--", StringUtils.EMPTY);
+            new ListBoxModel.Option("--Please choose your chart repository configuration--", StringUtils.EMPTY);
 
     public static boolean anyOfThemIsBlank(String... inputParameters) {
         for (String inputParameter : inputParameters) {

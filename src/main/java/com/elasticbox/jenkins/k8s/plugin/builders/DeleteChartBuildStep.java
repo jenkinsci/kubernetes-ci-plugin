@@ -1,11 +1,15 @@
 package com.elasticbox.jenkins.k8s.plugin.builders;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.plugin.util.TaskLogger;
+import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.Extension;
-import hudson.model.AbstractProject;
+import hudson.tasks.Builder;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -16,6 +20,7 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     private static final Logger LOGGER = Logger.getLogger(DeleteChartBuildStep.class.getName() );
 
     private static final String NAME_PREFIX = "DeleteChartBS-";
+    private static final String KUBERNETES_DELETE_CHART = "Kubernetes - Delete Chart";
 
     @DataBoundConstructor
     public DeleteChartBuildStep(String id, String cloudName, String chartsRepo, String chartName) {
@@ -28,7 +33,7 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     }
 
     @Override
-    protected void doPerform(TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
+    protected void doPerform(String runName, TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
             throws ServiceException {
 
         taskLogger.info("Deleting chart: " + getChartName());
@@ -37,18 +42,17 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     }
 
     @Extension
-    public static final class DescriptorImpl extends BaseChartBuildStep.DescriptorImpl {
+    public static final class DescriptorImpl extends ChartBuildStepDescriptor {
 
-        private static final String KUBERNETES_DELETE_CHART = "Kubernetes - Delete Chart";
-
-        @Override
-        public String getDisplayName() {
-            return KUBERNETES_DELETE_CHART;
+        public DescriptorImpl() {
+            this(null, null);
+            LOGGER.warning("No args constructor called. No injection performed!");
         }
 
-        @Override
-        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return true;
+        @Inject
+        public DescriptorImpl(Injector injector, ChartRepository chartRepository) {
+            super(DeleteChartBuildStep.class, injector, chartRepository, KUBERNETES_DELETE_CHART);
         }
     }
+
 }

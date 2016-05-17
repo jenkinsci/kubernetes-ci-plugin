@@ -22,6 +22,8 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Map;
 
 public class TestChartDeploymentService {
 
@@ -62,11 +64,17 @@ public class TestChartDeploymentService {
 
         ChartRepo fakeRepo = new ChartRepo("https://github.com/fakeOwner/fakeChartsRepo");
 
-        service.deployChart("fakeKubeCloud", "fakeNamespace", fakeRepo, "fakeChartName");
+        service.deployChart("fakeKubeCloud", "fakeNamespace", fakeRepo, "fakeChartName",
+                Collections.singletonMap("fakeLabelKey", "fakeLabelText") );
 
-        Mockito.verify(serviceRepositoryMock).create(anyString(), anyString(), any(Service.class) );
-        Mockito.verify(rcRepositoryMock).create(anyString(), anyString(), any(ReplicationController.class) );
-        Mockito.verify(podRepositoryMock, Mockito.never() ).create(anyString(), anyString(), any(Pod.class) );
+        Mockito.verify(serviceRepositoryMock).create(anyString(), anyString(), any(Service.class), any(Map.class) );
+
+        Mockito.verify(rcRepositoryMock).create(
+                anyString(), anyString(), any(ReplicationController.class), any(Map.class) );
+
+        Mockito.verify(podRepositoryMock, Mockito.never() ).create(
+                anyString(), anyString(), any(Pod.class), any(Map.class) );
+
         Mockito.verify(kubernetesRepositoryMock, Mockito.never() )
                 .createNamespece(anyString(), anyString(), any(KeyValuePair.class) );
     }

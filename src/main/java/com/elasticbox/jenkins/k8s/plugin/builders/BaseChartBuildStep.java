@@ -49,7 +49,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
     }
 
     protected void injectMembers() {
-        ((DescriptorImpl) getDescriptor()).injector.injectMembers(this);
+        ((ChartBuildStepDescriptor) getDescriptor()).getInjector().injectMembers(this);
     }
 
     public String getId() {
@@ -73,7 +73,8 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
                         @Nonnull TaskListener taskListener) throws InterruptedException, IOException {
 
         TaskLogger taskLogger = new TaskLogger(taskListener, LOGGER);
-        taskLogger.info("Executing Chart build step: " + run);
+        final String runName = (run != null) ? run.toString() : "<NO-RUN>";                ;
+        taskLogger.info("Executing Chart build step: " + runName);
 
         try {
             KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(getCloudName() );
@@ -85,7 +86,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
             Authentication authData = PluginHelper.getAuthenticationData(config.getCredentialsId() );
             ChartRepo chartRepo = new ChartRepo(config.getChartsRepoUrl(), authData);
 
-            doPerform(taskLogger, kubeCloud, chartRepo);
+            doPerform(runName, taskLogger, kubeCloud, chartRepo);
 
         } catch (ServiceException exception) {
             taskLogger.error(exception.getCausedByMessages() );
@@ -98,84 +99,8 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
         }
     }
 
-    protected abstract void doPerform(TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
+    protected abstract void doPerform(String runName, TaskLogger taskLogger,
+                                      KubernetesCloud kubeCloud, ChartRepo chartRepo)
             throws ServiceException;
 
-    protected static class DescriptorImpl extends BuildStepDescriptor<Builder> {
-
-        @Inject
-        private Injector injector;
-
-        @Inject
-        ChartRepository chartRepository;
-
-        @Override
-        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
-            return false;
-        }
-
-        public Injector getInjector() {
-            return injector;
-        }
-
-        public ListBoxModel doFillCloudNameItems() {
-            ListBoxModel items = new ListBoxModel(PluginHelper.OPTION_CHOOSE_CLOUD);
-            List<KubernetesCloud> cloudList = KubernetesCloud.getKubernetesClouds();
-
-            for (KubernetesCloud cloud : cloudList) {
-                items.add(cloud.getDisplayName(), cloud.name);
-            }
-            return items;
-        }
-
-        public ListBoxModel doFillChartsRepoItems(@QueryParameter String cloudName) {
-            ListBoxModel items = new ListBoxModel(PluginHelper.OPTION_CHOOSE_CHART_REPO_CONFIG);
-            if (cloudName != null) {
-                KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(cloudName);
-                if (kubeCloud != null) {
-                    List<ChartRepositoryConfig> chartRepoConfigList = kubeCloud.getChartRepositoryConfigurations();
-
-                    for (ChartRepositoryConfig config : chartRepoConfigList) {
-                        items.add(config.getDescription());
-                    }
-                }
-            }
-            return items;
-        }
-
-        public ListBoxModel doFillChartNameItems(@QueryParameter String cloudName, @QueryParameter String chartsRepo) {
-            if (cloudName != null && chartsRepo != null) {
-                KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(cloudName);
-                if (kubeCloud != null) {
-                    ChartRepositoryConfig config = kubeCloud.getChartRepositoryConfiguration(chartsRepo);
-
-                    if (config != null) {
-                        Authentication authData = PluginHelper.getAuthenticationData(config.getCredentialsId());
-                        ChartRepo chartRepo = new ChartRepo(config.getChartsRepoUrl(), authData);
-                        try {
-                            return PluginHelper.doFillChartItems(chartRepository.chartNames(chartRepo));
-                        } catch (RepositoryException excep) {
-                            LOGGER.severe("Error retrieving chart list from Charts repo: "
-                                    + chartsRepo + "@" + chartRepo.getUrl());
-                        }
-                    }
-                }
-            }
-            return PluginHelper.doFillChartItems(null);
-        }
-
-        public FormValidation doCheckNamespace(@QueryParameter String namespace) {
-            if (StringUtils.isBlank(namespace)) {
-                return FormValidation.error("Namespace is required");
-            }
-            return FormValidation.ok();
-        }
-
-        public FormValidation doCheckChartName(@QueryParameter String chartName) {
-            if (StringUtils.isBlank(chartName)) {
-                return FormValidation.error("Chart selection required");
-            }
-            return FormValidation.ok();
-        }
-    }
 }
