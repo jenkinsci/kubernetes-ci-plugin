@@ -8,11 +8,9 @@ import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +27,19 @@ public class PodRepositoryApiImpl implements PodRepository {
             LOGGER.config("Creating Pod: " + pod.getMetadata().getName() );
         }
         kubeRepository.getClient(kubeName).pods().inNamespace(namespace).create(pod);
+    }
+
+    @Override
+    public void create(String kubeName, String namespace, Pod pod, Map<String, String> labels)
+            throws RepositoryException {
+
+        if (labels != null) {
+            final Map<String, String> currentLabels = pod.getMetadata().getLabels();
+            currentLabels.putAll(labels);
+            pod.getMetadata().setLabels(currentLabels);
+        }
+
+        this.create(kubeName, namespace, pod);
     }
 
     @Override

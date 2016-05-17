@@ -6,11 +6,10 @@ import com.google.inject.Singleton;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.ReplicationControllerRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
-import io.fabric8.kubernetes.api.model.DoneableReplicationController;
 import io.fabric8.kubernetes.api.model.ReplicationController;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.ClientRollableScallableResource;
 
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,6 +28,19 @@ public class ReplicationControllerRepositoryApiImpl implements ReplicationContro
             LOGGER.config("Creating Replication Controller: " + replController.getMetadata().getName() );
         }
         kubeRepository.getClient(kubeName).replicationControllers().inNamespace(namespace).create(replController);
+    }
+
+    @Override
+    public void create(String kubeName, String namespace, ReplicationController controller, Map<String, String> labels)
+            throws RepositoryException {
+
+        if (labels != null) {
+            final Map<String, String> currentLabels = controller.getMetadata().getLabels();
+            currentLabels.putAll(labels);
+            controller.getMetadata().setLabels(currentLabels);
+        }
+
+        this.create(kubeName, namespace, controller);
     }
     
     @Override

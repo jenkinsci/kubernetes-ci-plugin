@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,20 +50,20 @@ public class TestDeployChartBuildStep extends com.elasticbox.jenkins.k8s.plugin.
         final LogTaskListener listener = new LogTaskListener(Logger.getLogger(this.getClass().getName()), Level.OFF);
 
         Mockito.doNothing().when(chartDeploymentServiceMock)
-                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString() );
+                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
 
         deployChartBuildStep.perform(null, null,null, listener);
         Mockito.verify(chartDeploymentServiceMock)
-                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString() );
+                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
 
         Mockito.doThrow(new ServiceException(FAKE_MOCK_EXCEPTION, new Throwable() ))
                 .when(chartDeploymentServiceMock)
-                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString() );
+                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
         try {
             deployChartBuildStep.perform(null, null,null, listener);
         } catch (IOException e) {
             Mockito.verify(chartDeploymentServiceMock, Mockito.times(2) )
-                    .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString() );
+                    .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
         }
 
     }
@@ -74,14 +75,14 @@ public class TestDeployChartBuildStep extends com.elasticbox.jenkins.k8s.plugin.
         Assert.assertNotNull("Injection failed", descriptor.chartRepository);
         Assert.assertNotNull("Injection failed", descriptor.getInjector() );
 
+        initChartRepositoryMock();
+        descriptor.chartRepository = chartRepositoryMock;
+
         ListBoxModel items = descriptor.doFillCloudNameItems();
         Assert.assertEquals("Error filling cloud list items", 2, items.size() );
 
         items = descriptor.doFillChartsRepoItems(cloud.name);
         Assert.assertEquals("Error filling charts repo list items", 2, items.size() );
-
-        initChartRepositoryMock();
-        descriptor.chartRepository = chartRepositoryMock;
 
         items = descriptor.doFillChartNameItems(cloud.name, FAKE_CHARTS_REPO);
         Assert.assertEquals("Error filling chart names list items", 2, items.size() );
