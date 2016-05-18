@@ -2,10 +2,7 @@ package com.elasticbox.jenkins.k8s.plugin.clouds;
 
 import com.google.inject.Inject;
 
-import com.elasticbox.jenkins.k8s.auth.Authentication;
-import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
-import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.Extension;
@@ -15,11 +12,9 @@ import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import java.util.List;
 import java.util.logging.Logger;
 
 public class PodSlaveConfig implements Describable<PodSlaveConfig> {

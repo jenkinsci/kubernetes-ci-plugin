@@ -45,7 +45,7 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     public static final class DescriptorImpl extends ChartBuildStepDescriptor {
 
         public DescriptorImpl() {
-            this(null, null);
+            super(DeleteChartBuildStep.class, KUBERNETES_DELETE_CHART);
             LOGGER.warning("No args constructor called. No injection performed!");
         }
 

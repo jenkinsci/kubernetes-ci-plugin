@@ -22,6 +22,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
 
     private static final String NAME_PREFIX = "DeployChartBS-";
     private static final String KUBERNETES_DEPLOY_CHART = "Kubernetes - Deploy Chart";
+    private static final String JENKINS_JOB = "jenkins-job-deployment";
 
     @DataBoundConstructor
     public DeployChartBuildStep(String id, String cloudName, String chartsRepo, String chartName) {
@@ -39,7 +40,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
 
         taskLogger.info("Deploying chart: " + getChartName());
 
-        Map<String, String> label = Collections.singletonMap("jenkinsJob",
+        Map<String, String> label = Collections.singletonMap(JENKINS_JOB,
                                         StringUtils.deleteWhitespace(runName).replace('#', '_') );
 
         deploymentService.deployChart(getCloudName(), kubeCloud.getNamespace(), chartRepo, getChartName(), label);
@@ -50,7 +51,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
     public static final class DescriptorImpl extends ChartBuildStepDescriptor {
 
         public DescriptorImpl() {
-            this(null, null);
+            super(DeployChartBuildStep.class, KUBERNETES_DEPLOY_CHART);
             LOGGER.warning("No args constructor called. No injection performed!");
         }
 

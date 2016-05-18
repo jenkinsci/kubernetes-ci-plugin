@@ -38,6 +38,10 @@ public abstract class ChartBuildStepDescriptor extends BuildStepDescriptor<Build
         this.displayName = displayName;
     }
 
+    public ChartBuildStepDescriptor(Class<? extends Builder> clazz, String displayName) {
+        this(clazz, null, null, displayName);
+    }
+
     public Injector getInjector() {
         return injector;
     }
