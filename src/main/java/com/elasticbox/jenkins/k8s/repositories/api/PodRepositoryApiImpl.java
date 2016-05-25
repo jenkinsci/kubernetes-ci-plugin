@@ -64,5 +64,20 @@ public class PodRepositoryApiImpl implements PodRepository {
         }
         return pod != null;
     }
+
+    @Override
+    public Pod getPod(String kubeName, String namespace, String yaml) throws RepositoryException {
+        Pod pod;
+        try {
+            pod = kubeRepository.getClient(kubeName).pods().inNamespace(namespace)
+                    .load(IOUtils.toInputStream(yaml) ).get();
+
+        } catch (KubernetesClientException exception) {
+            final RepositoryException repoException = new RepositoryException("Error while parsing Yaml", exception);
+            LOGGER.warning("Yaml definition not valid: " + repoException.getCausedByMessages());
+            throw repoException;
+        }
+        return pod;
+    }
 }
 

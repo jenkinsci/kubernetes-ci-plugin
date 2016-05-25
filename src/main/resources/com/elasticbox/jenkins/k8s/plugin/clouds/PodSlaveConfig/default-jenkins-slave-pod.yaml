@@ -1,0 +1,20 @@
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  name: "jenkins-slave"
+  labels:
+    name: "jenkins-slave"
+spec:
+    containers:
+      - name: "jenkins-slave"
+        image: "csanchez/jenkins-swarm-slave:2.0-net-tools"
+        command:
+          - "/usr/local/bin/jenkins-slave.sh"
+          - "-master"
+          - "${JENKINS_URL}"
+          - "-executors"
+          - "1"
+          - "-username"
+          - "jenkins"
+          - "-password"
+          - "jenkins"

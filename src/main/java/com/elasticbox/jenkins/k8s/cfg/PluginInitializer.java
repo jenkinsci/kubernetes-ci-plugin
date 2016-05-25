@@ -5,6 +5,7 @@ import static com.elasticbox.jenkins.k8s.plugin.util.PluginHelper.DEFAULT_NAMESP
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
+import com.elasticbox.jenkins.k8s.plugin.clouds.PodSlaveConfig;
 import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.KubernetesRepositoryApiImpl;
@@ -12,8 +13,11 @@ import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import jenkins.model.Jenkins;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +31,8 @@ public class PluginInitializer {
     private static final String DEFAULT_HELM_CHART_REPO_URL = "https://github.com/helm/charts";
 
     public static final String LOCAL_CLOUD_NAME = NAME_PREFIX + "Local";
+
+    private static final String DEFAULT_JENKINS_SLAVE_POD_YAML = "default-jenkins-slave-pod.yaml";
 
     static KubernetesRepository kubeRepository = new KubernetesRepositoryApiImpl();
 
@@ -63,9 +69,13 @@ public class PluginInitializer {
             final ChartRepositoryConfig chartRepositoryConfig =
                     new ChartRepositoryConfig(DEFAULT_HELM_CHART_REPO, DEFAULT_HELM_CHART_REPO_URL, StringUtils.EMPTY);
 
+            final PodSlaveConfig defaultPodSlaveConfig = getDefaultPodSlaveConfig();
+
             final KubernetesCloud cloud = new KubernetesCloud(LOCAL_CLOUD_NAME, LOCAL_CLOUD_NAME, kubernetesUri,
                     DEFAULT_NAMESPACE, MAX_SLAVES, StringUtils.EMPTY, false, StringUtils.EMPTY,
-                    Collections.singletonList(chartRepositoryConfig), Collections.EMPTY_LIST);
+                    Collections.singletonList(chartRepositoryConfig),
+                    (defaultPodSlaveConfig != null) ? Collections.singletonList(defaultPodSlaveConfig)
+                            : Collections.EMPTY_LIST);
 
             LOGGER.info(NAME_PREFIX + "Adding local Kubernetes Cloud configuration: " + cloud);
 
@@ -76,5 +86,26 @@ public class PluginInitializer {
         }
     }
 
+    private static PodSlaveConfig getDefaultPodSlaveConfig() {
 
+        final InputStream yamlStream =
+                PodSlaveConfig.class.getResourceAsStream("PodSlaveConfig/" + DEFAULT_JENKINS_SLAVE_POD_YAML);
+
+        final String yamlString;
+        try {
+            yamlString = IOUtils.toString(yamlStream);
+        } catch (IOException exception) {
+            LOGGER.severe(NAME_PREFIX + exception);
+            return null;
+        }
+
+        if (LOGGER.isLoggable(Level.CONFIG) ) {
+            LOGGER.config("Default Pod Yaml definition: " + yamlString);
+        }
+
+        final PodSlaveConfig podSlaveConfig =
+                new PodSlaveConfig(DEFAULT_JENKINS_SLAVE_POD_YAML, "Default JenkinsSlave Pod", yamlString, null);
+
+        return podSlaveConfig;
+    }
 }

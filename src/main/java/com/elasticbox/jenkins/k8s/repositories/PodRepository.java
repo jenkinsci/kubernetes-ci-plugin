@@ -15,4 +15,6 @@ public interface PodRepository {
     void delete(String kubeName, String namespace, Pod pod) throws RepositoryException;
 
     boolean testYaml(String kubeName, String namespace, String yaml) throws RepositoryException;
+
+    Pod getPod(String kubeName, String namespace, String yaml) throws RepositoryException;
 }

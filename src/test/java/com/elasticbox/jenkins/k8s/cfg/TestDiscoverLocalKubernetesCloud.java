@@ -1,5 +1,6 @@
 package com.elasticbox.jenkins.k8s.cfg;
 
+import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.util.TestLogHandler;
 import com.elasticbox.jenkins.k8s.util.TestUtils;
@@ -58,8 +59,15 @@ public class TestDiscoverLocalKubernetesCloud {
     public void testAutoDiscoverCloud() {
 
         // Testing first PluginInitializer run that should detect and add the local cloud:
-        Cloud cloud = jenkins.getInstance().getCloud(PluginInitializer.LOCAL_CLOUD_NAME);
+        KubernetesCloud cloud = (KubernetesCloud) jenkins.getInstance().getCloud(PluginInitializer.LOCAL_CLOUD_NAME);
         Assert.assertNotNull("Local Kubernetes cloud not found", cloud);
+
+        Assert.assertNotNull("Default chart repository configuration not included", cloud.getChartRepositoryConfigurations() );
+        Assert.assertEquals("Chart repository configuration list must have just one", cloud.getChartRepositoryConfigurations().size(), 1);
+
+        Assert.assertNotNull("Default pod slave configuration not included", cloud.getPodSlaveConfigurations() );
+        Assert.assertEquals("Pod slave configuration list must have just one", cloud.getPodSlaveConfigurations().size(), 1);
+        Assert.assertNotNull("Default pod slave configuration yaml not loaded", cloud.getPodSlaveConfigurations().get(0).getPodYaml() );
 
         assertLoggedMessage("Kubernetes Cloud found!");
         assertLoggedMessage("Adding local Kubernetes Cloud configuration");

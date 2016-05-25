@@ -53,11 +53,9 @@ public class ReplicationControllerRepositoryApiImpl implements ReplicationContro
         }
 
         final KubernetesClient client = kubeRepository.getClient(kubeName);
+
         client.replicationControllers().inNamespace(namespace)
-                .withName(replController.getMetadata().getName() )
-                .edit().editSpec()
-                    .withReplicas(0)
-                .endSpec().done();
+                .withName(replController.getMetadata().getName() ).scale(0);
 
         client.replicationControllers().inNamespace(namespace).delete(replController);
     }

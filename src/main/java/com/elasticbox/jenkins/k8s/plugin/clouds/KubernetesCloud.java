@@ -6,28 +6,41 @@ import com.google.inject.Injector;
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
+import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFactory;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.Extension;
-import hudson.init.Initializer;
+import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Label;
+import hudson.model.Node;
+import hudson.model.TaskListener;
+import hudson.slaves.AbstractCloudComputer;
 import hudson.slaves.AbstractCloudImpl;
+import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.Cloud;
+import hudson.slaves.ComputerListener;
 import hudson.slaves.NodeProvisioner;
+import hudson.slaves.OfflineCause;
+import hudson.slaves.SlaveComputer;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import io.fabric8.kubernetes.api.model.Pod;
 import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +57,9 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     @Inject
     transient KubernetesClientFactory kubeFactory;
+
+    @Inject
+    transient PodRepository podRepository;
 
     @DataBoundConstructor
     public KubernetesCloud(String name, String description, String endpointUrl, String namespace,
@@ -148,7 +164,37 @@ public class KubernetesCloud extends AbstractCloudImpl {
         if (LOGGER.isLoggable(Level.FINE)) {
             LOGGER.fine("Provisioning label [" + label + "] with excessWorkload: " + excessWorkload);
         }
-        // TODO Deploy Slave
+
+        if (podSlaveConfigurations == null || podSlaveConfigurations.size() == 0) {
+            LOGGER.warning("No slave configuration available to deploy slave!");
+            return Collections.EMPTY_LIST;
+        }
+
+        String jenkinsUrl = JenkinsLocationConfiguration.get().getUrl();
+        PodSlaveConfig podSlaveConfig = podSlaveConfigurations.get(0);
+        String podYaml = podSlaveConfig.getPodYaml().replace("${JENKINS_URL}", jenkinsUrl);
+
+        int index = Jenkins.getInstance().getNodes().size();
+        while (excessWorkload > 0) {
+            try {
+                Pod pod = podRepository.getPod(name, kubeCloudParams.getNamespace(), podYaml);
+
+                pod.getMetadata().setName(pod.getMetadata().getName() + "-" + ++index );
+
+                Map<String, String> labels = pod.getMetadata().getLabels();
+                labels.put("jenkins-label", (label != null) ? label.toString() : "NONE" );
+                pod.getMetadata().setLabels(labels);
+                LOGGER.info("Generated Pod:" + pod);
+
+                podRepository.create(name, kubeCloudParams.getNamespace(), pod);
+                LOGGER.info("Pod created as slave:" + pod);
+
+                excessWorkload --;
+
+            } catch (RepositoryException exc) {
+                exc.printStackTrace();
+            }
+        }
         return Collections.EMPTY_LIST;
     }
 
@@ -158,8 +204,9 @@ public class KubernetesCloud extends AbstractCloudImpl {
             LOGGER.finer("Label to check for provisioning: " + label);
         }
         // TODO
-        return label != null;
+        return true;//label != null;
     }
+
 
     public KubernetesCloudParams getKubernetesCloudParams() {
         return kubeCloudParams;
@@ -219,7 +266,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
         public FormValidation doTestConnection(@QueryParameter String endpointUrl,
                                                @QueryParameter String namespace,
                                                @QueryParameter String credentialsId,
-                                               @QueryParameter boolean disableCertCheck,
+                                                 @QueryParameter boolean disableCertCheck,
                                                @QueryParameter String serverCert) {
 
             if (StringUtils.isEmpty(endpointUrl) ) {
