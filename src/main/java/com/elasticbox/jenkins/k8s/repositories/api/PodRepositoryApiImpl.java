@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 @Singleton
 public class PodRepositoryApiImpl implements PodRepository {
+
     private static final Logger LOGGER = Logger.getLogger(PodRepositoryApiImpl.class.getName() );
 
     @Inject
@@ -51,33 +52,30 @@ public class PodRepositoryApiImpl implements PodRepository {
     }
 
     @Override
-    public boolean testYaml(String kubeName, String namespace, String yaml) throws RepositoryException {
-        Pod pod;
-        try {
-            pod = kubeRepository.getClient(kubeName).pods().inNamespace(namespace)
-                    .load(IOUtils.toInputStream(yaml) ).get();
-
-        } catch (KubernetesClientException exception) {
-            final RepositoryException repoException = new RepositoryException("Error while parsing Yaml", exception);
-            LOGGER.warning("Yaml definition not valid: " + repoException.getCausedByMessages());
-            throw repoException;
+    public void delete(String kubeName, String namespace, String podName) throws RepositoryException {
+        if (LOGGER.isLoggable(Level.CONFIG) ) {
+            LOGGER.config("Deleting Pod: " + podName );
         }
-        return pod != null;
+        kubeRepository.getClient(kubeName).pods().inNamespace(namespace).withName(podName).delete();
     }
 
     @Override
-    public Pod getPod(String kubeName, String namespace, String yaml) throws RepositoryException {
+    public Pod pod(String kubeName, String namespace, String yaml) throws RepositoryException {
         Pod pod;
         try {
-            pod = kubeRepository.getClient(kubeName).pods().inNamespace(namespace)
-                    .load(IOUtils.toInputStream(yaml) ).get();
+            pod = kubeRepository.getClient(kubeName)
+                .pods()
+                .inNamespace(namespace)
+                .load(IOUtils.toInputStream(yaml))
+                .get();
+
+            return pod;
 
         } catch (KubernetesClientException exception) {
             final RepositoryException repoException = new RepositoryException("Error while parsing Yaml", exception);
             LOGGER.warning("Yaml definition not valid: " + repoException.getCausedByMessages());
             throw repoException;
         }
-        return pod;
     }
 }
 

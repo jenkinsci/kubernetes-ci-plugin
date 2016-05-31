@@ -1,37 +1,35 @@
-package com.elasticbox.jenkins.k8s.plugin.clouds.chain;
+package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.plugin.clouds.slaves.JenkinsKubernetesSlave;
-import com.elasticbox.jenkins.k8s.pod.PodConfiguration;
+import com.elasticbox.jenkins.k8s.plugin.clouds.PodSlaveConfigurationParams;
+import com.elasticbox.jenkins.k8s.plugin.slaves.KubernetesSlave;
 import hudson.model.Label;
 import io.fabric8.kubernetes.api.model.Pod;
 
 import java.util.List;
 
-/**
- * Created by serna on 5/12/16.
- */
-public class JenkinsPodSlaveDeploymentContext {
+public class PodDeploymentContext {
 
     private Label jobLabel;
-    private List<PodConfiguration> availablePodConfigurations;
+
+    private List<PodSlaveConfigurationParams> availablePodConfigurations;
 
     private Pod podToDeploy;
-    private PodConfiguration podConfigurationChosen;
+    private PodSlaveConfigurationParams podConfigurationChosen;
 
     private KubernetesCloud cloudToDeployInto;
     private String deploymentNamespace;
 
-    private JenkinsKubernetesSlave jenkinsKubernetesSlave;
+    private KubernetesSlave kubernetesSlave;
 
-    private JenkinsPodSlaveDeploymentContext(JenkinsPodSlaveDeploymentContextBuilder builder) {
+    private PodDeploymentContext(JenkinsPodSlaveDeploymentContextBuilder builder) {
         jobLabel = builder.jobLabel;
         availablePodConfigurations = builder.podConfigurations;
         cloudToDeployInto = builder.kubernetesCloud;
         deploymentNamespace = builder.deploymentNamespace;
     }
 
-    public PodConfiguration getPodConfigurationChosen() {
+    public PodSlaveConfigurationParams getPodConfigurationChosen() {
         return podConfigurationChosen;
     }
 
@@ -51,7 +49,7 @@ public class JenkinsPodSlaveDeploymentContext {
         return podToDeploy;
     }
 
-    public List<PodConfiguration> getAvailablePodConfigurations() {
+    public List<PodSlaveConfigurationParams> getAvailablePodConfigurations() {
         return availablePodConfigurations;
     }
 
@@ -59,49 +57,49 @@ public class JenkinsPodSlaveDeploymentContext {
         this.podToDeploy = podToDeploy;
     }
 
-    public void setPodConfigurationChosen(PodConfiguration podConfigurationChosen) {
+    public void setPodConfigurationChosen(PodSlaveConfigurationParams podConfigurationChosen) {
         this.podConfigurationChosen = podConfigurationChosen;
     }
 
-    public JenkinsKubernetesSlave getJenkinsKubernetesSlave() {
-        return jenkinsKubernetesSlave;
+    public KubernetesSlave getKubernetesSlave() {
+        return kubernetesSlave;
     }
 
-    public void setJenkinsKubernetesSlave(JenkinsKubernetesSlave jenkinsKubernetesSlave) {
-        this.jenkinsKubernetesSlave = jenkinsKubernetesSlave;
+    public void setKubernetesSlave(KubernetesSlave kubernetesSlave) {
+        this.kubernetesSlave = kubernetesSlave;
     }
 
-    public static class JenkinsPodSlaveDeploymentContextBuilder{
+    public static class JenkinsPodSlaveDeploymentContextBuilder {
 
         private Label jobLabel;
-        private List<PodConfiguration> podConfigurations;
+        private List<PodSlaveConfigurationParams> podConfigurations;
         private KubernetesCloud kubernetesCloud;
         private String deploymentNamespace;
 
-        public JenkinsPodSlaveDeploymentContextBuilder withJobLabel(Label label){
+        public JenkinsPodSlaveDeploymentContextBuilder withJobLabel(Label label) {
             this.jobLabel = label;
             return this;
         }
 
         public JenkinsPodSlaveDeploymentContextBuilder withOneOfThesePodConfigurations(
-                        List<PodConfiguration> podConfigurations){
+                        List<PodSlaveConfigurationParams> podConfigurations) {
 
             this.podConfigurations = podConfigurations;
             return this;
         }
 
-        public JenkinsPodSlaveDeploymentContextBuilder intoKubernetesCloud(KubernetesCloud kubernetesCloud){
+        public JenkinsPodSlaveDeploymentContextBuilder intoKubernetesCloud(KubernetesCloud kubernetesCloud) {
             this.kubernetesCloud = kubernetesCloud;
             return this;
         }
 
-        public JenkinsPodSlaveDeploymentContextBuilder withNamespace(String deploymentNamespace){
+        public JenkinsPodSlaveDeploymentContextBuilder withNamespace(String deploymentNamespace) {
             this.deploymentNamespace = deploymentNamespace;
             return this;
         }
 
-        public JenkinsPodSlaveDeploymentContext build() {
-            return new JenkinsPodSlaveDeploymentContext(this);
+        public PodDeploymentContext build() {
+            return new PodDeploymentContext(this);
         }
 
     }

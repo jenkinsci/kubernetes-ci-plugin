@@ -2,7 +2,7 @@ package com.elasticbox.jenkins.k8s.plugin.clouds;
 
 import com.google.inject.Inject;
 
-import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
+import com.elasticbox.jenkins.k8s.util.PluginHelper;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.Extension;
@@ -11,6 +11,7 @@ import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import io.fabric8.kubernetes.api.model.Pod;
 import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -18,6 +19,7 @@ import org.kohsuke.stapler.QueryParameter;
 import java.util.logging.Logger;
 
 public class PodSlaveConfig implements Describable<PodSlaveConfig> {
+
     private static final Logger LOGGER = Logger.getLogger(PodSlaveConfig.class.getName());
 
     private final String id;
@@ -74,20 +76,17 @@ public class PodSlaveConfig implements Describable<PodSlaveConfig> {
                                          @RelativePath("..") @QueryParameter String name,
                                          @RelativePath("..") @QueryParameter String namespace) {
 
-            if (PluginHelper.anyOfThemIsBlank(podYaml, name, namespace) ) {
+            if (PluginHelper.anyOfThemIsBlank(podYaml) ) {
                 return FormValidation.error("Required fields not provided");
             }
 
             try {
-                final boolean validYaml = podRepository.testYaml(name, namespace, podYaml);
+                final Pod pod = podRepository.pod(name, namespace, podYaml);
 
-                if (validYaml) {
-                    return FormValidation.ok("Validation successful");
-                } else {
-                    return FormValidation.error("Invalid Pod Yaml definition");
-                }
-            } catch (RepositoryException excep) {
-                return FormValidation.error("Validation error - " + excep.getCausedByMessages() );
+                return FormValidation.ok("Validation successful");
+
+            } catch (RepositoryException exception) {
+                return FormValidation.error("Validation error - " + exception.getCausedByMessages());
             }
         }
 

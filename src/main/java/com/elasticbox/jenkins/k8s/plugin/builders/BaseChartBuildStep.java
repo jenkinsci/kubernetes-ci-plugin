@@ -6,8 +6,8 @@ import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
-import com.elasticbox.jenkins.k8s.plugin.util.TaskLogger;
+import com.elasticbox.jenkins.k8s.util.PluginHelper;
+import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.services.ChartDeploymentService;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.FilePath;
@@ -62,7 +62,8 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
                         @Nonnull TaskListener taskListener) throws InterruptedException, IOException {
 
         TaskLogger taskLogger = new TaskLogger(taskListener, LOGGER);
-        taskLogger.info("Executing Chart build step: " + run);
+        final String runName = (run != null) ? run.toString() : "<NO-RUN>";                ;
+        taskLogger.info("Executing Chart build step: " + runName);
 
         try {
             KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(getCloudName() );
@@ -74,7 +75,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
             Authentication authData = PluginHelper.getAuthenticationData(config.getCredentialsId() );
             ChartRepo chartRepo = new ChartRepo(config.getChartsRepoUrl(), authData);
 
-            doPerform(run, taskLogger, kubeCloud, chartRepo);
+            doPerform(runName, taskLogger, kubeCloud, chartRepo);
 
         } catch (ServiceException exception) {
             taskLogger.error(exception.getCausedByMessages() );
@@ -87,7 +88,8 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
         }
     }
 
-    protected abstract void doPerform(Run<?, ?> run, TaskLogger taskLogger,
-                                      KubernetesCloud kubeCloud, ChartRepo chartRepo) throws ServiceException;
+    protected abstract void doPerform(String runName, TaskLogger taskLogger,
+                                      KubernetesCloud kubeCloud, ChartRepo chartRepo)
+            throws ServiceException;
 
 }

@@ -1,7 +1,7 @@
 package com.elasticbox.jenkins.k8s.cfg;
 
 import static com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud.NAME_PREFIX;
-import static com.elasticbox.jenkins.k8s.plugin.util.PluginHelper.DEFAULT_NAMESPACE;
+import static com.elasticbox.jenkins.k8s.util.PluginHelper.DEFAULT_NAMESPACE;
 
 import com.cloudbees.plugins.credentials.Credentials;
 import com.cloudbees.plugins.credentials.CredentialsScope;
@@ -11,7 +11,7 @@ import com.elasticbox.jenkins.k8s.plugin.auth.TokenCredentialsImpl;
 import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.plugin.clouds.PodSlaveConfig;
-import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
+import com.elasticbox.jenkins.k8s.util.PluginHelper;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.KubernetesRepositoryApiImpl;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;

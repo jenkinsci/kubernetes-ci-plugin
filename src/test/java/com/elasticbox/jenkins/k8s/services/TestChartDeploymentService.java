@@ -4,7 +4,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
-import com.elasticbox.jenkins.k8s.plugin.util.KeyValuePair;
+import com.elasticbox.jenkins.k8s.util.KeyValuePair;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.ReplicationControllerRepository;
