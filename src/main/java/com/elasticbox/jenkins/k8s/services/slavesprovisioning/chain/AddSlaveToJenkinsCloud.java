@@ -26,7 +26,8 @@ public class AddSlaveToJenkinsCloud extends AbstractPodDeployment {
     public void handle(PodDeploymentContext deploymentContext) throws ServiceException {
 
         try {
-            KubernetesSlave slave = new KubernetesSlave(podRepository,
+            String podName = deploymentContext.getPodToDeploy().getMetadata().getName();
+            KubernetesSlave slave = new KubernetesSlave(podName, podRepository,
                 deploymentContext.getCloudToDeployInto(),
                 deploymentContext.getJobLabel());
 

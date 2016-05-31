@@ -23,8 +23,8 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
     @Inject
     private KubernetesRepository kubernetesRepository;
 
-    private static final long DELAY_SECONDS = 6;
-    private static final long INITIAL_DELAY = 6;
+    private static final long DELAY_SECONDS = 1;
+    private static final long INITIAL_DELAY = 1;
     private static final long TIMEOUT = 60;
 
     /**

@@ -16,9 +16,9 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
 
     private static final Logger LOGGER = Logger.getLogger(WaitForSlaveToBeOnline.class.getName());
 
-    private static final long DELAY_SECONDS = 10;
-    private static final long INITIAL_DELAY = 10;
-    private static final long TIMEOUT = 900;
+    private static final long DELAY_SECONDS = 1;
+    private static final long INITIAL_DELAY = 1;
+    private static final long TIMEOUT = 60;
 
 
     /**
@@ -58,13 +58,15 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
             super(delay, initialDelay, timeout);
 
             this.slave = slave;
+            this.result = false;
         }
 
         @Override
         protected void performExecute() throws TaskException {
 
             if (slave.getComputer() == null) {
-                throw new TaskException("Computer is null for the slave: " + slave);
+                LOGGER.warning("Computer is null for the slave: " + slave);
+                return;
             }
 
             this.result = slave.getComputer().isOnline();

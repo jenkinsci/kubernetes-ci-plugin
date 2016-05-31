@@ -31,7 +31,6 @@ public class AddEnvironmentVariablesToPodConfiguration extends AbstractPodDeploy
     public void handle(PodDeploymentContext deploymentContext) throws ServiceException {
 
         final KubernetesSlave slave = deploymentContext.getKubernetesSlave();
-        final String nodeName = slave.getNodeName();
         final String jenkinsUrl = JenkinsLocationConfiguration.get().getUrl();
 
         List<EnvVar> env = new ArrayList<EnvVar>(3);
@@ -44,6 +43,8 @@ public class AddEnvironmentVariablesToPodConfiguration extends AbstractPodDeploy
         env.add(new EnvVar("HOME", KubernetesSlave.DEFAULT_REMOTE_FS, null));
 
         final Pod podToDeploy = deploymentContext.getPodToDeploy();
+        podToDeploy.getSpec().setRestartPolicy("Never");
+
         for (Container container: podToDeploy.getSpec().getContainers()) {
             container.setEnv(env);
             container.setWorkingDir(KubernetesSlave.DEFAULT_REMOTE_FS);

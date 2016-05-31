@@ -1,10 +1,9 @@
 package com.elasticbox.jenkins.k8s.plugin.slaves;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.WaitForSlaveToBeOnline;
 import hudson.Messages;
+import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Label;
 import hudson.model.Node;
@@ -18,7 +17,6 @@ import org.jvnet.localizer.ResourceBundleHolder;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,8 +26,7 @@ public class KubernetesSlave extends AbstractCloudSlave {
     public static final String DEFAULT_REMOTE_FS = "/home/jenkins";
     public static final String DESCRIPTION = "Jenkins Kubernetes Slave";
 
-    private static final int IDLE_MINUTES = 5;
-    private static final String NAME_PREFIX = "jks-k8s-slave-";
+    private static final int IDLE_MINUTES = 1;
     private static final int EXECUTORS = 1;
 
     /**
@@ -45,18 +42,17 @@ public class KubernetesSlave extends AbstractCloudSlave {
 
     PodRepository podRepository;
 
-    public KubernetesSlave(PodRepository podRepository, KubernetesCloud kubernetesCloud, Label label)
+    public KubernetesSlave(String podName, PodRepository podRepository, KubernetesCloud kubernetesCloud, Label label)
         throws Descriptor.FormException,IOException {
 
-        super(NAME_PREFIX + UUID.randomUUID(),
+        super(podName,
             DESCRIPTION,
             DEFAULT_REMOTE_FS,
             EXECUTORS,
             Mode.NORMAL,
             label == null ? null : label.toString(),
             new JNLPLauncher(),
-//            new SingleUseRetentionStrategy(IDLE_MINUTES),
-            new OnceRetentionStrategy(IDLE_MINUTES),
+            new SingleUseRetentionStrategy(IDLE_MINUTES),
             Collections.<NodeProperty<Node>>emptyList());
 
         this.kubernetesCloud = kubernetesCloud;
@@ -66,30 +62,27 @@ public class KubernetesSlave extends AbstractCloudSlave {
     @Override
     protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
 
-        LOGGER.log(Level.INFO, "Terminating Kubernetes instance for slave {0}", name);
+        LOGGER.info("Terminating Kubernetes instance for slave: " + name);
 
-        if (toComputer() != null) {
+        final Computer computer = toComputer();
+        if (computer != null && computer.isOnline() ) {
 
             try {
+                computer.disconnect(OfflineCause.create(new Localizable(HOLDER, "offline")));
+                LOGGER.info("Disconnected computer: " + computer.getName() );
 
                 podRepository.delete(kubernetesCloud.name, kubernetesCloud.getNamespace(), name);
-
-                LOGGER.log(Level.INFO, "Terminated Kubernetes instance for slave {0}", name);
-
-                toComputer().disconnect(OfflineCause.create(new Localizable(HOLDER, "offline")));
-
-                LOGGER.log(Level.INFO, "Disconnected computer {0}", name);
+                LOGGER.info("Terminated Kubernetes instance for slave: " + name);
 
                 return;
 
             } catch (Exception e) {
 
-                LOGGER.log(Level.SEVERE, "Failure to terminate instance for slave " + name, e);
+                LOGGER.log(Level.SEVERE, "Failure to terminate instance for slave: " + name, e);
             }
-
         }
 
-        LOGGER.log(Level.WARNING, "There is no computer for slave: {0}", name);
+        LOGGER.warning("There is no computer for slave: " + name);
 
 
     }
