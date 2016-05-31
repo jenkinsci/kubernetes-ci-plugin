@@ -21,6 +21,13 @@
 
         <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
                           with="chartsRepoUrl,credentialsId" />
+
+        <f:entry title="">
+            <div align="right">
+                <f:repeatableDeleteButton />
+            </div>
+        </f:entry>
+
     </table>
 
 </j:jelly>

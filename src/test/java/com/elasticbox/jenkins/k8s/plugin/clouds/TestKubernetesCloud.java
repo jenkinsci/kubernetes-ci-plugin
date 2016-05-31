@@ -16,6 +16,8 @@ import java.util.List;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
+import javax.net.ssl.SSLHandshakeException;
+
 public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestBaseKubernetes {
 
     @Mock
@@ -36,7 +38,7 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
     }
 
     @Test
-    public void testGetttersChartRepoCfgsAndCloudParams() {
+    public void testGettersChartRepoCfgsAndCloudParams() {
         final List<ChartRepositoryConfig> chartRepositoryConfigurations = cloud.getChartRepositoryConfigurations();
         Assert.assertEquals("Chart repository configuration not found", 1, chartRepositoryConfigurations.size() );
 
@@ -56,13 +58,13 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
         Assert.assertNotNull("Injection failed", cloudDescriptor.getInjector() );
 
         // First attempts with fake data will fail (expect some errors in logs)
-        ListBoxModel namespaceItems = cloudDescriptor.doFillNamespaceItems(FAKE_URL, EMPTY, true, EMPTY);
+        ListBoxModel namespaceItems = cloudDescriptor.doFillNamespaceItems(FAKE_URL, EMPTY, EMPTY);
         Assert.assertEquals("Error filling default namespace list items", 1, namespaceItems.size() );
 
-        FormValidation formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, true, EMPTY);
+        FormValidation formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, EMPTY);
         Assert.assertEquals("Test connection fail was expected", FormValidation.Kind.ERROR, formValidation.kind);
 
-        formValidation = cloudDescriptor.doTestConnection(EMPTY, FAKE_NS, EMPTY, true, EMPTY);
+        formValidation = cloudDescriptor.doTestConnection(EMPTY, FAKE_NS, EMPTY, EMPTY);
         Assert.assertEquals("Test connection fail was expected", FormValidation.Kind.ERROR, formValidation.kind);
         Assert.assertTrue("Required fields message was expected", formValidation.getMessage().contains("Required"));
 
@@ -70,15 +72,19 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
         initMock();
         cloudDescriptor.kubeRepository = kubernetesRepositoryMock;
 
-        namespaceItems = cloudDescriptor.doFillNamespaceItems(FAKE_URL, EMPTY, true, EMPTY);
+        namespaceItems = cloudDescriptor.doFillNamespaceItems(FAKE_URL, EMPTY, EMPTY);
         Assert.assertEquals("Error filling namespace list with 3 items", 3, namespaceItems.size() );
 
-        formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, true, EMPTY);
+        formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, EMPTY);
         Assert.assertEquals("Test connection success was expected", FormValidation.Kind.OK, formValidation.kind);
 
-        formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, true, EMPTY);
+        formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, EMPTY);
         Assert.assertEquals("Test connection exception was expected", FormValidation.Kind.ERROR, formValidation.kind);
         Assert.assertTrue("Exception message was expected", formValidation.getMessage().contains(FAKE_MOCK_EXCEPTION));
+
+        formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, EMPTY);
+        Assert.assertEquals("Test connection warning was expected", FormValidation.Kind.WARNING, formValidation.kind);
+        Assert.assertTrue("'Not trusted' message was expected", formValidation.getMessage().contains("not trusted"));
     }
 
     private void initMock() throws RepositoryException {
@@ -90,7 +96,10 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
                     .thenReturn(Arrays.asList("default", FAKE_NS));
             Mockito.when(kubernetesRepositoryMock.testConnection(any(KubernetesCloudParams.class)))
                     .thenReturn(true)
-                    .thenThrow(new RepositoryException(FAKE_MOCK_EXCEPTION));
+                    .thenThrow(new RepositoryException(FAKE_MOCK_EXCEPTION))
+                    .thenThrow(new RepositoryException("Wrapper", new RepositoryException(
+                            "MidCause", new SSLHandshakeException("InitialCause") )))
+                    .thenReturn(true);
         }
     }
 }

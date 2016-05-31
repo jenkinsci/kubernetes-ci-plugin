@@ -1,10 +1,20 @@
 package com.elasticbox.jenkins.k8s.plugin.builders;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+
+import com.elasticbox.jenkins.k8s.chart.Chart;
+import com.elasticbox.jenkins.k8s.chart.ChartDetails;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
+import com.elasticbox.jenkins.k8s.plugin.TestBaseKubernetes;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import com.elasticbox.jenkins.k8s.services.ChartDeploymentService;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
+import hudson.model.FreeStyleBuild;
+import hudson.model.FreeStyleProject;
+import hudson.model.Result;
+import hudson.tasks.Builder;
 import hudson.util.ListBoxModel;
 import hudson.util.LogTaskListener;
 import org.junit.Assert;
@@ -17,13 +27,11 @@ import org.mockito.MockitoAnnotations;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-
-public class TestChartBuildSteps extends com.elasticbox.jenkins.k8s.plugin.TestBaseKubernetes {
+public class TestChartBuildSteps extends TestBaseKubernetes {
 
     private static final String FAKE_CHART_NAME = "FakeChartName";
 
@@ -39,34 +47,64 @@ public class TestChartBuildSteps extends com.elasticbox.jenkins.k8s.plugin.TestB
     }
 
     @Test
-    public void testDeployChartBS() throws RepositoryException, ServiceException, InterruptedException, IOException {
-        DeployChartBuildStep deployChartBuildStep =
-                getFakeDeployChartBuildStep();
+    public void testDeployChartBS()
+            throws RepositoryException, ServiceException, InterruptedException, IOException, ExecutionException {
 
-        Assert.assertNotNull("Injection failed", deployChartBuildStep.deploymentService);
+        DeployChartBuildStep deployChartBuildStep = getFakeDeployChartBuildStep(false);
 
-        deployChartBuildStep.deploymentService = chartDeploymentServiceMock;
+        Mockito.when(chartDeploymentServiceMock
+                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) ))
+                .thenReturn(getFakeChart() );
 
-        final LogTaskListener listener = new LogTaskListener(Logger.getLogger(this.getClass().getName()), Level.OFF);
+        // Test only deploy chart:
+        Result result = executeBuild(deployChartBuildStep);
 
-        Mockito.doNothing().when(chartDeploymentServiceMock)
-                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
-
-        deployChartBuildStep.perform(null, null,null, listener);
-
+        Assert.assertTrue("Build result was not successful", result.isBetterOrEqualTo(result.SUCCESS) );
         Mockito.verify(chartDeploymentServiceMock)
                 .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
+        Mockito.verify(chartDeploymentServiceMock, Mockito.times(0) )
+                .deleteChart(anyString(), anyString(), any(Chart.class) );
 
+        // Test deploy and delete chart:
+        deployChartBuildStep = getFakeDeployChartBuildStep(true);
+        result = executeBuild(deployChartBuildStep);
+
+        Assert.assertTrue("Build result was not successful", result.isBetterOrEqualTo(result.SUCCESS) );
+        Mockito.verify(chartDeploymentServiceMock, Mockito.times(2) )
+                .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
+        Mockito.verify(chartDeploymentServiceMock, Mockito.times(1) )
+                .deleteChart(anyString(), anyString(), any(Chart.class) );
+
+        // Test exception:
         Mockito.doThrow(new ServiceException(FAKE_MOCK_EXCEPTION, new Throwable() ))
                 .when(chartDeploymentServiceMock)
                 .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
 
         try {
-            deployChartBuildStep.perform(null, null,null, listener);
+            result = executeBuild(deployChartBuildStep);
         } catch (IOException e) {
-            Mockito.verify(chartDeploymentServiceMock, Mockito.times(2) )
+            Mockito.verify(chartDeploymentServiceMock, Mockito.times(3) )
                     .deployChart(anyString(), anyString(), any(ChartRepo.class), anyString(), any(Map.class) );
+            Mockito.verify(chartDeploymentServiceMock, Mockito.times(1) )
+                    .deleteChart(anyString(), anyString(), any(Chart.class) );
         }
+    }
+
+    private Chart getFakeChart() throws RepositoryException {
+        final ChartDetails details = new ChartDetails();
+        details.setMaintainers(Collections.EMPTY_LIST);
+        return new Chart.ChartBuilder().chartDetails(details).build();
+    }
+
+    private Result executeBuild(Builder buildStep) throws IOException, InterruptedException, ExecutionException {
+        FreeStyleProject project = jenkins.createFreeStyleProject();
+        project.getBuildersList().add(buildStep);
+
+        final FreeStyleBuild build = project.scheduleBuild2(0).get();
+        if ( !build.getResult().isCompleteBuild() ) {
+            Thread.sleep(5000);
+        }
+        return build.getResult();
     }
 
     @Test
@@ -103,7 +141,7 @@ public class TestChartBuildSteps extends com.elasticbox.jenkins.k8s.plugin.TestB
     @Test
     public void testDescriptor() throws RepositoryException {
         final DeployChartBuildStep.DescriptorImpl descriptor =
-                (DeployChartBuildStep.DescriptorImpl) getFakeDeployChartBuildStep().getDescriptor();
+                (DeployChartBuildStep.DescriptorImpl) getFakeDeployChartBuildStep(false).getDescriptor();
 
         Assert.assertNotNull("Injection failed", descriptor.chartRepository);
         Assert.assertNotNull("Injection failed", descriptor.getInjector() );
@@ -135,7 +173,14 @@ public class TestChartBuildSteps extends com.elasticbox.jenkins.k8s.plugin.TestB
         Assert.assertFalse("Invalid item selected", items.get(1).selected);
     }
 
-    private DeployChartBuildStep getFakeDeployChartBuildStep() {
-        return new DeployChartBuildStep(EMPTY, cloud.name, FAKE_CHARTS_REPO, FAKE_CHART_NAME);
+    private DeployChartBuildStep getFakeDeployChartBuildStep(boolean alsoDeleteChart) {
+
+        DeployChartBuildStep deployChartBuildStep =
+                new DeployChartBuildStep(EMPTY, cloud.name, FAKE_CHARTS_REPO, FAKE_CHART_NAME, alsoDeleteChart);
+
+        Assert.assertNotNull("Injection failed", deployChartBuildStep.deploymentService);
+        deployChartBuildStep.deploymentService = chartDeploymentServiceMock;
+
+        return deployChartBuildStep;
     }
 }

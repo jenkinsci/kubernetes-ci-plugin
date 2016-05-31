@@ -9,6 +9,7 @@ import com.elasticbox.jenkins.k8s.plugin.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.Extension;
+import hudson.model.Run;
 import hudson.tasks.Builder;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -33,7 +34,7 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     }
 
     @Override
-    protected void doPerform(String runName, TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
+    protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
             throws ServiceException {
 
         taskLogger.info("Deleting chart: " + getChartName());

@@ -20,6 +20,13 @@
 
         <f:validateButton title="${%Test Yaml}" progress="${%Testing...}" method="testYaml"
                           with="podYaml,name,namespace" />
+
+        <f:entry title="">
+            <div align="right">
+                <f:repeatableDeleteButton />
+            </div>
+        </f:entry>
+
     </table>
 
 </j:jelly>

@@ -33,6 +33,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -249,7 +250,6 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
         public ListBoxModel doFillNamespaceItems(@QueryParameter String endpointUrl,
                                                  @QueryParameter String credentialsId,
-                                                 @QueryParameter boolean disableCertCheck,
                                                  @QueryParameter String serverCert) {
 
             if (StringUtils.isEmpty(endpointUrl) ) {
@@ -258,7 +258,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
             Authentication authData = PluginHelper.getAuthenticationData(credentialsId);
             final KubernetesCloudParams kubeCloudParams =
-                    new KubernetesCloudParams(endpointUrl, null, authData, disableCertCheck, serverCert);
+                    new KubernetesCloudParams(endpointUrl, null, authData, true, serverCert);
 
             return PluginHelper.doFillNamespaceItems(kubeRepository.getNamespaces(kubeCloudParams) );
         }
@@ -266,7 +266,6 @@ public class KubernetesCloud extends AbstractCloudImpl {
         public FormValidation doTestConnection(@QueryParameter String endpointUrl,
                                                @QueryParameter String namespace,
                                                @QueryParameter String credentialsId,
-                                                 @QueryParameter boolean disableCertCheck,
                                                @QueryParameter String serverCert) {
 
             if (StringUtils.isEmpty(endpointUrl) ) {
@@ -275,7 +274,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
             Authentication authData = PluginHelper.getAuthenticationData(credentialsId);
             final KubernetesCloudParams kubeCloudParams = new KubernetesCloudParams(
-                    endpointUrl, namespace, authData, disableCertCheck, serverCert);
+                    endpointUrl, namespace, authData, false, serverCert);
 
             try {
                 if (kubeRepository.testConnection(kubeCloudParams) ) {
@@ -289,6 +288,21 @@ public class KubernetesCloud extends AbstractCloudImpl {
                 }
             } catch (RepositoryException excep) {
                 String msg = "Connection error - " + excep.getCausedByMessages();
+                if (excep.getCause() != null && excep.getCause().getCause() instanceof SSLHandshakeException) {
+                    kubeCloudParams.setDisableCertCheck(true);
+                    try {
+                        if (kubeRepository.testConnection(kubeCloudParams) ) {
+                            if (LOGGER.isLoggable(Level.CONFIG) ) {
+                                LOGGER.config("Connection successful disabling Cert check to Kubernetes Cloud at: "
+                                        + endpointUrl);
+                            }
+                            return FormValidation.warning(
+                                    "Warning: Connection successful but the server certificate is not trusted");
+                        }
+                    } catch (RepositoryException exception) {
+                        msg = "Connection error - " + exception.getCausedByMessages();
+                    }
+                }
                 LOGGER.severe(msg);
                 return FormValidation.error(msg);
             }

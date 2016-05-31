@@ -44,8 +44,8 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
     }
 
     @Override
-    public void deployChart(String kubeName, String namespace, ChartRepo chartRepo, String chartName,
-                            Map<String, String> label)
+    public Chart deployChart(String kubeName, String namespace, ChartRepo chartRepo, String chartName,
+                             Map<String, String> label)
             throws ServiceException {
 
         try {
@@ -74,6 +74,8 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
                 }
             }
 
+            return chart;
+
         } catch (RepositoryException exception) {
             final String message = "Error accessing/creating namespace [" + namespace + "]. ";
             LOGGER.severe(message + exception.getMessage() );
@@ -92,7 +94,20 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
 
         try {
             final Chart chart = chartRepository.chart(chartRepo, chartName);
+            deleteChart(kubeName, namespace, chart);
 
+        } catch (RepositoryException exception) {
+            final String message = "Error accessing chart [" + chartName + "]. ";
+            LOGGER.severe(message + exception.getMessage() );
+            throw new ServiceException(message, exception);
+
+        }
+    }
+
+    @Override
+    public void deleteChart(String kubeName, String namespace, Chart chart) throws ServiceException {
+
+        try {
             if ( !kubernetesRepository.namespaceExists(kubeName, namespace)) {
                 LOGGER.warning("Namespace not found. Unable to delete chart.");
                 return;
@@ -122,7 +137,7 @@ public class ChartDeploymentServiceImpl implements ChartDeploymentService {
             throw new ServiceException(message, exception);
 
         } catch (KubernetesClientException exception) {
-            final String message = "Error in Kubernetes client trying to delete chart [" + chartName + "]. ";
+            final String message = "Error in Kubernetes client trying to delete chart [" + chart + "]. ";
             LOGGER.severe(message + exception.getMessage() );
             throw new ServiceException(message, exception);
         }

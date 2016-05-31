@@ -18,4 +18,8 @@
         <f:select clazz="required" />
     </f:entry>
 
+    <f:entry title="${%Delete Chart when job finishes}" field="deleteChartWhenFinished">
+        <f:checkbox />
+    </f:entry>
+
 </j:jelly>
