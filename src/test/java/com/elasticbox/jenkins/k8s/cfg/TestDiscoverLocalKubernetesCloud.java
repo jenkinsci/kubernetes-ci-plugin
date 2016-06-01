@@ -1,5 +1,7 @@
 package com.elasticbox.jenkins.k8s.cfg;
 
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.ctc.wstx.util.StringUtil;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.util.TestLogHandler;
@@ -7,6 +9,7 @@ import com.elasticbox.jenkins.k8s.util.TestUtils;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.slaves.Cloud;
+import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -14,6 +17,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -28,6 +32,8 @@ public class TestDiscoverLocalKubernetesCloud {
     private static final String LOG_MESSAGE_NOT_FOUND = " <-- Log message not found";
 
     private static KubernetesRepository kubernetesRepositoryMock = Mockito.mock(KubernetesRepository.class);
+
+    private static File fileMock = Mockito.mock(File.class);
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -53,6 +59,7 @@ public class TestDiscoverLocalKubernetesCloud {
 
         Mockito.when(kubernetesRepositoryMock.testConnection(Mockito.anyString() )).thenReturn(true);
         PluginInitializer.kubeRepository = kubernetesRepositoryMock;
+        PluginInitializer.KUBE_TOKEN_PATH = PluginInitializer.class.getResource("fakeToken").getFile();
     }
 
     @Test
@@ -64,6 +71,8 @@ public class TestDiscoverLocalKubernetesCloud {
 
         Assert.assertNotNull("Default chart repository configuration not included", cloud.getChartRepositoryConfigurations() );
         Assert.assertEquals("Chart repository configuration list must have just one", cloud.getChartRepositoryConfigurations().size(), 1);
+        Assert.assertTrue("No Kubernetes service token has been configured", StringUtils.isNotEmpty(cloud.getCredentialsId() ));
+        Assert.assertEquals("No credentials object has been added", SystemCredentialsProvider.getInstance().getCredentials().size(), 1);
 
         Assert.assertNotNull("Default pod slave configuration not included", cloud.getPodSlaveConfigurations() );
         Assert.assertEquals("Pod slave configuration list must have just one", cloud.getPodSlaveConfigurations().size(), 1);

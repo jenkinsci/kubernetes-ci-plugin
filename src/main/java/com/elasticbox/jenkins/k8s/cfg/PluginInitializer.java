@@ -3,6 +3,11 @@ package com.elasticbox.jenkins.k8s.cfg;
 import static com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud.NAME_PREFIX;
 import static com.elasticbox.jenkins.k8s.plugin.util.PluginHelper.DEFAULT_NAMESPACE;
 
+import com.cloudbees.plugins.credentials.Credentials;
+import com.cloudbees.plugins.credentials.CredentialsScope;
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
+import com.elasticbox.jenkins.k8s.plugin.auth.TokenCredentials;
+import com.elasticbox.jenkins.k8s.plugin.auth.TokenCredentialsImpl;
 import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.plugin.clouds.PodSlaveConfig;
@@ -12,10 +17,12 @@ import com.elasticbox.jenkins.k8s.repositories.api.KubernetesRepositoryApiImpl;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -31,8 +38,10 @@ public class PluginInitializer {
     private static final String DEFAULT_HELM_CHART_REPO_URL = "https://github.com/helm/charts";
 
     public static final String LOCAL_CLOUD_NAME = NAME_PREFIX + "Local";
-
     private static final String DEFAULT_JENKINS_SLAVE_POD_YAML = "default-jenkins-slave-pod.yaml";
+    private static final String KUBE_SERVICE_TOKEN_ID = "KubeServiceToken";
+
+    static String KUBE_TOKEN_PATH = "/run/secrets/kubernetes.io/serviceaccount/token";
 
     static KubernetesRepository kubeRepository = new KubernetesRepositoryApiImpl();
 
@@ -71,8 +80,10 @@ public class PluginInitializer {
 
             final PodSlaveConfig defaultPodSlaveConfig = getDefaultPodSlaveConfig();
 
+            String credentialsId = checkLocalKubernetesToken();
+
             final KubernetesCloud cloud = new KubernetesCloud(LOCAL_CLOUD_NAME, LOCAL_CLOUD_NAME, kubernetesUri,
-                    DEFAULT_NAMESPACE, MAX_SLAVES, StringUtils.EMPTY, false, StringUtils.EMPTY,
+                    DEFAULT_NAMESPACE, MAX_SLAVES, credentialsId, false, StringUtils.EMPTY,
                     Collections.singletonList(chartRepositoryConfig),
                     (defaultPodSlaveConfig != null) ? Collections.singletonList(defaultPodSlaveConfig)
                             : Collections.EMPTY_LIST);
@@ -84,6 +95,26 @@ public class PluginInitializer {
         } catch (RepositoryException exception) {
             LOGGER.log(Level.SEVERE, NAME_PREFIX + exception.getCausedByMessages(), exception);
         }
+    }
+
+    private static String checkLocalKubernetesToken() {
+        File file = new File(KUBE_TOKEN_PATH);
+        if (file.exists() && file.canRead() ) {
+            try {
+                String token = IOUtils.toString(file.toURI() );
+                TokenCredentialsImpl kubeServiceToken = new TokenCredentialsImpl(CredentialsScope.SYSTEM,
+                        KUBE_SERVICE_TOKEN_ID, "Local Kubernetes service token", Secret.fromString(token) );
+
+                SystemCredentialsProvider.getInstance().getCredentials().add(kubeServiceToken);
+                SystemCredentialsProvider.getInstance().save();
+
+                return KUBE_SERVICE_TOKEN_ID;
+
+            } catch (IOException excep) {
+                LOGGER.warning("Unable to read Kubernetes service token file: " + excep);
+            }
+        }
+        return StringUtils.EMPTY;
     }
 
     private static PodSlaveConfig getDefaultPodSlaveConfig() {
