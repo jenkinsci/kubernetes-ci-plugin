@@ -83,7 +83,7 @@ public class PluginInitializer {
             String credentialsId = checkLocalKubernetesToken();
 
             final KubernetesCloud cloud = new KubernetesCloud(LOCAL_CLOUD_NAME, LOCAL_CLOUD_NAME, kubernetesUri,
-                    DEFAULT_NAMESPACE, MAX_SLAVES, credentialsId, false, StringUtils.EMPTY,
+                    DEFAULT_NAMESPACE, MAX_SLAVES, credentialsId, StringUtils.EMPTY,
                     Collections.singletonList(chartRepositoryConfig),
                     (defaultPodSlaveConfig != null) ? Collections.singletonList(defaultPodSlaveConfig)
                             : Collections.EMPTY_LIST);

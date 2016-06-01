@@ -60,7 +60,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     @DataBoundConstructor
     public KubernetesCloud(String name, String description, String endpointUrl, String namespace,
-                           String maxContainers, String credentialsId, boolean disableCertCheck, String serverCert,
+                           String maxContainers, String credentialsId, String serverCert,
                            List<ChartRepositoryConfig> chartRepositoryConfigurations,
                            List<PodSlaveConfig> podSlaveConfigurations) {
 
@@ -70,7 +70,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
         // Passing !disableCertCheck because it is with 'negative' property in jelly (opposite behaviour)
         this.kubeCloudParams = new KubernetesCloudParams(endpointUrl, namespace,
-                PluginHelper.getAuthenticationData(credentialsId), !disableCertCheck, serverCert);
+                PluginHelper.getAuthenticationData(credentialsId), serverCert);
 
         this.chartRepositoryConfigurations = chartRepositoryConfigurations;
         this.podSlaveConfigurations = podSlaveConfigurations;
@@ -260,7 +260,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
             Authentication authData = PluginHelper.getAuthenticationData(credentialsId);
             final KubernetesCloudParams kubeCloudParams =
-                new KubernetesCloudParams(endpointUrl, null, authData, true, serverCert);
+                new KubernetesCloudParams(endpointUrl, null, authData, serverCert);
 
             return PluginHelper.doFillNamespaceItems(kubeRepository.getNamespaces(kubeCloudParams) );
         }
@@ -275,8 +275,10 @@ public class KubernetesCloud extends AbstractCloudImpl {
             }
 
             Authentication authData = PluginHelper.getAuthenticationData(credentialsId);
+
             final KubernetesCloudParams kubeCloudParams = new KubernetesCloudParams(
-                endpointUrl, namespace, authData, false, serverCert);
+                endpointUrl, namespace, authData, serverCert);
+            kubeCloudParams.setDisableCertCheck(false);
 
             try {
                 if (kubeRepository.testConnection(kubeCloudParams) ) {
