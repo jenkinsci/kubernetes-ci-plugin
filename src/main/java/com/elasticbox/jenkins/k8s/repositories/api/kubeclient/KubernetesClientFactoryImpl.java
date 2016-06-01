@@ -49,7 +49,9 @@ public class KubernetesClientFactoryImpl
 
     @Override
     public KubernetesClient load(String kubeName) throws Exception {
+
         final Jenkins instance = Jenkins.getInstance();
+
         final Cloud cloud = (instance != null) ? instance.getCloud(kubeName) : null;
 
         if (cloud != null && cloud instanceof KubernetesCloud) {
@@ -60,6 +62,7 @@ public class KubernetesClientFactoryImpl
 
         String msg = "There is no KubernetesCloud with name: " + kubeName;
         LOGGER.severe(msg);
+
         throw new RepositoryException(msg);
     }
 

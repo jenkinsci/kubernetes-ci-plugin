@@ -1,4 +1,4 @@
-package com.elasticbox.jenkins.k8s.plugin.util;
+package com.elasticbox.jenkins.k8s.util;
 
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -10,22 +10,14 @@ import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.auth.TokenAuthentication;
 import com.elasticbox.jenkins.k8s.auth.UserAndPasswordAuthentication;
-import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.auth.TokenCredentialsImpl;
-import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
-import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
-import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class PluginHelper {
 

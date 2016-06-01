@@ -2,12 +2,12 @@ package com.elasticbox.jenkins.k8s.plugin.builders;
 
 import com.google.inject.Inject;
 
+import com.elasticbox.jenkins.k8s.util.PluginHelper;
+import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
-import com.elasticbox.jenkins.k8s.plugin.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.services.ChartDeploymentService;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.FilePath;
@@ -71,7 +71,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
             ChartRepositoryConfig config = kubeCloud.getChartRepositoryConfiguration(getChartsRepo() );
             taskLogger.info("Using Chart repository config: " + config);
 
-            Authentication authData = PluginHelper.getAuthenticationData(config.getCredentialsId() );
+            Authentication authData = PluginHelper.getAuthenticationData(config.getCredentialsId());
             ChartRepo chartRepo = new ChartRepo(config.getChartsRepoUrl(), authData);
 
             doPerform(run, taskLogger, kubeCloud, chartRepo);

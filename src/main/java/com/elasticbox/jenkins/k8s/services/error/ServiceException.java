@@ -13,6 +13,10 @@ public class ServiceException extends Exception {
         super(message, exception);
     }
 
+    public ServiceException(String message) {
+        super(message);
+    }
+
     public String getCausedByMessages() {
         Throwable initialCause = getCause();
         if (initialCause != null) {

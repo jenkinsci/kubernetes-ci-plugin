@@ -1,4 +1,4 @@
-package com.elasticbox.jenkins.k8s.plugin.util;
+package com.elasticbox.jenkins.k8s.util;
 
 import java.util.Map;
 

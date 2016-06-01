@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
-import com.elasticbox.jenkins.k8s.plugin.util.PluginHelper;
+import com.elasticbox.jenkins.k8s.util.PluginHelper;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import hudson.Extension;

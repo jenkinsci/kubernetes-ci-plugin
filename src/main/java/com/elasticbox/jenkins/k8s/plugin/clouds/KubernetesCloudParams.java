@@ -3,6 +3,7 @@ package com.elasticbox.jenkins.k8s.plugin.clouds;
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 
 public class KubernetesCloudParams {
+
     private final String endpointUrl;
     private final String namespace;
     private final Authentication authData;
@@ -10,13 +11,13 @@ public class KubernetesCloudParams {
     private final String serverCert;
 
     public KubernetesCloudParams(String endpointUrl, String namespace,
-                                 Authentication authData, boolean disableCertCheck, String serverCert) {
+                                 Authentication authData,  String serverCert) {
 
         this.endpointUrl = endpointUrl;
         this.namespace = namespace;
         this.authData = authData;
-        this.disableCertCheck = disableCertCheck;
         this.serverCert = serverCert;
+        this.disableCertCheck = true;
 
     }
 

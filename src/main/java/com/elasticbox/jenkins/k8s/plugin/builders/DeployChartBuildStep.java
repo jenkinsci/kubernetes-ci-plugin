@@ -3,10 +3,10 @@ package com.elasticbox.jenkins.k8s.plugin.builders;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.chart.Chart;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.plugin.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.Extension;
@@ -51,7 +51,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
 
     @Override
     protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
-            throws ServiceException {
+        throws ServiceException {
 
         taskLogger.info("Deploying chart: " + getChartName() );
 
@@ -59,7 +59,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
         final String runName = (run != null) ? run.toString() : "<NO-RUN>";
 
         Map<String, String> label = Collections.singletonMap(JENKINS_JOB,
-                                        StringUtils.deleteWhitespace(runName).replace('#', '_') );
+            StringUtils.deleteWhitespace(runName).replace('#', '_') );
 
         final Chart chart = deploymentService.deployChart(getCloudName(), namespace, chartRepo, chartName, label);
         taskLogger.info("Chart [" + chartName + "] deployed");
@@ -102,7 +102,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
 
             } catch (ServiceException excep) {
                 taskLogger.error("Error while cleaning up chart [" + chart.getName() + "]: " + excep
-                        + ". Initial cause: " + excep.getCausedByMessages() );
+                    + ". Initial cause: " + excep.getCausedByMessages() );
             }
             return true;
         }

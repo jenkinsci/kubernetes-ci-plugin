@@ -9,12 +9,11 @@ public interface PodRepository {
 
     void create(String kubeName, String namespace, Pod pod) throws RepositoryException;
 
-    void create(String kubeName, String namespace, Pod pod, Map<String, String> labels)
-            throws RepositoryException;
+    void create(String kubeName, String namespace, Pod pod, Map<String, String> labels) throws RepositoryException;
 
     void delete(String kubeName, String namespace, Pod pod) throws RepositoryException;
 
-    boolean testYaml(String kubeName, String namespace, String yaml) throws RepositoryException;
+    void delete(String kubeName, String namespace, String podName) throws RepositoryException;
 
-    Pod getPod(String kubeName, String namespace, String yaml) throws RepositoryException;
+    Pod pod(String kubeName, String namespace, String yaml) throws RepositoryException;
 }

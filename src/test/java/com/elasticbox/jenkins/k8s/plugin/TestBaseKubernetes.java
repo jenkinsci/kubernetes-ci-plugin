@@ -18,9 +18,6 @@ import java.util.Collections;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
-/**
- * Created by guillermo on 6/5/16.
- */
 public class TestBaseKubernetes {
 
     protected static final String EMPTY = "";
@@ -39,7 +36,7 @@ public class TestBaseKubernetes {
     @Before
     public void setupCloud() throws Exception {
         fakeChartRepoCfg = new ChartRepositoryConfig(FAKE_CHARTS_REPO, FAKE_URL, EMPTY);
-        cloud = new KubernetesCloud(EMPTY, "FakeKubeCloud", FAKE_URL, FAKE_NS, "10", EMPTY, true, EMPTY,
+        cloud = new KubernetesCloud(EMPTY, "FakeKubeCloud", FAKE_URL, FAKE_NS, "10", EMPTY, EMPTY,
                                     Collections.singletonList(fakeChartRepoCfg), null);
 
         jenkins.getInstance().clouds.add(cloud);

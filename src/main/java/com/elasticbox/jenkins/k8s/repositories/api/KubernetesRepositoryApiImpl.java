@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloudParams;
-import com.elasticbox.jenkins.k8s.plugin.util.KeyValuePair;
+import com.elasticbox.jenkins.k8s.util.KeyValuePair;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFactory;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;

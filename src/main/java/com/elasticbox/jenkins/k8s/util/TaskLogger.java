@@ -10,7 +10,7 @@
  * written permission is obtained from ElasticBox.
  */
 
-package com.elasticbox.jenkins.k8s.plugin.util;
+package com.elasticbox.jenkins.k8s.util;
 
 import hudson.model.TaskListener;
 
