@@ -18,13 +18,6 @@
         <c:select />
     </f:entry>
 
-    <f:optionalBlock title="${%Disable server certificate check}" negative="true"
-                     inline="true" name="disableCertCheck" checked="${instance.disableCertCheck}">
-        <f:entry title="${%Kubernetes server certificate}" field="serverCert">
-            <f:textarea/>
-        </f:entry>
-    </f:optionalBlock>
-
     <f:entry title="${%Namespace}" field="namespace">
         <f:select clazz="required"/>
     </f:entry>
@@ -34,7 +27,7 @@
     </f:entry>
 
     <f:validateButton title="${%Test Connection}" progress="${%Testing...}" method="testConnection"
-                      with="endpointUrl,credentialsId,disableCertCheck,serverCert,namespace" />
+                      with="endpointUrl,credentialsId,namespace" />
 
     <f:entry title="${%Chart Repository Configurations}" description="${%Configuration of chart repositories}">
         <f:repeatable field="chartRepositoryConfigurations">

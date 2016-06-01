@@ -10,12 +10,23 @@
             <f:textbox clazz="required" />
         </f:entry>
 
+        <f:entry title="${%Labels}" field="labels">
+            <f:textbox />
+        </f:entry>
+
         <f:entry title="${%Pod YAML definition}" field="podYaml">
-            <f:textarea/>
+            <f:textarea />
         </f:entry>
 
         <f:validateButton title="${%Test Yaml}" progress="${%Testing...}" method="testYaml"
                           with="podYaml,name,namespace" />
+
+        <f:entry title="">
+            <div align="right">
+                <f:repeatableDeleteButton />
+            </div>
+        </f:entry>
+
     </table>
 
 </j:jelly>

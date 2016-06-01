@@ -1,0 +1,10 @@
+apiVersion: "v1"
+kind: "Pod"
+metadata:
+  name: "jenkins-slave"
+  labels:
+    name: "jenkins-slave"
+spec:
+    containers:
+      - name: "jenkins-slave"
+        image: "jenkinsci/jnlp-slave"
