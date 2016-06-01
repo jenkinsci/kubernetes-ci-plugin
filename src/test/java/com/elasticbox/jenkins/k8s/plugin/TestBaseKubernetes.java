@@ -18,9 +18,6 @@ import java.util.Collections;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 
-/**
- * Created by guillermo on 6/5/16.
- */
 public class TestBaseKubernetes {
 
     protected static final String EMPTY = "";

@@ -93,13 +93,13 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
 
             Mockito.when(kubernetesRepositoryMock.namespaceExists(anyString(), anyString())).thenReturn(Boolean.TRUE);
             Mockito.when(kubernetesRepositoryMock.getNamespaces(any(KubernetesCloudParams.class)))
-                    .thenReturn(Arrays.asList("default", FAKE_NS));
+                .thenReturn(Arrays.asList("default", FAKE_NS));
             Mockito.when(kubernetesRepositoryMock.testConnection(any(KubernetesCloudParams.class)))
-                    .thenReturn(true)
-                    .thenThrow(new RepositoryException(FAKE_MOCK_EXCEPTION))
-                    .thenThrow(new RepositoryException("Wrapper", new RepositoryException(
-                            "MidCause", new SSLHandshakeException("InitialCause") )))
-                    .thenReturn(true);
+                .thenReturn(true)
+                .thenThrow(new RepositoryException(FAKE_MOCK_EXCEPTION))
+                .thenThrow(new RepositoryException("Wrapper", new RepositoryException(
+                    "MidCause", new SSLHandshakeException("InitialCause") )))
+                .thenReturn(true);
         }
     }
 }

@@ -3,12 +3,14 @@ package com.elasticbox.jenkins.k8s.plugin.builders;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.Extension;
+import hudson.model.Run;
+import hudson.tasks.Builder;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -16,6 +18,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class DeleteChartBuildStep extends BaseChartBuildStep {
+
     private static final Logger LOGGER = Logger.getLogger(DeleteChartBuildStep.class.getName() );
 
     private static final String NAME_PREFIX = "DeleteChartBS-";
@@ -32,8 +35,8 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     }
 
     @Override
-    protected void doPerform(String runName, TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
-            throws ServiceException {
+    protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
+        throws ServiceException {
 
         taskLogger.info("Deleting chart: " + getChartName());
         deploymentService.deleteChart(getCloudName(), kubeCloud.getNamespace(), chartRepo, getChartName() );
