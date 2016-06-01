@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class SingleUseRetentionStrategy extends CloudRetentionStrategy implements ExecutorListener {
 
-    private static final Logger LOGGER = Logger.getLogger(KubernetesComputer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(SingleUseRetentionStrategy.class.getName());
 
 
     public SingleUseRetentionStrategy(int idleMinutes) {
@@ -44,6 +44,8 @@ public class SingleUseRetentionStrategy extends CloudRetentionStrategy implement
 
 
     private void terminate(final AbstractCloudComputer<?> computer) {
+
+        LOGGER.log(Level.INFO, "Terminating computer: " + computer.getName());
 
         computer.setAcceptingTasks(false); // just in case
 

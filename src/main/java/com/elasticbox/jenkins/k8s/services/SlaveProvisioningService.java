@@ -14,4 +14,9 @@ public interface SlaveProvisioningService {
     KubernetesSlave slaveProvision(KubernetesCloud kubernetesCloud,
                                    List<PodSlaveConfigurationParams> podConfigurations,
                                    Label label) throws ServiceException;
+
+    boolean canProvision(KubernetesCloud kubernetesCloud,
+                            List<PodSlaveConfigurationParams> podConfigurations,
+                            Label label) throws ServiceException;
+
 }

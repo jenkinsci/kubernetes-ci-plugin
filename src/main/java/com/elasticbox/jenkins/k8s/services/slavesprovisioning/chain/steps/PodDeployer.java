@@ -1,8 +1,11 @@
-package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain;
+package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AbstractPodDeployment;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeploymentContext;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;

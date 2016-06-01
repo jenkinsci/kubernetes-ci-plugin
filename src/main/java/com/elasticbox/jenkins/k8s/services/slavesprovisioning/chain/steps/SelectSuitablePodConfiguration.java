@@ -1,13 +1,14 @@
-package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain;
+package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AbstractPodDeployment;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeploymentContext;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.PodSlaveConfigurationParams;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.model.Label;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,7 @@ public class SelectSuitablePodConfiguration extends AbstractPodDeployment {
             final String [] labels = config.getLabels();
             if (ArrayUtils.contains(labels, jobLabel.getName())) {
                 deploymentContext.setPodConfigurationChosen(config);
+                return;
             }
 
         }
@@ -46,5 +48,7 @@ public class SelectSuitablePodConfiguration extends AbstractPodDeployment {
         throw new ServiceException(message);
 
     }
+
+
 
 }

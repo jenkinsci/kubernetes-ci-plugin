@@ -4,15 +4,13 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AddSlaveToJenkinsCloud;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AddEnvironmentVariablesToPodConfiguration;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AddLabelsToPodConfiguration;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.CheckProvisioningAllowed;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.CreatePodFromPodConfiguration;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeployer;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.SelectSuitablePodConfiguration;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.WaitForPodToBeRunning;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.WaitForSlaveToBeOnline;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.AddSlaveToJenkinsCloud;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.CheckProvisioningAllowed;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.CreatePodFromPodConfiguration;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.PodDeployer;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.SelectSuitablePodConfiguration;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.WaitForPodToBeRunning;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.WaitForSlaveToBeOnline;
 
 import com.elasticbox.jenkins.k8s.services.SlaveProvisioningService;
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.SlaveProvisioningStep;
@@ -80,12 +78,11 @@ public class GuiceBindings extends AbstractModule {
 
         Multibinder<SlaveProvisioningStep> podCreationChainHandlers =
             Multibinder.newSetBinder(binder(), SlaveProvisioningStep.class);
+
         podCreationChainHandlers.addBinding().to(CheckProvisioningAllowed.class);
+        podCreationChainHandlers.addBinding().to(AddSlaveToJenkinsCloud.class);
         podCreationChainHandlers.addBinding().to(SelectSuitablePodConfiguration.class);
         podCreationChainHandlers.addBinding().to(CreatePodFromPodConfiguration.class);
-        podCreationChainHandlers.addBinding().to(AddLabelsToPodConfiguration.class);
-        podCreationChainHandlers.addBinding().to(AddSlaveToJenkinsCloud.class);
-        podCreationChainHandlers.addBinding().to(AddEnvironmentVariablesToPodConfiguration.class);
         podCreationChainHandlers.addBinding().to(PodDeployer.class);
         podCreationChainHandlers.addBinding().to(WaitForPodToBeRunning.class);
         podCreationChainHandlers.addBinding().to(WaitForSlaveToBeOnline.class);

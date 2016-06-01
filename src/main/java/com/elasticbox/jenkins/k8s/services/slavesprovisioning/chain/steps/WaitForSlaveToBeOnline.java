@@ -1,8 +1,9 @@
-package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain;
+package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AbstractPodDeployment;
+import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeploymentContext;
 import com.elasticbox.jenkins.k8s.plugin.slaves.KubernetesSlave;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import com.elasticbox.jenkins.k8s.services.task.ScheduledPoolingTask;
@@ -17,7 +18,7 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
     private static final Logger LOGGER = Logger.getLogger(WaitForSlaveToBeOnline.class.getName());
 
     private static final long DELAY_SECONDS = 1;
-    private static final long INITIAL_DELAY = 1;
+    private static final long INITIAL_DELAY = 0;
     private static final long TIMEOUT = 60;
 
 
@@ -63,6 +64,7 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
 
         @Override
         protected void performExecute() throws TaskException {
+
 
             if (slave.getComputer() == null) {
                 LOGGER.warning("Computer is null for the slave: " + slave);
