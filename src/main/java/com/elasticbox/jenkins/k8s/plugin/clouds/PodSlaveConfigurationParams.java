@@ -32,6 +32,6 @@ public class PodSlaveConfigurationParams {
 
     @Override
     public String toString() {
-        return "PodSlaveConfigurationParams{description='" + description + '\'' + ", labels='" + labels + '\'' + '}';
+        return "PodSlaveConfigurationParams{description='" + description + "', labels='" + labels + "'}";
     }
 }
