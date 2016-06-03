@@ -26,7 +26,7 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
     @Test
     public void testGetKubernetesClouds() {
         final List<KubernetesCloud> kubernetesClouds = KubernetesCloud.getKubernetesClouds();
-        Assert.assertEquals("Kubernetes clouds not found", 1, kubernetesClouds.size() );
+        Assert.assertEquals("Kubernetes clouds not found.", 1, kubernetesClouds.size() );
 
         final KubernetesCloud kubernetesCloud = KubernetesCloud.getKubernetesCloud(cloud.name);
         Assert.assertNotNull("Kubernetes clouds not found", kubernetesCloud);

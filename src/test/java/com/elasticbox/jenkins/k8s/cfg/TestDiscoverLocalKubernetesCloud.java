@@ -1,15 +1,14 @@
 package com.elasticbox.jenkins.k8s.cfg;
 
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
-import com.ctc.wstx.util.StringUtil;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.util.TestLogHandler;
 import com.elasticbox.jenkins.k8s.util.TestUtils;
 import hudson.init.InitMilestone;
 import hudson.init.Initializer;
-import hudson.slaves.Cloud;
 import org.apache.commons.lang.StringUtils;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -42,11 +41,18 @@ public class TestDiscoverLocalKubernetesCloud {
 
     @BeforeClass
     public static void initEnv() {
+
         final Map<String, String> newEnv = new HashMap<>();
         newEnv.put(KUBERNETES_PORT_443_TCP_ADDR, FAKE_IP);
         newEnv.put(KUBERNETES_PORT_443_TCP_PORT, FAKE_PORT);
 
         TestUtils.setEnv(newEnv);
+    }
+
+    @AfterClass
+    public static void restoreEnv() {
+
+        TestUtils.clearEnv(KUBERNETES_PORT_443_TCP_ADDR, KUBERNETES_PORT_443_TCP_PORT);
     }
 
     @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED)
