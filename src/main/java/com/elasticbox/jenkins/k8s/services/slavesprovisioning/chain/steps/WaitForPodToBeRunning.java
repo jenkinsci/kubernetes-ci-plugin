@@ -3,6 +3,7 @@ package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AbstractPodDeployment;
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeploymentContext;
 
@@ -24,7 +25,7 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
     private static final Logger LOGGER = Logger.getLogger(WaitForPodToBeRunning.class.getName());
 
     @Inject
-    private KubernetesRepository kubernetesRepository;
+    private PodRepository podRepository;
 
     private static final long DELAY_SECONDS = 1;
     private static final long INITIAL_DELAY = 1;
@@ -44,10 +45,13 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
 
         try {
 
-            final KubernetesClient client = kubernetesRepository.getClient(cloudToDeployInto.name);
-
-            new WaitForThePodToBeRunningTask(client, namespace, podName, DELAY_SECONDS, INITIAL_DELAY, TIMEOUT)
-                .execute();
+            new WaitForThePodToBeRunningTask(
+                podRepository,
+                cloudToDeployInto.getDisplayName(),
+                namespace,
+                podName,
+                DELAY_SECONDS, INITIAL_DELAY,
+                TIMEOUT).execute();
 
             LOGGER.log(Level.INFO, "Pod is up and running");
 
@@ -57,13 +61,7 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
 
             throw new ServiceException("Error waiting for the Pod to be running", error);
 
-        } catch (RepositoryException error) {
-
-            LOGGER.log(Level.SEVERE, "Error getting the client for the cloud " + cloudToDeployInto.name, error);
-
-            throw new ServiceException("Error getting the client for the cloud " + cloudToDeployInto.name, error);
         }
-
 
     }
 
@@ -99,11 +97,13 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
 
     private static class WaitForThePodToBeRunningTask extends ScheduledPoolingTask<PodState> {
 
+        private String cloudName;
         private String namespace;
         private String podName;
-        private KubernetesClient client;
+        private PodRepository podRepository;
 
-        public WaitForThePodToBeRunningTask(KubernetesClient client,
+        public WaitForThePodToBeRunningTask(PodRepository podRepository,
+                                            String cloudName,
                                             String namespace,
                                             String podName,
                                             long delay,
@@ -112,7 +112,8 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
 
             super(delay, initialDelay, timeout);
 
-            this.client = client;
+            this.podRepository = podRepository;
+            this.cloudName = cloudName;
             this.podName = podName;
             this.namespace = namespace;
             this.result = PodState.UNKNOWN;
@@ -121,23 +122,36 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
         @Override
         protected void performExecute() throws TaskException {
 
-            final Pod pod = client.pods().inNamespace(namespace).withName(podName).get();
+            try {
+                final Pod pod = podRepository.getPod(cloudName, namespace, podName);
 
-            final String phase = pod.getStatus().getPhase();
+                final String phase = pod.getStatus().getPhase();
 
-            final PodState podStatus = PodState.findByDescription(phase);
+                final PodState podStatus = PodState.findByDescription(phase);
 
-            if (podStatus == PodState.FAILED) {
+                if (podStatus == PodState.FAILED) {
 
-                LOGGER.log(Level.INFO, "Pod is at the Failed stage");
+                    LOGGER.log(Level.INFO, "Pod is at the Failed stage");
 
-                throw new TaskException("Pod deployment failed");
+                    throw new TaskException("Pod deployment failed");
+                }
+
+                this.result = podStatus;
+
+                LOGGER.log(Level.INFO,
+                    "Pod: " + pod.getMetadata().getName() + " is at the " + result.getStatus() + "stage");
+
+            } catch (RepositoryException exception) {
+                String message =
+                    "Error getting pod in cloud: " + cloudName + " in namespace: " + namespace + " and pod name : "
+                        + podName;
+                LOGGER.log(
+                    Level.SEVERE,
+                    message,
+                    exception);
+                throw new TaskException(message, exception);
             }
 
-            this.result = podStatus;
-
-            LOGGER.log(Level.INFO,
-                "Pod: " + pod.getMetadata().getName() + " is at the " + result.getStatus() + "stage");
         }
 
         @Override
