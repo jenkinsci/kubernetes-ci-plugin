@@ -8,6 +8,7 @@ import com.elasticbox.jenkins.k8s.plugin.slaves.KubernetesSlave;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import com.elasticbox.jenkins.k8s.services.task.ScheduledPoolingTask;
 import com.elasticbox.jenkins.k8s.services.task.TaskException;
+import hudson.slaves.SlaveComputer;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,13 +66,13 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
         @Override
         protected void performExecute() throws TaskException {
 
-
-            if (slave.getComputer() == null) {
+            final SlaveComputer computer = slave.getComputer();
+            if (computer == null) {
                 LOGGER.warning("Computer is null for the slave: " + slave);
                 return;
             }
 
-            this.result = slave.getComputer().isOnline();
+            this.result = computer.isOnline();
 
             LOGGER.log(Level.INFO, "Jenkins slave is online: " + this.result);
         }

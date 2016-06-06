@@ -50,13 +50,14 @@ public class CreatePodFromPodConfiguration extends AbstractPodDeployment {
 
         final KubernetesCloud cloudToDeployInto = deploymentContext.getCloudToDeployInto();
 
-        final KubernetesSlave kubernetesSlave = deploymentContext.getKubernetesSlave();
 
         final PodSlaveConfigurationParams podConfigurationChosen = deploymentContext.getPodConfigurationChosen();
 
         try {
 
-            final Pod podToDeploy = podRepository.pod(cloudToDeployInto.name,
+            final String displayName = cloudToDeployInto.getDisplayName();
+
+            final Pod podToDeploy = podRepository.pod(displayName,
                                                         cloudToDeployInto.getNamespace(),
                                                         podConfigurationChosen.getPodYaml());
 

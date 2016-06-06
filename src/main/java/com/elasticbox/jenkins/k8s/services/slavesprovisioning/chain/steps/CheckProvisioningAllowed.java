@@ -3,16 +3,18 @@ package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AbstractPodDeployment;
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeploymentContext;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
-import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.apache.commons.lang.StringUtils;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +24,7 @@ public class CheckProvisioningAllowed extends AbstractPodDeployment {
     private static final Logger LOGGER = Logger.getLogger(CheckProvisioningAllowed.class.getName());
 
     @Inject
-    private KubernetesRepository kubernetesRepository;
+    private PodRepository podRepository;
 
 
     /**
@@ -47,20 +49,17 @@ public class CheckProvisioningAllowed extends AbstractPodDeployment {
             ? deploymentContext.getDeploymentNamespace()
             : cloudToDeployInto.getNamespace();
 
-        final KubernetesClient kubernetesClient;
         try {
 
-            kubernetesClient = kubernetesRepository.getClient(cloudToDeployInto.name);
+            final List<Pod> pods = podRepository.getAllPods(cloudToDeployInto.getDisplayName(), deploymentNamespace);
 
-            PodList list = kubernetesClient.pods().inNamespace(deploymentNamespace).list();
-
-            if (list.getItems().size() >= cloudCapacity) {
+            if (pods.size() >= cloudCapacity) {
                 String message = "Not provisioning, max cloud capacity: " + cloudCapacity + "reached";
                 LOGGER.log(Level.SEVERE, message);
                 throw new ServiceException(message);
             }
 
-            LOGGER.log(Level.INFO, "Pod deployment granted, cloud capacity: " + list.getItems().size());
+            LOGGER.log(Level.INFO, "Pod deployment granted, cloud capacity: " + pods.size());
 
         } catch (RepositoryException e) {
 

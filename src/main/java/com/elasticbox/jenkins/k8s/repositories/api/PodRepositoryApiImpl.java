@@ -3,13 +3,17 @@ package com.elasticbox.jenkins.k8s.repositories.api;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodList;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.apache.commons.io.IOUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -77,5 +81,26 @@ public class PodRepositoryApiImpl implements PodRepository {
             throw repoException;
         }
     }
+
+    @Override
+    public List<Pod> getAllPods(String cloudName, String deploymentNamespace) throws RepositoryException {
+
+        final KubernetesClient kubernetesClient = kubeRepository.getClient(cloudName);
+
+        PodList list = kubernetesClient.pods().inNamespace(deploymentNamespace).list();
+
+        return list.getItems();
+    }
+
+    @Override
+    public Pod getPod(String cloudName, String namespace, String podName) throws RepositoryException {
+
+        final KubernetesClient kubernetesClient = kubeRepository.getClient(cloudName);
+
+        final Pod pod = kubernetesClient.pods().inNamespace(namespace).withName(podName).get();
+
+        return pod;
+    }
+
 }
 
