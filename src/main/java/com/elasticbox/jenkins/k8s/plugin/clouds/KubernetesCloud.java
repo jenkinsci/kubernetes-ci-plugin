@@ -53,9 +53,6 @@ public class KubernetesCloud extends AbstractCloudImpl {
     transient KubernetesClientFactory kubeFactory;
 
     @Inject
-    transient PodRepository podRepository;
-
-    @Inject
     transient SlaveProvisioningService slaveProvisioningService;
 
     @DataBoundConstructor

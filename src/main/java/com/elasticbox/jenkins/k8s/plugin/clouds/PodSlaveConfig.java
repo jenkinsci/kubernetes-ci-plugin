@@ -16,6 +16,7 @@ import jenkins.model.Jenkins;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PodSlaveConfig implements Describable<PodSlaveConfig> {
@@ -82,6 +83,9 @@ public class PodSlaveConfig implements Describable<PodSlaveConfig> {
 
             try {
                 final Pod pod = podRepository.pod(name, namespace, podYaml);
+                if (LOGGER.isLoggable(Level.FINER) ) {
+                    LOGGER.finer("Pod: " + pod);
+                }
 
                 return FormValidation.ok("Validation successful");
 

@@ -38,9 +38,9 @@ public class KubernetesSlave extends AbstractCloudSlave {
 
     private static final long serialVersionUID = -8642936855413034232L;
 
-    private final KubernetesCloud kubernetesCloud;
+    private final transient KubernetesCloud kubernetesCloud;
 
-    PodRepository podRepository;
+    private final transient PodRepository podRepository;
 
     public KubernetesSlave(String podName, PodRepository podRepository, KubernetesCloud kubernetesCloud, Label label)
         throws Descriptor.FormException,IOException {

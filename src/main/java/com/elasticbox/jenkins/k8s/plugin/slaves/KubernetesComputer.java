@@ -27,7 +27,7 @@ public class KubernetesComputer extends AbstractCloudComputer<KubernetesSlave> {
 
         Queue.Executable executable = executor.getCurrentExecutable();
 
-        LOGGER.log(Level.FINE, " Computer: " + this + " taskCompleted: " + executable.toString());
+        LOGGER.log(Level.FINE, " Computer: " + this + " taskCompleted: " + executable);
 
         // May take the slave offline and remove it, in which case getNode()
         // above would return null and we'd not find our DockerSlave anymore.
