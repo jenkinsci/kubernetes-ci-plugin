@@ -51,7 +51,7 @@ public class CheckProvisioningAllowed extends AbstractPodDeployment {
 
         try {
 
-            final List<Pod> pods = podRepository.getAllPods(cloudToDeployInto.getDisplayName(), deploymentNamespace);
+            final List<Pod> pods = podRepository.getAllPods(cloudToDeployInto.getName(), deploymentNamespace);
 
             if (pods.size() >= cloudCapacity) {
                 String message = "Not provisioning, max cloud capacity: " + cloudCapacity + "reached";
@@ -59,18 +59,15 @@ public class CheckProvisioningAllowed extends AbstractPodDeployment {
                 throw new ServiceException(message);
             }
 
-            LOGGER.log(Level.INFO, "Pod deployment granted, cloud capacity: " + pods.size());
+            LOGGER.log(Level.INFO, "Pod deployment granted, cloud capacity: " + pods.size() );
 
         } catch (RepositoryException e) {
 
-            LOGGER.log(Level.SEVERE, "Error getting the kubernetes client for the cloud " +  cloudToDeployInto.name);
+            LOGGER.log(Level.SEVERE, "Error getting the kubernetes client for the cloud "
+                    + cloudToDeployInto.getName() );
 
-            throw new ServiceException("Error getting the kubernetes client for the cloud " +  cloudToDeployInto.name);
+            throw new ServiceException("Error getting the kubernetes client for the cloud "
+                    + cloudToDeployInto.getName() );
         }
-
-
     }
-
-
-
 }

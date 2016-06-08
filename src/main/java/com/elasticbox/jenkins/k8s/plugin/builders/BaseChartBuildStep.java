@@ -25,7 +25,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
     private static final Logger LOGGER = Logger.getLogger(BaseChartBuildStep.class.getName() );
 
     protected String id;
-    protected String cloudName;
+    protected String kubeName;
     protected String chartsRepo;
     protected String chartName;
 
@@ -45,8 +45,8 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
         return id;
     }
 
-    public String getCloudName() {
-        return cloudName;
+    public String getKubeName() {
+        return kubeName;
     }
 
     public String getChartsRepo() {
@@ -65,7 +65,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
         taskLogger.info("Executing Chart build step: " + run);
 
         try {
-            KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(getCloudName() );
+            KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(getKubeName() );
             taskLogger.info("Using Kubernetes clouds config: " + kubeCloud);
 
             ChartRepositoryConfig config = kubeCloud.getChartRepositoryConfiguration(getChartsRepo() );

@@ -6,7 +6,6 @@ import com.google.inject.Injector;
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.plugin.slaves.KubernetesSlave;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
-import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFactory;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import com.elasticbox.jenkins.k8s.services.SlaveProvisioningService;
@@ -43,7 +42,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     public static final String NAME_PREFIX = "KubeCloud-";
 
-    private final String description;
+    private final String displayName;
     private final String credentialsId;
     private final KubernetesCloudParams kubeCloudParams;
     private final List<ChartRepositoryConfig> chartRepositoryConfigurations;
@@ -56,13 +55,13 @@ public class KubernetesCloud extends AbstractCloudImpl {
     transient SlaveProvisioningService slaveProvisioningService;
 
     @DataBoundConstructor
-    public KubernetesCloud(String name, String description, String endpointUrl, String namespace,
+    public KubernetesCloud(String name, String displayName, String endpointUrl, String namespace,
                            String maxContainers, String credentialsId, String serverCert,
                            List<ChartRepositoryConfig> chartRepositoryConfigurations,
                            List<PodSlaveConfig> podSlaveConfigurations) {
 
         super( (StringUtils.isNotEmpty(name) ) ? name : NAME_PREFIX + UUID.randomUUID().toString(), maxContainers );
-        this.description = description;
+        this.displayName = displayName;
         this.credentialsId = credentialsId;
 
         // Passing !disableCertCheck because it is with 'negative' property in jelly (opposite behaviour)
@@ -102,8 +101,13 @@ public class KubernetesCloud extends AbstractCloudImpl {
         return (cloud != null && cloud instanceof KubernetesCloud) ? (KubernetesCloud)cloud : null;
     }
 
-    public String getDescription() {
-        return description;
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
     }
 
     public String getNamespace() {
@@ -120,10 +124,6 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     public String getCredentialsId() {
         return credentialsId;
-    }
-
-    public boolean getDisableCertCheck() {
-        return kubeCloudParams.isDisableCertCheck();
     }
 
     public List<ChartRepositoryConfig> getChartRepositoryConfigurations() {
@@ -143,20 +143,10 @@ public class KubernetesCloud extends AbstractCloudImpl {
         return null;
     }
 
-    @DataBoundSetter
-    public void setDisableCertCheck(boolean disableCertCheck) {
-        this.kubeCloudParams.setDisableCertCheck(disableCertCheck);
-    }
-
-    @Override
-    public String getDisplayName() {
-        return StringUtils.isNotBlank(description) ? description : kubeCloudParams.getEndpointUrl();
-    }
-
     @Override
     public Collection<NodeProvisioner.PlannedNode> provision(final Label label, int excessWorkload) {
 
-        LOGGER.log(Level.INFO, "Slave provisioning requested, excess workload: " + excessWorkload);
+        LOGGER.info("Slave provisioning requested, excess workload: " + excessWorkload);
 
         final List<PodSlaveConfigurationParams> podSlaveConfigurationParams = new ArrayList<>();
         for (PodSlaveConfig config: podSlaveConfigurations) {
@@ -191,20 +181,20 @@ public class KubernetesCloud extends AbstractCloudImpl {
     @Override
     public boolean canProvision(Label label) {
 
+        LOGGER.info("Checking label: " + label);
+
         final List<PodSlaveConfigurationParams> podSlaveConfigurationParams = new ArrayList<>();
         for (PodSlaveConfig config: podSlaveConfigurations) {
             podSlaveConfigurationParams.add(config.getPodSlaveConfigurationParams());
         }
 
         try {
-            return slaveProvisioningService.canProvision( KubernetesCloud.this,podSlaveConfigurationParams,label);
+            return slaveProvisioningService.canProvision(KubernetesCloud.this, podSlaveConfigurationParams, label);
 
         } catch (ServiceException exception) {
-            LOGGER.log(Level.SEVERE, "Error checking if provision is allowed", exception);
+            LOGGER.info("Error while checking if provision is allowed");
             return false;
         }
-
-
     }
 
 
@@ -214,7 +204,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
 
     @Override
     public String toString() {
-        return "KubernetesCloud [" + getDescription() + "@" + kubeCloudParams.getEndpointUrl() + "]";
+        return "KubernetesCloud [" + getDisplayName() + "@" + kubeCloudParams.getEndpointUrl() + "]";
     }
 
     protected Object readResolve() {

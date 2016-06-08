@@ -97,8 +97,8 @@ public class TestSlaveProvisioningFailing {
                 podCreationChainHandlers.addBinding().to(SelectSuitablePodConfiguration.class);
                 podCreationChainHandlers.addBinding().to(CreatePodFromPodConfiguration.class);
                 podCreationChainHandlers.addBinding().to(PodDeployer.class);
-                podCreationChainHandlers.addBinding().to(WaitForPodToBeRunning.class);
-                podCreationChainHandlers.addBinding().to(WaitForSlaveToBeOnline.class);
+                podCreationChainHandlers.addBinding().toInstance(new WaitForPodToBeRunning(0, 1, 5));
+                podCreationChainHandlers.addBinding().toInstance(new WaitForSlaveToBeOnline(0, 1, 5));
 
             }
         });
@@ -108,7 +108,7 @@ public class TestSlaveProvisioningFailing {
 
         final KubernetesCloud mockKubernetesCloud = Mockito.mock(KubernetesCloud.class);
         when(mockKubernetesCloud.getInstanceCap()).thenReturn(10);
-        when(mockKubernetesCloud.getDisplayName()).thenReturn("FakeCloudName");
+        when(mockKubernetesCloud.getName()).thenReturn("FakeCloudName");
         when(mockKubernetesCloud.getNamespace()).thenReturn("FakeNamespace");
 
         final String podYamlDefault = getPodYamlDefault();
@@ -147,7 +147,7 @@ public class TestSlaveProvisioningFailing {
 
         final KubernetesCloud mockKubernetesCloud = Mockito.mock(KubernetesCloud.class);
         when(mockKubernetesCloud.getInstanceCap()).thenReturn(10);
-        when(mockKubernetesCloud.getDisplayName()).thenReturn("FakeCloudName");
+        when(mockKubernetesCloud.getName()).thenReturn("FakeCloudName");
         when(mockKubernetesCloud.getNamespace()).thenReturn("FakeNamespace");
 
         final String podYamlDefault = getPodYamlDefault();

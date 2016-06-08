@@ -1,5 +1,7 @@
 package com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps;
 
+import static com.elasticbox.jenkins.k8s.util.Constants.JENKINS_URL;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -21,9 +23,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 
 import jenkins.model.JenkinsLocationConfiguration;
 
-import org.apache.commons.lang.StringUtils;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -52,9 +51,14 @@ public class CreatePodFromPodConfiguration extends AbstractPodDeployment {
 
         final PodSlaveConfigurationParams podConfigurationChosen = deploymentContext.getPodConfigurationChosen();
 
+        if (podConfigurationChosen == null) {
+            throw new ServiceException("No pod configuration available to handle label: "
+                    + deploymentContext.getJobLabel() );
+        }
+
         try {
 
-            final Pod podToDeploy = podRepository.pod(cloudToDeployInto.name,
+            final Pod podToDeploy = podRepository.pod(cloudToDeployInto.getName(),
                                                         cloudToDeployInto.getNamespace(),
                                                         podConfigurationChosen.getPodYaml());
 
@@ -65,62 +69,52 @@ public class CreatePodFromPodConfiguration extends AbstractPodDeployment {
 
             deploymentContext.setPodToDeploy(podToDeploy);
 
-
         } catch (RepositoryException exception) {
 
-            LOGGER.log(Level.SEVERE, "Error creating Pod model object");
-
+            LOGGER.log(Level.SEVERE, "Error creating Pod model object: " + podConfigurationChosen);
             throw new ServiceException("Error creating Pod model object", exception);
         }
-
     }
 
     public void addName(Pod podToDeploy, PodDeploymentContext deploymentContext) {
 
         final String nodeName = deploymentContext.getKubernetesSlave().getNodeName();
-
         podToDeploy.getMetadata().setName(nodeName);
 
-        LOGGER.log(Level.INFO, "Pod object model created from PodConfiguration with name: " + nodeName);
-
+        LOGGER.info("Pod object model created from PodConfiguration with name: " + nodeName);
     }
 
     public void addRestartPolicy(Pod podToDeploy, PodDeploymentContext deploymentContext) {
 
         //set the restart policy in order to not restart if something goes wrong
         podToDeploy.getSpec().setRestartPolicy("Never");
-
     }
 
     public void addEnvironmentVariables(Pod podToDeploy, PodDeploymentContext deploymentContext) {
 
         final KubernetesSlave kubernetesSlave = deploymentContext.getKubernetesSlave();
 
-        final String jenkinsUrl = JenkinsLocationConfiguration.get().getUrl();
-
-        List<EnvVar> env = new ArrayList<>();
-        env.add(new EnvVar("JENKINS_SECRET", kubernetesSlave.getComputer().getJnlpMac(), null));
-        env.add(new EnvVar("JENKINS_LOCATION_URL", JenkinsLocationConfiguration.get().getUrl(), null));
-
-        String url = StringUtils.isBlank(jenkinsUrl) ? JenkinsLocationConfiguration.get().getUrl() : jenkinsUrl;
-        env.add(new EnvVar("JENKINS_URL", url, null));
-
-        url = url.endsWith("/") ? url : url + "/";
-        env.add(
-            new EnvVar(
-                    "JENKINS_JNLP_URL",
-                    url + kubernetesSlave.getComputer().getUrl() + "slave-agent.jnlp", null));
-
-        env.add(new EnvVar("HOME", KubernetesSlave.DEFAULT_REMOTE_FS, null));
-
-
         for (Container container: podToDeploy.getSpec().getContainers()) {
-            container.setEnv(env);
+
+            List<EnvVar> currentEnv = container.getEnv();
+            boolean found = false;
+            for (EnvVar var: currentEnv) {
+                if (var.getName().equals(JENKINS_URL) ) {
+                    found = true;
+                    break;
+                }
+            }
+            if ( !found) {
+                String url = JenkinsLocationConfiguration.get().getUrl();
+                currentEnv.add(new EnvVar(JENKINS_URL, url, null));
+            }
+
             container.setWorkingDir(KubernetesSlave.DEFAULT_REMOTE_FS);
+
             container.getArgs().add(kubernetesSlave.getComputer().getJnlpMac());
             container.getArgs().add(kubernetesSlave.getComputer().getName());
 
-            LOGGER.log(Level.INFO, "Added environment variables to container {0}", container.getName());
+            LOGGER.log(Level.INFO, "Added environment variables to container: " + container.getName() );
         }
 
     }
@@ -131,20 +125,17 @@ public class CreatePodFromPodConfiguration extends AbstractPodDeployment {
 
         final Label jobLabel = deploymentContext.getJobLabel();
         if (jobLabel != null) {
-            podLabels.put(ELASTICKUBE_COM_JENKINS_LABEL, jobLabel.getName());
+            podLabels.put(ELASTICKUBE_COM_JENKINS_LABEL, jobLabel.getName() );
 
-            LOGGER.log(Level.INFO,
-                "Label [" + ELASTICKUBE_COM_JENKINS_LABEL + "/" + jobLabel.getName() + "] added to Pod ");
+            LOGGER.info("JobLabel [" + ELASTICKUBE_COM_JENKINS_LABEL + " = " + jobLabel.getName() + "] added to Pod ");
         }
 
         final String podName = podToDeploy.getMetadata().getName();
         podLabels.put(ELASTICKUBE_COM_JENKINS_SLAVE, podName);
 
-        LOGGER.log(Level.INFO,
-            "Label [" + ELASTICKUBE_COM_JENKINS_SLAVE + "/" + podName + "] added to Pod ");
+        LOGGER.info("Label [" + ELASTICKUBE_COM_JENKINS_SLAVE + " = " + podName + "] added to Pod ");
 
         podToDeploy.getMetadata().setLabels(podLabels);
-
     }
 }
 

@@ -47,15 +47,15 @@ public class ReplicationControllerRepositoryApiImpl implements ReplicationContro
     public void delete(String kubeName, String namespace, ReplicationController replController)
             throws RepositoryException {
 
+        String replControllerName = replController.getMetadata().getName();
+
         if (LOGGER.isLoggable(Level.CONFIG) ) {
-            LOGGER.config("Deleting Replication Controller and associated Pods: "
-                    + replController.getMetadata().getName() );
+            LOGGER.config("Deleting Replication Controller and associated Pods: " + replControllerName);
         }
 
         final KubernetesClient client = kubeRepository.getClient(kubeName);
 
-        client.replicationControllers().inNamespace(namespace)
-                .withName(replController.getMetadata().getName() ).scale(0);
+        client.replicationControllers().inNamespace(namespace).withName(replControllerName).scale(0, true);
 
         client.replicationControllers().inNamespace(namespace).delete(replController);
     }

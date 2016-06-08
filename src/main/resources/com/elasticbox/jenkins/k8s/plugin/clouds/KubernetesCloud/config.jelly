@@ -6,7 +6,7 @@
         <f:readOnlyTextbox field="name" />
     </f:invisibleEntry>
 
-    <f:entry title="${%Description}" field="description">
+    <f:entry title="${%Description}" field="displayName">
         <f:textbox clazz="required" />
     </f:entry>
 

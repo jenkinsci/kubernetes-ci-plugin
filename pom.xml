@@ -139,11 +139,6 @@
       <version>1.28</version>
     </dependency>
     <dependency>
-      <groupId>org.jenkins-ci.plugins</groupId>
-      <artifactId>swarm</artifactId>
-      <version>2.0</version>
-    </dependency>
-    <dependency>
       <groupId>com.google.inject.extensions</groupId>
       <artifactId>guice-multibindings</artifactId>
       <version>4.0</version>
@@ -232,6 +227,7 @@
         <configuration>
           <forkCount>1C</forkCount>
           <skipTests>${skipTests}</skipTests>
+          <argLine>-Xmx1024m</argLine>
         </configuration>
       </plugin>
       <plugin>

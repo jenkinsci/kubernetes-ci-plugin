@@ -1,5 +1,10 @@
 package com.elasticbox.jenkins.k8s.cfg;
 
+import static com.elasticbox.jenkins.k8s.cfg.PluginInitializer.JENKINS_SERVICE_HOST;
+import static com.elasticbox.jenkins.k8s.cfg.PluginInitializer.JENKINS_SERVICE_PORT;
+import static com.elasticbox.jenkins.k8s.cfg.PluginInitializer.KUBERNETES_API_SERVER_ADDR;
+import static com.elasticbox.jenkins.k8s.cfg.PluginInitializer.KUBERNETES_API_SERVER_PORT;
+
 import com.cloudbees.plugins.credentials.SystemCredentialsProvider;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
@@ -25,8 +30,6 @@ public class TestDiscoverLocalKubernetesCloud {
 
     private static final String FAKE_IP = "FAKE_IP";
     private static final String FAKE_PORT = "FAKE_PORT";
-    private static final String KUBERNETES_PORT_443_TCP_ADDR = "KUBERNETES_PORT_443_TCP_ADDR";
-    private static final String KUBERNETES_PORT_443_TCP_PORT = "KUBERNETES_PORT_443_TCP_PORT";
 
     private static final String LOG_MESSAGE_NOT_FOUND = " <-- Log message not found";
 
@@ -43,8 +46,12 @@ public class TestDiscoverLocalKubernetesCloud {
     public static void initEnv() {
 
         final Map<String, String> newEnv = new HashMap<>();
-        newEnv.put(KUBERNETES_PORT_443_TCP_ADDR, FAKE_IP);
-        newEnv.put(KUBERNETES_PORT_443_TCP_PORT, FAKE_PORT);
+
+        newEnv.put(KUBERNETES_API_SERVER_ADDR, FAKE_IP);
+        newEnv.put(KUBERNETES_API_SERVER_PORT, FAKE_PORT);
+
+        newEnv.put(JENKINS_SERVICE_HOST, FAKE_IP);
+        newEnv.put(JENKINS_SERVICE_PORT, FAKE_PORT);
 
         TestUtils.setEnv(newEnv);
     }
@@ -52,7 +59,8 @@ public class TestDiscoverLocalKubernetesCloud {
     @AfterClass
     public static void restoreEnv() {
 
-        TestUtils.clearEnv(KUBERNETES_PORT_443_TCP_ADDR, KUBERNETES_PORT_443_TCP_PORT);
+        TestUtils.clearEnv(KUBERNETES_API_SERVER_ADDR, KUBERNETES_API_SERVER_PORT,
+                            JENKINS_SERVICE_HOST, JENKINS_SERVICE_PORT);
     }
 
     @Initializer(after = InitMilestone.EXTENSIONS_AUGMENTED)
@@ -83,6 +91,8 @@ public class TestDiscoverLocalKubernetesCloud {
         Assert.assertNotNull("Default pod slave configuration not included", cloud.getPodSlaveConfigurations() );
         Assert.assertEquals("Pod slave configuration list must have just one", cloud.getPodSlaveConfigurations().size(), 1);
         Assert.assertNotNull("Default pod slave configuration yaml not loaded", cloud.getPodSlaveConfigurations().get(0).getPodYaml() );
+        Assert.assertTrue("Jenkins addr. not injected in pod yaml.",
+                cloud.getPodSlaveConfigurations().get(0).getPodYaml().contains(FAKE_IP) );
 
         assertLoggedMessage("Kubernetes Cloud found!");
         assertLoggedMessage("Adding local Kubernetes Cloud configuration");

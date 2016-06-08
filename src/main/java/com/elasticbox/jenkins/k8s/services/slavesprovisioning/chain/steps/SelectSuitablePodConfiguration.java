@@ -10,7 +10,6 @@ import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.model.Label;
 import org.apache.commons.lang.ArrayUtils;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Singleton
@@ -25,13 +24,16 @@ public class SelectSuitablePodConfiguration extends AbstractPodDeployment {
     public void handle(PodDeploymentContext deploymentContext) throws ServiceException {
 
         final Label jobLabel = deploymentContext.getJobLabel();
+
         if (jobLabel == null) {
-            //default option
-            deploymentContext.setPodConfigurationChosen(deploymentContext.getAvailablePodConfigurations().get(0));
+            PodSlaveConfigurationParams podConfiguration = deploymentContext.getAvailablePodConfigurations().get(0);
+            LOGGER.config("No label provided, returning first available pod configuration: " + podConfiguration);
+            deploymentContext.setPodConfigurationChosen(podConfiguration);
             return;
         }
 
         for ( PodSlaveConfigurationParams config: deploymentContext.getAvailablePodConfigurations()) {
+            LOGGER.config("Looking for a slave configuration with label: " + jobLabel);
 
             final String [] labels = config.getLabels();
             if (ArrayUtils.contains(labels, jobLabel.getName())) {
@@ -42,13 +44,6 @@ public class SelectSuitablePodConfiguration extends AbstractPodDeployment {
         }
 
         //There is no pod configuration to handle this label
-        String message = "There is no Pod slave configuration to handle this label: " + jobLabel.getName();
-        LOGGER.log(Level.SEVERE, message);
-
-        throw new ServiceException(message);
-
+        LOGGER.config("There is no Pod slave configuration to handle this label: " + jobLabel.getName() );
     }
-
-
-
 }

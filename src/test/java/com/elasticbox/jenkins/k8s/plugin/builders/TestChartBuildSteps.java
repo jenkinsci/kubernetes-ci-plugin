@@ -110,7 +110,7 @@ public class TestChartBuildSteps extends TestBaseKubernetes {
     @Test
     public void testDeleteChartBS() throws RepositoryException, ServiceException, InterruptedException, IOException {
         final DeleteChartBuildStep deleteChartBuildStep =
-                new DeleteChartBuildStep(EMPTY, cloud.name, FAKE_CHARTS_REPO, FAKE_CHART_NAME);
+                new DeleteChartBuildStep(EMPTY, cloud.getName(), FAKE_CHARTS_REPO, FAKE_CHART_NAME);
 
         Assert.assertNotNull("Injection failed", deleteChartBuildStep.deploymentService);
 
@@ -151,7 +151,7 @@ public class TestChartBuildSteps extends TestBaseKubernetes {
 
         descriptor.chartRepository = chartRepositoryMock;
 
-        ListBoxModel items = descriptor.doFillCloudNameItems();
+        ListBoxModel items = descriptor.doFillKubeNameItems();
         Assert.assertEquals("Error filling cloud list items", 2, items.size() );
         Assert.assertTrue("Unique item not selected", items.get(1).selected);
 
@@ -159,7 +159,7 @@ public class TestChartBuildSteps extends TestBaseKubernetes {
         Assert.assertEquals("Error filling default charts repo list items", 1, items.size() );
         Assert.assertFalse("Invalid item selected", items.get(0).selected);
 
-        items = descriptor.doFillChartsRepoItems(cloud.name);
+        items = descriptor.doFillChartsRepoItems(cloud.getName());
         Assert.assertEquals("Error filling charts repo list items", 2, items.size() );
         Assert.assertTrue("Unique item not selected", items.get(1).selected);
 
@@ -167,7 +167,7 @@ public class TestChartBuildSteps extends TestBaseKubernetes {
         Assert.assertEquals("Error filling default chart names list items", 1, items.size() );
         Assert.assertFalse("Invalid item selected", items.get(0).selected);
 
-        items = descriptor.doFillChartNameItems(cloud.name, FAKE_CHARTS_REPO);
+        items = descriptor.doFillChartNameItems(cloud.getName(), FAKE_CHARTS_REPO);
         Assert.assertEquals("Error filling chart names list items", 2, items.size() );
         Assert.assertFalse("Invalid item selected", items.get(0).selected);
         Assert.assertFalse("Invalid item selected", items.get(1).selected);
@@ -176,7 +176,7 @@ public class TestChartBuildSteps extends TestBaseKubernetes {
     private DeployChartBuildStep getFakeDeployChartBuildStep(boolean alsoDeleteChart) {
 
         DeployChartBuildStep deployChartBuildStep =
-                new DeployChartBuildStep(EMPTY, cloud.name, FAKE_CHARTS_REPO, FAKE_CHART_NAME, alsoDeleteChart);
+                new DeployChartBuildStep(EMPTY, cloud.getName(), FAKE_CHARTS_REPO, FAKE_CHART_NAME, alsoDeleteChart);
 
         Assert.assertNotNull("Injection failed", deployChartBuildStep.deploymentService);
         deployChartBuildStep.deploymentService = chartDeploymentServiceMock;

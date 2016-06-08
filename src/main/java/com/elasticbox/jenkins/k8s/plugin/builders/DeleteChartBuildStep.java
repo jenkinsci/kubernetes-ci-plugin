@@ -25,10 +25,10 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     private static final String KUBERNETES_DELETE_CHART = "Kubernetes - Delete Chart";
 
     @DataBoundConstructor
-    public DeleteChartBuildStep(String id, String cloudName, String chartsRepo, String chartName) {
+    public DeleteChartBuildStep(String id, String kubeName, String chartsRepo, String chartName) {
         super();
         this.id = StringUtils.isNotEmpty(id)  ? id : NAME_PREFIX + UUID.randomUUID().toString();
-        this.cloudName = cloudName;
+        this.kubeName = kubeName;
         this.chartsRepo = chartsRepo;
         this.chartName = chartName;
         injectMembers();
@@ -39,7 +39,7 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
         throws ServiceException {
 
         taskLogger.info("Deleting chart: " + getChartName());
-        deploymentService.deleteChart(getCloudName(), kubeCloud.getNamespace(), chartRepo, getChartName() );
+        deploymentService.deleteChart(getKubeName(), kubeCloud.getNamespace(), chartRepo, getChartName() );
         taskLogger.info("Chart [" + getChartName() + "] deleted");
     }
 
