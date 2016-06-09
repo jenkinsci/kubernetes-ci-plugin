@@ -27,6 +27,7 @@
     -->
     <maven-compiler-plugin.version>2.3.2</maven-compiler-plugin.version>
     <java.version>1.7</java.version>
+    <maven.javadoc.skip>true</maven.javadoc.skip>
     <skipTests>false</skipTests>
     <findbugs.skip>true</findbugs.skip>
     <hamcrest.version>1.3</hamcrest.version>
