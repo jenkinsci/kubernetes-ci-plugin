@@ -1,1 +1,1 @@
-# jenkins-plugin-kubernetes
+# kubernetes-ci-plugin
