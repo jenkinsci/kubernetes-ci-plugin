@@ -35,6 +35,7 @@ import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -127,7 +128,7 @@ public class TestSlaveProvisioning {
 
         final KubernetesCloud mockKubernetesCloud = Mockito.mock(KubernetesCloud.class);
         when(mockKubernetesCloud.getInstanceCap()).thenReturn(10);
-        when(mockKubernetesCloud.getDisplayName()).thenReturn("FakeCloudName");
+        when(mockKubernetesCloud.getName()).thenReturn("FakeName");
         when(mockKubernetesCloud.getNamespace()).thenReturn("FakeNamespace");
 
         final String podYamlDefault = getPodYamlDefault();
@@ -155,10 +156,10 @@ public class TestSlaveProvisioning {
         }
 
         final SlaveProvisioningService slaveProvisioningService = injector.getInstance(SlaveProvisioningService.class);
-        slaveProvisioningService.slaveProvision(mockKubernetesCloud, podSlaveConfigurationParams, null);
+        KubernetesSlave kubernetesSlave = slaveProvisioningService.slaveProvision(mockKubernetesCloud, podSlaveConfigurationParams, null);
 
-
-
+        Assert.assertNotNull("Slave is null.", kubernetesSlave);
+        Assert.assertEquals("Node not added to Jenkins.", jenkins.getInstance().getNodes().size(), 1);
     }
 
 

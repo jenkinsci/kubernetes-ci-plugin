@@ -8,13 +8,11 @@ import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.AbstractPodD
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeploymentContext;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import com.elasticbox.jenkins.k8s.services.task.ScheduledPoolingTask;
 import com.elasticbox.jenkins.k8s.services.task.TaskException;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.client.KubernetesClient;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,9 +25,26 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
     @Inject
     private PodRepository podRepository;
 
-    private static final long DELAY_SECONDS = 1;
-    private static final long INITIAL_DELAY = 1;
-    private static final long TIMEOUT = 60;
+    private static final long DELAY_IN_SECONDS = 1;
+    private static final long INITIAL_DELAY_IN_SECONDS = 1;
+    private static final long TIMEOUT_IN_SECONDS = 60;
+
+    private long initialDelay;
+    private long delay;
+    private long timeout;
+
+    public WaitForPodToBeRunning() {
+        this(INITIAL_DELAY_IN_SECONDS, DELAY_IN_SECONDS, TIMEOUT_IN_SECONDS);
+    }
+
+    /**
+     * Only for testing purposes for now.
+     */
+    public WaitForPodToBeRunning(long initialDelay, long delay, long timeout) {
+        this.initialDelay = initialDelay;
+        this.delay = delay;
+        this.timeout = timeout;
+    }
 
     /**
      * Its mission is wait for the Pod to be running until the specified timeout.
@@ -41,17 +56,16 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
 
         final KubernetesCloud cloudToDeployInto = deploymentContext.getCloudToDeployInto();
 
-        final String namespace = cloudToDeployInto.getNamespace();
-
         try {
 
             new WaitForThePodToBeRunningTask(
                 podRepository,
-                cloudToDeployInto.getDisplayName(),
-                namespace,
+                cloudToDeployInto.getName(),
+                cloudToDeployInto.getNamespace(),
                 podName,
-                DELAY_SECONDS, INITIAL_DELAY,
-                TIMEOUT).execute();
+                delay,
+                initialDelay,
+                timeout).execute();
 
             LOGGER.log(Level.INFO, "Pod is up and running");
 
@@ -97,13 +111,13 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
 
     private static class WaitForThePodToBeRunningTask extends ScheduledPoolingTask<PodState> {
 
-        private String cloudName;
+        private String kubeName;
         private String namespace;
         private String podName;
         private PodRepository podRepository;
 
         public WaitForThePodToBeRunningTask(PodRepository podRepository,
-                                            String cloudName,
+                                            String kubeName,
                                             String namespace,
                                             String podName,
                                             long delay,
@@ -113,7 +127,7 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
             super(delay, initialDelay, timeout);
 
             this.podRepository = podRepository;
-            this.cloudName = cloudName;
+            this.kubeName = kubeName;
             this.podName = podName;
             this.namespace = namespace;
             this.result = PodState.UNKNOWN;
@@ -123,7 +137,7 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
         protected void performExecute() throws TaskException {
 
             try {
-                final Pod pod = podRepository.getPod(cloudName, namespace, podName);
+                final Pod pod = podRepository.getPod(kubeName, namespace, podName);
 
                 final String phase = pod.getStatus().getPhase();
 
@@ -143,7 +157,7 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
 
             } catch (RepositoryException exception) {
                 String message =
-                    "Error getting pod in cloud: " + cloudName + " in namespace: " + namespace + " and pod name : "
+                    "Error getting pod in cloud: " + kubeName + " in namespace: " + namespace + " and pod name : "
                         + podName;
                 LOGGER.log(
                     Level.SEVERE,

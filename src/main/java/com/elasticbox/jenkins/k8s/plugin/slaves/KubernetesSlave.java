@@ -29,17 +29,11 @@ public class KubernetesSlave extends AbstractCloudSlave {
     private static final int IDLE_MINUTES = 1;
     private static final int EXECUTORS = 1;
 
-    /**
-     * The resource bundle reference.
-     */
-    private static final ResourceBundleHolder HOLDER = ResourceBundleHolder.get(Messages.class);
-
     private static final Logger LOGGER = Logger.getLogger(KubernetesSlave.class.getName());
 
     private static final long serialVersionUID = -8642936855413034232L;
 
     private final transient KubernetesCloud kubernetesCloud;
-
     private final transient PodRepository podRepository;
 
     public KubernetesSlave(String podName, PodRepository podRepository, KubernetesCloud kubernetesCloud, Label label)
@@ -68,30 +62,25 @@ public class KubernetesSlave extends AbstractCloudSlave {
         if (computer != null && computer.isOnline() ) {
 
             try {
-                computer.disconnect(OfflineCause.create(new Localizable(HOLDER, "offline")));
-                LOGGER.info("Disconnected computer: " + computer.getName() );
+                podRepository.delete(kubernetesCloud.getName(), kubernetesCloud.getNamespace(), name);
 
-                podRepository.delete(kubernetesCloud.name, kubernetesCloud.getNamespace(), name);
-                LOGGER.info("Terminated Kubernetes instance for slave: " + name);
-
+                if (LOGGER.isLoggable(Level.FINE) ) {
+                    LOGGER.fine("Terminated Kubernetes instance for slave: " + name);
+                }
                 return;
 
-            } catch (Exception e) {
-
-                LOGGER.log(Level.SEVERE, "Failure to terminate instance for slave: " + name, e);
+            } catch (Exception exception) {
+                LOGGER.log(Level.SEVERE, "Failure to terminate instance for slave: " + name, exception);
             }
         }
 
         LOGGER.warning("There is no computer for slave: " + name);
-
-
     }
 
     @Override
     public KubernetesComputer createComputer() {
         return new KubernetesComputer(this);
     }
-
 
     @Override
     public String toString() {

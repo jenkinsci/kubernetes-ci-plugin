@@ -16,7 +16,6 @@ public class SingleUseRetentionStrategy extends CloudRetentionStrategy implement
 
     private static final Logger LOGGER = Logger.getLogger(SingleUseRetentionStrategy.class.getName());
 
-
     public SingleUseRetentionStrategy(int idleMinutes) {
         super(idleMinutes);
     }
@@ -29,24 +28,21 @@ public class SingleUseRetentionStrategy extends CloudRetentionStrategy implement
     @Override
     public void taskCompleted(Executor executor, Queue.Task task, long duration) {
 
-        LOGGER.fine("Completed task: " + task.getName() + " in: " + duration + " ms");
-
-        terminate((AbstractCloudComputer<?>) executor.getOwner());
+        LOGGER.info("Completed task: " + task.getName() + " in: " + duration + " ms");
+        terminate( (AbstractCloudComputer<?>) executor.getOwner() );
     }
 
     @Override
     public void taskCompletedWithProblems(Executor executor, Queue.Task task, long duration, Throwable problems) {
 
-        LOGGER.fine("Task completed with problems: " + task.getName() + " in: " + duration + " ms");
-
+        LOGGER.info("Task completed with problems: " + task.getName() + " in: " + duration + " ms");
         terminate((AbstractCloudComputer<?>) executor.getOwner());
     }
 
 
     private void terminate(final AbstractCloudComputer<?> computer) {
 
-        LOGGER.log(Level.INFO, "Terminating computer: " + computer.getName());
-
+        LOGGER.info("Terminating computer: " + computer.getName() );
         computer.setAcceptingTasks(false); // just in case
 
         Computer.threadPoolForRemoting.submit(new Runnable() {

@@ -6,7 +6,7 @@
         <f:textbox field="id"/>
     </f:invisibleEntry>
 
-    <f:entry title="${%Cloud}" field="cloudName">
+    <f:entry title="${%Cloud}" field="kubeName">
         <f:select clazz="required" />
     </f:entry>
 

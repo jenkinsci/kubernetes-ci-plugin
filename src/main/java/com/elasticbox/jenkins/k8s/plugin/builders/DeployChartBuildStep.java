@@ -34,11 +34,11 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
     private final boolean deleteChartWhenFinished;
 
     @DataBoundConstructor
-    public DeployChartBuildStep(String id, String cloudName, String chartsRepo, String chartName,
+    public DeployChartBuildStep(String id, String kubeName, String chartsRepo, String chartName,
                                 boolean deleteChartWhenFinished) {
         super();
         this.id = StringUtils.isNotEmpty(id)  ? id : NAME_PREFIX + UUID.randomUUID().toString();
-        this.cloudName = cloudName;
+        this.kubeName = kubeName;
         this.chartsRepo = chartsRepo;
         this.chartName = chartName;
         this.deleteChartWhenFinished = deleteChartWhenFinished;
@@ -61,7 +61,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
         Map<String, String> label = Collections.singletonMap(JENKINS_JOB,
             StringUtils.deleteWhitespace(runName).replace('#', '_') );
 
-        final Chart chart = deploymentService.deployChart(getCloudName(), namespace, chartRepo, chartName, label);
+        final Chart chart = deploymentService.deployChart(getKubeName(), namespace, chartRepo, chartName, label);
         taskLogger.info("Chart [" + chartName + "] deployed");
 
         if (deleteChartWhenFinished && run instanceof FreeStyleBuild) {
@@ -97,7 +97,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
             }
 
             try {
-                deployer.deploymentService.deleteChart(deployer.cloudName, namespace, chart);
+                deployer.deploymentService.deleteChart(deployer.getKubeName(), namespace, chart);
                 taskLogger.info("Chart [" + chart.getName() + "] successfully removed");
 
             } catch (ServiceException excep) {

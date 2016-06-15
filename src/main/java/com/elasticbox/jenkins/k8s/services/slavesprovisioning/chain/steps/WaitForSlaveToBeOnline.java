@@ -18,9 +18,26 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
 
     private static final Logger LOGGER = Logger.getLogger(WaitForSlaveToBeOnline.class.getName());
 
-    private static final long DELAY_SECONDS = 1;
-    private static final long INITIAL_DELAY = 0;
-    private static final long TIMEOUT = 60;
+    private static final long DELAY_IN_SECONDS = 1;
+    private static final long INITIAL_DELAY_IN_SECONDS = 0;
+    private static final long TIMEOUT_IN_SECONDS = 60;
+
+    private long initialDelay;
+    private long delay;
+    private long timeout;
+
+    public WaitForSlaveToBeOnline() {
+        this(INITIAL_DELAY_IN_SECONDS, DELAY_IN_SECONDS, TIMEOUT_IN_SECONDS);
+    }
+
+    /**
+     * Only for testing purposes for now.
+     */
+    public WaitForSlaveToBeOnline(long initialDelay, long delay, long timeout) {
+        this.initialDelay = initialDelay;
+        this.delay = delay;
+        this.timeout = timeout;
+    }
 
 
     /**
@@ -33,7 +50,7 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
 
             final KubernetesSlave kubernetesSlave = deploymentContext.getKubernetesSlave();
 
-            new WaitForTheSlaveToBeOnlineTask(kubernetesSlave, DELAY_SECONDS, INITIAL_DELAY, TIMEOUT).execute();
+            new WaitForTheSlaveToBeOnlineTask(kubernetesSlave, delay, initialDelay, timeout).execute();
 
             LOGGER.log(Level.INFO, "Jenkins slave: " + kubernetesSlave.getNodeName() + " is online");
 

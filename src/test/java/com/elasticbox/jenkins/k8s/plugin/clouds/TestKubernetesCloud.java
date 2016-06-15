@@ -28,12 +28,12 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
         final List<KubernetesCloud> kubernetesClouds = KubernetesCloud.getKubernetesClouds();
         Assert.assertEquals("Kubernetes clouds not found.", 1, kubernetesClouds.size() );
 
-        final KubernetesCloud kubernetesCloud = KubernetesCloud.getKubernetesCloud(cloud.name);
+        final KubernetesCloud kubernetesCloud = KubernetesCloud.getKubernetesCloud(cloud.getName() );
         Assert.assertNotNull("Kubernetes clouds not found", kubernetesCloud);
         Assert.assertNotNull("Injection failed", kubernetesCloud.kubeFactory);
 
-        Assert.assertEquals(cloud.getDescription(), kubernetesCloud.getDescription() );
-        Assert.assertEquals(cloud.name, kubernetesCloud.name);
+        Assert.assertEquals(cloud.getDisplayName(), kubernetesCloud.getDisplayName() );
+        Assert.assertEquals(cloud.getName(), kubernetesCloud.getName() );
         Assert.assertEquals(FAKE_URL, kubernetesCloud.getEndpointUrl() );
     }
 

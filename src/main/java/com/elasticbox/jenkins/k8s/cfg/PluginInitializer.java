@@ -19,12 +19,14 @@ import hudson.init.InitMilestone;
 import hudson.init.Initializer;
 import hudson.util.Secret;
 import jenkins.model.Jenkins;
+import jenkins.model.JenkinsLocationConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,6 +40,12 @@ public class PluginInitializer {
     private static final String DEFAULT_HELM_CHART_REPO_URL = "https://github.com/helm/charts";
 
     public static final String LOCAL_CLOUD_NAME = NAME_PREFIX + "Local";
+
+    public static final String KUBERNETES_API_SERVER_ADDR = "KUBERNETES_PORT_443_TCP_ADDR";
+    public static final String KUBERNETES_API_SERVER_PORT = "KUBERNETES_PORT_443_TCP_PORT";
+    public static final String JENKINS_SERVICE_HOST = "JENKINS_SERVICE_HOST";
+    public static final String JENKINS_SERVICE_PORT = "JENKINS_SERVICE_PORT";
+
     private static final String DEFAULT_JENKINS_SLAVE_POD_YAML = "default-jenkins-slave-pod.yaml";
     private static final String KUBE_SERVICE_TOKEN_ID = "KubeServiceToken";
 
@@ -50,8 +58,8 @@ public class PluginInitializer {
 
         LOGGER.info(NAME_PREFIX + "Checking if running inside a Kubernetes Cloud (Auto-discovery)...");
 
-        final String kubernetesAddr = System.getenv("KUBERNETES_PORT_443_TCP_ADDR");
-        final String kubernetesAddrPort = System.getenv("KUBERNETES_PORT_443_TCP_PORT");
+        final String kubernetesAddr = System.getenv(KUBERNETES_API_SERVER_ADDR);
+        final String kubernetesAddrPort = System.getenv(KUBERNETES_API_SERVER_PORT);
 
         if (PluginHelper.anyOfThemIsBlank(kubernetesAddr, kubernetesAddrPort)) {
             LOGGER.info(NAME_PREFIX + "Not running inside a Kubernetes Cloud.");
@@ -64,7 +72,12 @@ public class PluginInitializer {
                 + "Kubernetes Cloud found! Checking if local Kubernetes cloud is configured at: "
                 + kubernetesUri);
 
-        if (Jenkins.getInstance().getCloud(LOCAL_CLOUD_NAME) != null) {
+        final Jenkins jenkins = Jenkins.getInstance();
+        if (jenkins == null) {
+            return;
+        }
+
+        if (jenkins.getCloud(LOCAL_CLOUD_NAME) != null) {
             LOGGER.info(NAME_PREFIX + "Local Kubernetes Cloud already configured.");
             return;
         }
@@ -90,10 +103,14 @@ public class PluginInitializer {
 
             LOGGER.info(NAME_PREFIX + "Adding local Kubernetes Cloud configuration: " + cloud);
 
-            Jenkins.getInstance().clouds.add(cloud);
+            jenkins.clouds.add(cloud);
+            jenkins.setNumExecutors(0);
 
         } catch (RepositoryException exception) {
             LOGGER.log(Level.SEVERE, NAME_PREFIX + exception.getCausedByMessages(), exception);
+
+        } catch (IOException excep) {
+            LOGGER.log(Level.SEVERE, NAME_PREFIX + "Error setting number of executors in master to 0.", excep);
         }
     }
 
@@ -122,12 +139,20 @@ public class PluginInitializer {
         final InputStream yamlStream =
                 PodSlaveConfig.class.getResourceAsStream("PodSlaveConfig/" + DEFAULT_JENKINS_SLAVE_POD_YAML);
 
-        final String yamlString;
+        String yamlString;
         try {
             yamlString = IOUtils.toString(yamlStream);
         } catch (IOException exception) {
             LOGGER.severe(NAME_PREFIX + exception);
             return null;
+        }
+
+        final String jenkinsServiceHost = System.getenv(JENKINS_SERVICE_HOST);
+        final String jenkinsServicePort = System.getenv(JENKINS_SERVICE_PORT);
+
+        if (jenkinsServiceHost != null && jenkinsServicePort != null) {
+            yamlString =
+                    yamlString.replace("${JENKINS_URL}", "http://" + jenkinsServiceHost + ':' + jenkinsServicePort);
         }
 
         if (LOGGER.isLoggable(Level.CONFIG) ) {

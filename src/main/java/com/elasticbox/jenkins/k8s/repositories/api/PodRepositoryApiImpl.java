@@ -83,9 +83,9 @@ public class PodRepositoryApiImpl implements PodRepository {
     }
 
     @Override
-    public List<Pod> getAllPods(String cloudName, String deploymentNamespace) throws RepositoryException {
+    public List<Pod> getAllPods(String kubeName, String deploymentNamespace) throws RepositoryException {
 
-        final KubernetesClient kubernetesClient = kubeRepository.getClient(cloudName);
+        final KubernetesClient kubernetesClient = kubeRepository.getClient(kubeName);
 
         PodList list = kubernetesClient.pods().inNamespace(deploymentNamespace).list();
 
@@ -93,9 +93,9 @@ public class PodRepositoryApiImpl implements PodRepository {
     }
 
     @Override
-    public Pod getPod(String cloudName, String namespace, String podName) throws RepositoryException {
+    public Pod getPod(String kubeName, String namespace, String podName) throws RepositoryException {
 
-        final KubernetesClient kubernetesClient = kubeRepository.getClient(cloudName);
+        final KubernetesClient kubernetesClient = kubeRepository.getClient(kubeName);
 
         final Pod pod = kubernetesClient.pods().inNamespace(namespace).withName(podName).get();
 

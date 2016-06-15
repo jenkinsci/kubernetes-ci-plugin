@@ -39,14 +39,14 @@ public class PodDeployer extends AbstractPodDeployment {
 
         try {
 
-            podRepository.create(cloudToDeployInto.name, deploymentNamespace, podToDeploy);
+            podRepository.create(cloudToDeployInto.getName(), deploymentNamespace, podToDeploy);
 
             String podName = podToDeploy.getMetadata().getName();
 
             LOGGER.log(Level.INFO, "Pod: " + podName + " created");
 
         } catch (RepositoryException exception) {
-            String message = "Error getting the Kubernetes client for the cloud " + cloudToDeployInto.name;
+            String message = "Error getting the Kubernetes client for the cloud " + cloudToDeployInto.getName() ;
             LOGGER.log(Level.SEVERE, message);
             throw new ServiceException(message, exception);
         }

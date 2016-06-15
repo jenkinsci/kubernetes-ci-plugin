@@ -26,12 +26,6 @@ public class SlaveProvisioningServiceImpl implements SlaveProvisioningService {
     private static final Logger LOGGER = Logger.getLogger(SlaveProvisioningServiceImpl.class.getName());
 
     @Inject
-    private PodRepository podRepository;
-
-    @Inject
-    private KubernetesRepository kubernetesRepository;
-
-    @Inject
     private Set<SlaveProvisioningStep> podCreationChainHandlers;
 
     @Inject
@@ -56,19 +50,14 @@ public class SlaveProvisioningServiceImpl implements SlaveProvisioningService {
             }
 
             final KubernetesSlave kubernetesSlave = deploymentContext.getKubernetesSlave();
-
-            LOGGER.log(Level.INFO, "The pod is running and the slave is online, provision done");
-
+            LOGGER.log(Level.INFO, "Provision done. The pod is running and the slave is online: " + kubernetesSlave);
             return kubernetesSlave;
 
         } catch (ServiceException exception) {
 
             LOGGER.log(Level.SEVERE, "Error provisioning Pod Jenkins slave ", exception);
-
             throw exception;
         }
-
-
     }
 
     @Override
@@ -84,11 +73,8 @@ public class SlaveProvisioningServiceImpl implements SlaveProvisioningService {
                 .withNamespace(kubernetesCloud.getNamespace())
                 .build();
 
-
         this.selectSuitablePodConfiguration.handle(deploymentContext);
 
         return deploymentContext.getPodConfigurationChosen() != null;
     }
-
-
 }

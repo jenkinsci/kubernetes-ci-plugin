@@ -14,7 +14,7 @@
   <builders>
     <com.elasticbox.jenkins.k8s.plugin.builders.DeployChartBuildStep plugin="jenkins-plugin-kubernetes@1.0-SNAPSHOT">
       <id>FakeDeployChartBS</id>
-      <cloudName>FakeKubeCloudName</cloudName>
+      <kubeName>FakeKubeCloudName</kubeName>
       <chartsRepo>FakeChartsRepo</chartsRepo>
       <chartName>FakeChartName</chartName>
     </com.elasticbox.jenkins.k8s.plugin.builders.DeployChartBuildStep>

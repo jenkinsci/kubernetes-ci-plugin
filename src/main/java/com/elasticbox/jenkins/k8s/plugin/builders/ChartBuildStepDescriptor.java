@@ -57,30 +57,30 @@ public abstract class ChartBuildStepDescriptor extends BuildStepDescriptor<Build
     }
 
 
-    public ListBoxModel doFillCloudNameItems() {
+    public ListBoxModel doFillKubeNameItems() {
         List<KubernetesCloud> cloudList = KubernetesCloud.getKubernetesClouds();
 
         ListBoxModel items = new ListBoxModel(PluginHelper.OPTION_CHOOSE_CLOUD);
         if (cloudList != null && cloudList.size() == 1) {
             final KubernetesCloud cloud = cloudList.get(0);
-            items.add(new ListBoxModel.Option(cloud.getDisplayName(), cloud.name, true) );
+            items.add(new ListBoxModel.Option(cloud.getDisplayName(), cloud.getName(), true) );
 
         } else {
             for (KubernetesCloud cloud : cloudList) {
-                items.add(cloud.getDisplayName(), cloud.name);
+                items.add(cloud.getDisplayName(), cloud.getName() );
             }
         }
         return items;
     }
 
-    public ListBoxModel doFillChartsRepoItems(@QueryParameter String cloudName) {
+    public ListBoxModel doFillChartsRepoItems(@QueryParameter String kubeName) {
         ListBoxModel items =  new ListBoxModel(PluginHelper.OPTION_CHOOSE_CHART_REPO_CONFIG);
 
-        if (cloudName == null) {
+        if (kubeName == null) {
             return items;
         }
 
-        KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(cloudName);
+        KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(kubeName);
         if (kubeCloud == null) {
             return items;
         }
@@ -102,9 +102,9 @@ public abstract class ChartBuildStepDescriptor extends BuildStepDescriptor<Build
         return items;
     }
 
-    public ListBoxModel doFillChartNameItems(@QueryParameter String cloudName, @QueryParameter String chartsRepo) {
-        if (cloudName != null && chartsRepo != null) {
-            KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(cloudName);
+    public ListBoxModel doFillChartNameItems(@QueryParameter String kubeName, @QueryParameter String chartsRepo) {
+        if (kubeName != null && chartsRepo != null) {
+            KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(kubeName);
             if (kubeCloud != null) {
                 ChartRepositoryConfig config = kubeCloud.getChartRepositoryConfiguration(chartsRepo);
 
