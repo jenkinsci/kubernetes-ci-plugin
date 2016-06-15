@@ -11,7 +11,7 @@
   </parent>
 
   <groupId>com.elasticbox.jenkins-ci.plugins</groupId>
-  <artifactId>jenkins-plugin-kubernetes</artifactId>
+  <artifactId>kubernetes-ci</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
@@ -37,19 +37,21 @@
     <checkstyle.plugin.version>2.16</checkstyle.plugin.version>
   </properties>
 
-  <name>ElasticBox Kubernetes Jenkins CI Plug-in</name>
+  <name>ElasticBox Jenkins Kubernetes CI/CD Plug-in</name>
   <description>
-    TODO. Provides full integration between Jenkins and Kubernetes.
+    Provides integration between Jenkins and Kubernetes for CI/CD scenarios based on charts
   </description>
   <url>https://wiki.jenkins-ci.org/display/JENKINS/TODO+Plugin</url>
-
-  <!-- The default licence for Jenkins OSS Plugins is MIT. Substitute for the applicable one if needed. -->
 
   <licenses>
     <license>
       <name>MIT License</name>
       <url>http://opensource.org/licenses/MIT</url>
     </license>
+    <license>
+      <name>Apache Software License, Version 2.0</name>
+      <url> http://www.apache.org/licenses/LICENSE-2.0</url>
+  </license>
   </licenses>
 
   <developers>
