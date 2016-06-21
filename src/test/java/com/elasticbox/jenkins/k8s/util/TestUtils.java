@@ -1,3 +1,11 @@
+/*
+ * Copyright 2016 ElasticBox
+ *
+ * Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or http://apache.org/licenses/LICENSE-2.0>
+ * or the MIT license <LICENSE-MIT or http://opensource.org/licenses/MIT> , at your option.
+ * This file may not be copied, modified, or distributed except according to those terms.
+ */
+
 package com.elasticbox.jenkins.k8s.util;
 
 import static org.mockito.Matchers.any;
@@ -106,14 +114,9 @@ public final class TestUtils {
     }
 
     public static GitHubClientsFactory getGitHubClientsFactoryMock() throws IOException, RepositoryException {
-        final String chart = IOUtils.toString(new FileInputStream(new File
-                ("src/test/resources/chartYaml.yaml")));
-
-        final String service = IOUtils.toString(new FileInputStream(new File
-                ("src/test/resources/serviceChartManifest.yaml")));
-
-        final String rc = IOUtils.toString(new FileInputStream(new File
-                ("src/test/resources/replicationControllerChartManifest.yaml")));
+        final String chart = IOUtils.toString(TestUtils.class.getResourceAsStream("chartYaml.yaml") );
+        final String service = IOUtils.toString(TestUtils.class.getResourceAsStream("serviceChartManifest.yaml") );
+        final String rc = IOUtils.toString(TestUtils.class.getResourceAsStream("replicationControllerChartManifest.yaml") );
 
         // fake content of: https://api.github.com/repositories/44991456/contents/rabbitmq
         final List<GitHubContent> rootChartContent = Arrays.asList(

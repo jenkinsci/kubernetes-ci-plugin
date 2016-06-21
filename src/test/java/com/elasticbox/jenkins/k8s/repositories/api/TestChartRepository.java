@@ -1,3 +1,11 @@
+/*
+ * Copyright 2016 ElasticBox
+ *
+ * Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or http://apache.org/licenses/LICENSE-2.0>
+ * or the MIT license <LICENSE-MIT or http://opensource.org/licenses/MIT> , at your option.
+ * This file may not be copied, modified, or distributed except according to those terms.
+ */
+
 package com.elasticbox.jenkins.k8s.repositories.api;
 
 import static org.junit.Assert.assertTrue;
@@ -78,16 +86,13 @@ public class TestChartRepository {
         final List<Container> containerList = Arrays.asList(container);
 
         assertTrue(rcModel.getSpec().getTemplate().getSpec().getContainers().equals(containerList));
-
     }
-
-
 
     @Test
     public void testGetChartFromRepoRequiringUserAndPassword() throws IOException, RepositoryException,
         InterruptedException {
 
-        final String rootChartsRepoContent = IOUtils.toString(new FileInputStream(new File("src/test/resources/rootChartsRepoContent.json")));
+        final String rootChartsRepoContent = IOUtils.toString(this.getClass().getResourceAsStream("rootChartsRepoContent.json") );
 
         MockWebServer server = new MockWebServer();
         server.start(9999);
@@ -108,15 +113,13 @@ public class TestChartRepository {
         assertTrue("Basic dXNlcjpwYXNzd29yZA==".equals(recordedRequest.getHeader("Authorization")));
 
         server.shutdown();
-
     }
 
     @Test
     public void testGetChartFromRepoRequiringToken() throws IOException, RepositoryException,
         InterruptedException {
 
-        final String rootChartsRepoContent = IOUtils.toString(new FileInputStream(new File
-            ("src/test/resources/rootChartsRepoContent.json")));
+        final String rootChartsRepoContent = IOUtils.toString(this.getClass().getResourceAsStream("rootChartsRepoContent.json") );
 
         MockWebServer server = new MockWebServer();
         server.start(9999);
@@ -137,8 +140,6 @@ public class TestChartRepository {
         assertTrue("token fakeToken".equals(recordedRequest.getHeader("Authorization")));
 
         server.shutdown();
-
     }
-
 
 }

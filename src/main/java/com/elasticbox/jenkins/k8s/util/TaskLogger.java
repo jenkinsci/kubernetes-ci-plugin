@@ -1,13 +1,9 @@
 /*
- * ElasticBox Confidential
- * Copyright (c) 2014 All Right Reserved, ElasticBox Inc.
+ * Copyright 2016 ElasticBox
  *
- * NOTICE:  All information contained herein is, and remains the property
- * of ElasticBox. The intellectual and technical concepts contained herein are
- * proprietary and may be covered by U.S. and Foreign Patents, patents in process,
- * and are protected by trade secret or copyright law. Dissemination of this
- * information or reproduction of this material is strictly forbidden unless prior
- * written permission is obtained from ElasticBox.
+ * Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or http://apache.org/licenses/LICENSE-2.0>
+ * or the MIT license <LICENSE-MIT or http://opensource.org/licenses/MIT> , at your option.
+ * This file may not be copied, modified, or distributed except according to those terms.
  */
 
 package com.elasticbox.jenkins.k8s.util;
