@@ -42,7 +42,7 @@
   <description>
     Provides integration between Jenkins and Kubernetes for CI/CD scenarios based on charts
   </description>
-  <url>https://wiki.jenkins-ci.org/display/JENKINS/TODO+Plugin</url>
+  <url>https://wiki.jenkins-ci.org/display/JENKINS/Kubernetes+CI+Plugin</url>
 
   <licenses>
     <license>
@@ -68,13 +68,12 @@
     </developer>
   </developers>
 
-  <!-- Assuming you want to host on @jenkinsci: TODO
   <scm>
     <connection>scm:git:git://github.com/jenkinsci/${project.artifactId}-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
     <url>http://github.com/jenkinsci/${project.artifactId}-plugin</url>
   </scm>
-   -->
+
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
