@@ -1,9 +1,16 @@
+/*
+ * Copyright 2016 ElasticBox
+ *
+ * Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or http://apache.org/licenses/LICENSE-2.0>
+ * or the MIT license <LICENSE-MIT or http://opensource.org/licenses/MIT> , at your option.
+ * This file may not be copied, modified, or distributed except according to those terms.
+ */
+
 package com.elasticbox.jenkins.k8s.services;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.plugin.clouds.PodSlaveConfig;
 import com.elasticbox.jenkins.k8s.plugin.clouds.PodSlaveConfigurationParams;
-import com.elasticbox.jenkins.k8s.plugin.slaves.KubernetesComputer;
 import com.elasticbox.jenkins.k8s.plugin.slaves.KubernetesSlave;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
@@ -24,7 +31,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
-import hudson.model.Descriptor;
 import hudson.model.Label;
 import hudson.model.labels.LabelOperatorPrecedence;
 import hudson.model.labels.LabelVisitor;
@@ -32,7 +38,6 @@ import hudson.slaves.SlaveComputer;
 import hudson.util.VariableResolver;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
-import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -46,7 +51,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.modules.junit4.rule.PowerMockRule;
 
 import java.io.File;
 import java.io.FileInputStream;
