@@ -55,7 +55,7 @@ public class CheckProvisioningAllowed extends AbstractPodDeployment {
 
         String deploymentNamespace = StringUtils.isNotBlank(deploymentContext.getDeploymentNamespace())
             ? deploymentContext.getDeploymentNamespace()
-            : cloudToDeployInto.getNamespace();
+            : cloudToDeployInto.getPredefinedNamespace();
 
         try {
 

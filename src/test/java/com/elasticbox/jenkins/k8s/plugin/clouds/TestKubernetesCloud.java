@@ -66,7 +66,7 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
         Assert.assertNotNull("Injection failed", cloudDescriptor.getInjector() );
 
         // First attempts with fake data will fail (expect some errors in logs)
-        ListBoxModel namespaceItems = cloudDescriptor.doFillNamespaceItems(FAKE_URL, EMPTY, EMPTY);
+        ListBoxModel namespaceItems = cloudDescriptor.doFillPredefinedNamespaceItems(FAKE_URL, EMPTY, EMPTY);
         Assert.assertEquals("Error filling default namespace list items", 1, namespaceItems.size() );
 
         FormValidation formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, EMPTY);
@@ -80,7 +80,7 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
         initMock();
         cloudDescriptor.kubeRepository = kubernetesRepositoryMock;
 
-        namespaceItems = cloudDescriptor.doFillNamespaceItems(FAKE_URL, EMPTY, EMPTY);
+        namespaceItems = cloudDescriptor.doFillPredefinedNamespaceItems(FAKE_URL, EMPTY, EMPTY);
         Assert.assertEquals("Error filling namespace list with 3 items", 3, namespaceItems.size() );
 
         formValidation = cloudDescriptor.doTestConnection(FAKE_URL, FAKE_NS, EMPTY, EMPTY);

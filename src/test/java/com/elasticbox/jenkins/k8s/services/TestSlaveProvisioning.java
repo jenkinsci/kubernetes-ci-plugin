@@ -133,7 +133,7 @@ public class TestSlaveProvisioning {
         final KubernetesCloud mockKubernetesCloud = Mockito.mock(KubernetesCloud.class);
         when(mockKubernetesCloud.getInstanceCap()).thenReturn(10);
         when(mockKubernetesCloud.getName()).thenReturn("FakeName");
-        when(mockKubernetesCloud.getNamespace()).thenReturn("FakeNamespace");
+        when(mockKubernetesCloud.getPredefinedNamespace() ).thenReturn("FakeNamespace");
 
         final String podYamlDefault = getPodYamlDefault();
         final PodSlaveConfig fakePodSlaveConfig = getFakePodSlaveConfig(podYamlDefault);
@@ -143,8 +143,8 @@ public class TestSlaveProvisioning {
 
         final Pod pod = new DefaultKubernetesClient()
             .pods()
-            .inNamespace(mockKubernetesCloud.getNamespace())
-            .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml()))
+            .inNamespace(mockKubernetesCloud.getPredefinedNamespace() )
+            .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml() ))
             .get();
 
         pod.setStatus(new PodStatus(null,null,null,null,"Running",null,null,null));

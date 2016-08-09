@@ -14,8 +14,8 @@ import com.google.inject.Injector;
 import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.chart.Chart;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
-import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
+import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
@@ -42,11 +42,12 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
     private final boolean deleteChartWhenFinished;
 
     @DataBoundConstructor
-    public DeployChartBuildStep(String id, String kubeName, String chartsRepo, String chartName,
+    public DeployChartBuildStep(String id, String kubeName, String namespace, String chartsRepo, String chartName,
                                 boolean deleteChartWhenFinished) {
         super();
         this.id = StringUtils.isNotEmpty(id)  ? id : NAME_PREFIX + UUID.randomUUID().toString();
         this.kubeName = kubeName;
+        this.namespace = namespace;
         this.chartsRepo = chartsRepo;
         this.chartName = chartName;
         this.deleteChartWhenFinished = deleteChartWhenFinished;
@@ -58,23 +59,22 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
     }
 
     @Override
-    protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
+    protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, ChartRepo chartRepo)
         throws ServiceException {
 
         taskLogger.info("Deploying chart: " + getChartName() );
 
-        final String namespace = kubeCloud.getNamespace();
         final String runName = (run != null) ? run.toString() : "<NO-RUN>";
 
         Map<String, String> label = Collections.singletonMap(JENKINS_JOB,
             StringUtils.deleteWhitespace(runName).replace('#', '_') );
 
-        final Chart chart = deploymentService.deployChart(getKubeName(), namespace, chartRepo, chartName, label);
+        final Chart chart = deploymentService.deployChart(getKubeName(), getNamespace(), chartRepo, chartName, label);
         taskLogger.info("Chart [" + chartName + "] deployed");
 
         if (deleteChartWhenFinished && run instanceof FreeStyleBuild) {
             taskLogger.info("Chart [" + chartName + "] will be deleted at the end of the run");
-            final DeployChartCleanup chartCleanup = new DeployChartCleanup(this, namespace, chart, taskLogger);
+            final DeployChartCleanup chartCleanup = new DeployChartCleanup(this, getNamespace(), chart, taskLogger);
             ((FreeStyleBuild) run).getEnvironments().add(0, chartCleanup);
         }
     }
@@ -126,8 +126,8 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
         }
 
         @Inject
-        public DescriptorImpl(Injector injector, ChartRepository chartRepository) {
-            super(DeployChartBuildStep.class, injector, chartRepository, KUBERNETES_DEPLOY_CHART);
+        public DescriptorImpl(Injector injector, ChartRepository chartRepository, KubernetesRepository kubeRepository) {
+            super(DeployChartBuildStep.class, injector, chartRepository, kubeRepository, KUBERNETES_DEPLOY_CHART);
         }
     }
 

@@ -34,6 +34,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
 
     protected String id;
     protected String kubeName;
+    protected String namespace;
     protected String chartsRepo;
     protected String chartName;
 
@@ -55,6 +56,10 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
 
     public String getKubeName() {
         return kubeName;
+    }
+
+    public String getNamespace() {
+        return namespace;
     }
 
     public String getChartsRepo() {
@@ -82,7 +87,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
             Authentication authData = PluginHelper.getAuthenticationData(config.getCredentialsId());
             ChartRepo chartRepo = new ChartRepo(config.getChartsRepoUrl(), authData);
 
-            doPerform(run, taskLogger, kubeCloud, chartRepo);
+            doPerform(run, taskLogger, chartRepo);
 
         } catch (ServiceException exception) {
             taskLogger.error(exception.getCausedByMessages() );
@@ -95,7 +100,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
         }
     }
 
-    protected abstract void doPerform(Run<?, ?> run, TaskLogger taskLogger,
-                                      KubernetesCloud kubeCloud, ChartRepo chartRepo) throws ServiceException;
+    protected abstract void doPerform(Run<?, ?> run, TaskLogger taskLogger, ChartRepo chartRepo)
+            throws ServiceException;
 
 }

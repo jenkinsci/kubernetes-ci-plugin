@@ -67,7 +67,7 @@ public class CreatePodFromPodConfiguration extends AbstractPodDeployment {
         try {
 
             final Pod podToDeploy = podRepository.pod(cloudToDeployInto.getName(),
-                                                        cloudToDeployInto.getNamespace(),
+                                                        cloudToDeployInto.getPredefinedNamespace(),
                                                         podConfigurationChosen.getPodYaml());
 
             addName(podToDeploy, deploymentContext);

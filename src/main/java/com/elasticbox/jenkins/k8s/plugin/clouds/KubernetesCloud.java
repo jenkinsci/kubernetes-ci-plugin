@@ -63,7 +63,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
     transient SlaveProvisioningService slaveProvisioningService;
 
     @DataBoundConstructor
-    public KubernetesCloud(String name, String displayName, String endpointUrl, String namespace,
+    public KubernetesCloud(String name, String displayName, String endpointUrl, String predefinedNamespace,
                            String maxContainers, String credentialsId, String serverCert,
                            List<ChartRepositoryConfig> chartRepositoryConfigurations,
                            List<PodSlaveConfig> podSlaveConfigurations) {
@@ -73,7 +73,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
         this.credentialsId = credentialsId;
 
         // Passing !disableCertCheck because it is with 'negative' property in jelly (opposite behaviour)
-        this.kubeCloudParams = new KubernetesCloudParams(endpointUrl, namespace,
+        this.kubeCloudParams = new KubernetesCloudParams(endpointUrl, predefinedNamespace,
                 PluginHelper.getAuthenticationData(credentialsId), serverCert);
 
         this.chartRepositoryConfigurations = chartRepositoryConfigurations;
@@ -118,7 +118,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
         return displayName;
     }
 
-    public String getNamespace() {
+    public String getPredefinedNamespace() {
         return kubeCloudParams.getNamespace();
     }
 
@@ -245,7 +245,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
             return injector;
         }
 
-        public ListBoxModel doFillNamespaceItems(@QueryParameter String endpointUrl,
+        public ListBoxModel doFillPredefinedNamespaceItems(@QueryParameter String endpointUrl,
                                                  @QueryParameter String credentialsId,
                                                  @QueryParameter String serverCert) {
 

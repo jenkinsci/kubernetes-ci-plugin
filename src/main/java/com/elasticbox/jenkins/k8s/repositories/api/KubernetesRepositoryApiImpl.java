@@ -22,6 +22,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,7 +65,9 @@ public class KubernetesRepositoryApiImpl implements KubernetesRepository {
 
     @Override
     public KubernetesClient getClient(String kubeName) throws RepositoryException {
-        return kubeFactory.getKubernetesClient(kubeName);
+        return kubeName != null
+                ? kubeFactory.getKubernetesClient(kubeName)
+                : new DefaultKubernetesClient();
     }
 
     public boolean namespaceExists(String kubeName, String namespace) throws RepositoryException {

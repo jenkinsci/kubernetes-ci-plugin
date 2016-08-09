@@ -69,7 +69,7 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
             new WaitForThePodToBeRunningTask(
                 podRepository,
                 cloudToDeployInto.getName(),
-                cloudToDeployInto.getNamespace(),
+                cloudToDeployInto.getPredefinedNamespace(),
                 podName,
                 delay,
                 initialDelay,

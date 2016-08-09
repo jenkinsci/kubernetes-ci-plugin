@@ -10,6 +10,9 @@ package com.elasticbox.jenkins.k8s.plugin.builders;
 
 import com.google.inject.Injector;
 
+import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloudParams;
+import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
+
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
@@ -37,17 +40,19 @@ public abstract class ChartBuildStepDescriptor extends BuildStepDescriptor<Build
 
     ChartRepository chartRepository;
 
+    KubernetesRepository kubeRepository;
 
-    public ChartBuildStepDescriptor(Class<? extends Builder> clazz, Injector injector,
-                                    ChartRepository chartRepository, String displayName) {
+    public ChartBuildStepDescriptor(Class<? extends Builder> clazz, Injector injector, ChartRepository chartRepository,
+                                    KubernetesRepository kubeRepository, String displayName) {
         super(clazz);
         this.injector = injector;
         this.chartRepository = chartRepository;
+        this.kubeRepository = kubeRepository;
         this.displayName = displayName;
     }
 
     public ChartBuildStepDescriptor(Class<? extends Builder> clazz, String displayName) {
-        this(clazz, null, null, displayName);
+        this(clazz, null, null, null, displayName);
     }
 
     public Injector getInjector() {
@@ -78,6 +83,32 @@ public abstract class ChartBuildStepDescriptor extends BuildStepDescriptor<Build
                 items.add(cloud.getDisplayName(), cloud.getName() );
             }
         }
+        return items;
+    }
+
+    public ListBoxModel doFillNamespaceItems(@QueryParameter String kubeName, @QueryParameter String namespace) {
+        ListBoxModel items =  new ListBoxModel();
+
+        if (kubeName == null) {
+            return items;
+        }
+
+        KubernetesCloud kubeCloud = KubernetesCloud.getKubernetesCloud(kubeName);
+        if (kubeCloud == null) {
+            return items;
+        }
+
+        items = PluginHelper.doFillNamespaceItems(kubeRepository.getNamespaces(kubeCloud.getKubernetesCloudParams() ));
+
+        String selectNamespace = (StringUtils.isNotEmpty(namespace) ) ? namespace : kubeCloud.getPredefinedNamespace();
+
+        for (ListBoxModel.Option option: items) {
+            if (option.name.equals(selectNamespace) ) {
+                option.selected = true;
+                break;
+            }
+        }
+
         return items;
     }
 

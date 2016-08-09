@@ -49,7 +49,7 @@ public class SlaveProvisioningServiceImpl implements SlaveProvisioningService {
                 .withJobLabel(label)
                                                 .withOneOfThesePodConfigurations(podConfigurations)
                                                 .intoKubernetesCloud(kubernetesCloud)
-                                                .withNamespace(kubernetesCloud.getNamespace())
+                                                .withNamespace(kubernetesCloud.getPredefinedNamespace() )
                                                 .build();
 
         try {
@@ -78,7 +78,7 @@ public class SlaveProvisioningServiceImpl implements SlaveProvisioningService {
                 .withJobLabel(label)
                 .withOneOfThesePodConfigurations(podConfigurations)
                 .intoKubernetesCloud(kubernetesCloud)
-                .withNamespace(kubernetesCloud.getNamespace())
+                .withNamespace(kubernetesCloud.getPredefinedNamespace() )
                 .build();
 
         this.selectSuitablePodConfiguration.handle(deploymentContext);
