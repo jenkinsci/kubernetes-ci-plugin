@@ -56,6 +56,10 @@ public class PodSlaveConfig implements Describable<PodSlaveConfig> {
         return podSlaveConfigurationParams;
     }
 
+    public String getLabels() {
+        return podSlaveConfigurationParams.getLabelsAsString();
+    }
+
     @Override
     public Descriptor<PodSlaveConfig> getDescriptor() {
         final Jenkins instance = Jenkins.getInstance();
@@ -81,16 +85,14 @@ public class PodSlaveConfig implements Describable<PodSlaveConfig> {
             return POD_SLAVE_CONFIGURATION;
         }
 
-        public FormValidation doTestYaml(@QueryParameter String podYaml,
-                                         @RelativePath("..") @QueryParameter String name,
-                                         @RelativePath("..") @QueryParameter String namespace) {
+        public FormValidation doTestYaml(@QueryParameter String podYaml) {
 
             if (PluginHelper.anyOfThemIsBlank(podYaml) ) {
                 return FormValidation.error("Required fields not provided");
             }
 
             try {
-                final Pod pod = podRepository.pod(name, namespace, podYaml);
+                final Pod pod = podRepository.pod(null, null, podYaml);
                 if (LOGGER.isLoggable(Level.FINER) ) {
                     LOGGER.finer("Pod: " + pod);
                 }
