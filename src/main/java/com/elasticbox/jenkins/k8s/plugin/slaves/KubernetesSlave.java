@@ -70,7 +70,7 @@ public class KubernetesSlave extends AbstractCloudSlave {
         if (computer != null && computer.isOnline() ) {
 
             try {
-                podRepository.delete(kubernetesCloud.getName(), kubernetesCloud.getNamespace(), name);
+                podRepository.delete(kubernetesCloud.getName(), kubernetesCloud.getPredefinedNamespace(), name);
 
                 if (LOGGER.isLoggable(Level.FINE) ) {
                     LOGGER.fine("Terminated Kubernetes instance for slave: " + name);

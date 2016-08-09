@@ -118,7 +118,7 @@ public class TestChartBuildSteps extends TestBaseKubernetes {
     @Test
     public void testDeleteChartBS() throws RepositoryException, ServiceException, InterruptedException, IOException {
         final DeleteChartBuildStep deleteChartBuildStep =
-                new DeleteChartBuildStep(EMPTY, cloud.getName(), FAKE_CHARTS_REPO, FAKE_CHART_NAME);
+                new DeleteChartBuildStep(EMPTY, cloud.getName(), cloud.getPredefinedNamespace(), FAKE_CHARTS_REPO, FAKE_CHART_NAME);
 
         Assert.assertNotNull("Injection failed", deleteChartBuildStep.deploymentService);
 
@@ -184,7 +184,7 @@ public class TestChartBuildSteps extends TestBaseKubernetes {
     private DeployChartBuildStep getFakeDeployChartBuildStep(boolean alsoDeleteChart) {
 
         DeployChartBuildStep deployChartBuildStep =
-                new DeployChartBuildStep(EMPTY, cloud.getName(), FAKE_CHARTS_REPO, FAKE_CHART_NAME, alsoDeleteChart);
+                new DeployChartBuildStep(EMPTY, cloud.getName(), cloud.getPredefinedNamespace(), FAKE_CHARTS_REPO, FAKE_CHART_NAME, alsoDeleteChart);
 
         Assert.assertNotNull("Injection failed", deployChartBuildStep.deploymentService);
         deployChartBuildStep.deploymentService = chartDeploymentServiceMock;

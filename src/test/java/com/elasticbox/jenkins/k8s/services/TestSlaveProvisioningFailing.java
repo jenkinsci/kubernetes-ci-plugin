@@ -117,7 +117,7 @@ public class TestSlaveProvisioningFailing {
         final KubernetesCloud mockKubernetesCloud = Mockito.mock(KubernetesCloud.class);
         when(mockKubernetesCloud.getInstanceCap()).thenReturn(10);
         when(mockKubernetesCloud.getName()).thenReturn("FakeCloudName");
-        when(mockKubernetesCloud.getNamespace()).thenReturn("FakeNamespace");
+        when(mockKubernetesCloud.getPredefinedNamespace() ).thenReturn("FakeNamespace");
 
         final String podYamlDefault = getPodYamlDefault();
         final PodSlaveConfig fakePodSlaveConfig = getFakePodSlaveConfig(podYamlDefault);
@@ -127,8 +127,8 @@ public class TestSlaveProvisioningFailing {
 
         final Pod pod = new DefaultKubernetesClient()
             .pods()
-            .inNamespace(mockKubernetesCloud.getNamespace())
-            .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml()))
+            .inNamespace(mockKubernetesCloud.getPredefinedNamespace() )
+            .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml() ))
             .get();
 
         pod.setStatus(new PodStatus(null,null,null,null,"Running",null,null,null));
@@ -156,7 +156,7 @@ public class TestSlaveProvisioningFailing {
         final KubernetesCloud mockKubernetesCloud = Mockito.mock(KubernetesCloud.class);
         when(mockKubernetesCloud.getInstanceCap()).thenReturn(10);
         when(mockKubernetesCloud.getName()).thenReturn("FakeCloudName");
-        when(mockKubernetesCloud.getNamespace()).thenReturn("FakeNamespace");
+        when(mockKubernetesCloud.getPredefinedNamespace() ).thenReturn("FakeNamespace");
 
         final String podYamlDefault = getPodYamlDefault();
         final PodSlaveConfig fakePodSlaveConfig = getFakePodSlaveConfig(podYamlDefault);
@@ -166,8 +166,8 @@ public class TestSlaveProvisioningFailing {
 
         final Pod pod = new DefaultKubernetesClient()
             .pods()
-            .inNamespace(mockKubernetesCloud.getNamespace())
-            .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml()))
+            .inNamespace(mockKubernetesCloud.getPredefinedNamespace() )
+            .load(IOUtils.toInputStream(fakePodSlaveConfig.getPodYaml() ))
             .get();
 
         pod.setStatus(new PodStatus(null,null,null,null,"Failed",null,null,null));

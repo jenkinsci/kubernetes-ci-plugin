@@ -13,8 +13,8 @@ import com.google.inject.Injector;
 
 import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
-import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
+import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 import hudson.Extension;
 import hudson.model.Run;
@@ -33,21 +33,22 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     private static final String KUBERNETES_DELETE_CHART = "Kubernetes - Delete Chart";
 
     @DataBoundConstructor
-    public DeleteChartBuildStep(String id, String kubeName, String chartsRepo, String chartName) {
+    public DeleteChartBuildStep(String id, String kubeName, String namespace, String chartsRepo, String chartName) {
         super();
         this.id = StringUtils.isNotEmpty(id)  ? id : NAME_PREFIX + UUID.randomUUID().toString();
         this.kubeName = kubeName;
+        this.namespace = namespace;
         this.chartsRepo = chartsRepo;
         this.chartName = chartName;
         injectMembers();
     }
 
     @Override
-    protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, KubernetesCloud kubeCloud, ChartRepo chartRepo)
+    protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, ChartRepo chartRepo)
         throws ServiceException {
 
         taskLogger.info("Deleting chart: " + getChartName());
-        deploymentService.deleteChart(getKubeName(), kubeCloud.getNamespace(), chartRepo, getChartName() );
+        deploymentService.deleteChart(getKubeName(), getNamespace(), chartRepo, getChartName() );
         taskLogger.info("Chart [" + getChartName() + "] deleted");
     }
 
@@ -60,8 +61,8 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
         }
 
         @Inject
-        public DescriptorImpl(Injector injector, ChartRepository chartRepository) {
-            super(DeleteChartBuildStep.class, injector, chartRepository, KUBERNETES_DELETE_CHART);
+        public DescriptorImpl(Injector injector, ChartRepository chartRepository, KubernetesRepository kubeRepository) {
+            super(DeleteChartBuildStep.class, injector, chartRepository, kubeRepository, KUBERNETES_DELETE_CHART);
         }
     }
 
