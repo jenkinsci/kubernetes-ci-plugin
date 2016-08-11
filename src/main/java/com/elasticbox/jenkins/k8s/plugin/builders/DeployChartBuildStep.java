@@ -11,12 +11,12 @@ package com.elasticbox.jenkins.k8s.plugin.builders;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import com.elasticbox.jenkins.k8s.chart.Chart;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
+import com.elasticbox.jenkins.k8s.util.TaskLogger;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
