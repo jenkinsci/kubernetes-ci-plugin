@@ -10,16 +10,14 @@ package com.elasticbox.jenkins.k8s.plugin.builders;
 
 import com.google.inject.Injector;
 
-import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloudParams;
-import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
-
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.clouds.ChartRepositoryConfig;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.util.PluginHelper;
 import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
+import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
+import com.elasticbox.jenkins.k8s.util.PluginHelper;
 import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
