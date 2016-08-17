@@ -47,7 +47,6 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
         this.timeout = timeout;
     }
 
-
     /**
      * Its mission is wait for the Jenkins slave to be online until the specified timeout.
      */
@@ -55,9 +54,7 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
     public void handle(PodDeploymentContext deploymentContext) throws ServiceException {
 
         try {
-
             final KubernetesSlave kubernetesSlave = deploymentContext.getKubernetesSlave();
-
             new WaitForTheSlaveToBeOnlineTask(kubernetesSlave, delay, initialDelay, timeout).execute();
 
             LOGGER.log(Level.INFO, "Jenkins slave: " + kubernetesSlave.getNodeName() + " is online");
@@ -65,9 +62,7 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
         } catch (TaskException error) {
 
             LOGGER.log(Level.SEVERE, "Error waiting for the Jenkins slave to be online", error);
-
             throw new ServiceException("Error waiting for the Jenkins slave to be online", error);
-
         }
 
     }
@@ -107,7 +102,5 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
             return result;
         }
     }
-
-
 
 }
