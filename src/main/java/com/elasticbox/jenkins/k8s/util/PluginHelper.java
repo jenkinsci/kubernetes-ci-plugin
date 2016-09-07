@@ -18,7 +18,9 @@ import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.auth.TokenAuthentication;
 import com.elasticbox.jenkins.k8s.auth.UserAndPasswordAuthentication;
+import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.plugin.auth.TokenCredentialsImpl;
+import hudson.ProxyConfiguration;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
@@ -113,5 +115,22 @@ public class PluginHelper {
                                 Jenkins.getInstance(),
                                 ACL.SYSTEM,
                                 URIRequirementBuilder.fromUri(endpointUrl).build()));
+    }
+
+    public static ChartRepo getChartRepoData(String chartsRepoUrl, String credentialsId) {
+        Authentication authData = PluginHelper.getAuthenticationData(credentialsId);
+        ChartRepo chartRepo = new ChartRepo(chartsRepoUrl, authData);
+
+        final ProxyConfiguration proxyConfig = Jenkins.getInstance().proxy;
+        if (proxyConfig != null) {
+            chartRepo.setProxy(proxyConfig.createProxy(chartsRepoUrl) );
+
+            if (StringUtils.isNotEmpty(proxyConfig.getUserName() )) {
+                UserAndPasswordAuthentication proxyAuth =
+                        new UserAndPasswordAuthentication(proxyConfig.getUserName(), proxyConfig.getPassword() );
+                chartRepo.setProxyAuthentication(proxyAuth);
+            }
+        }
+        return chartRepo;
     }
 }

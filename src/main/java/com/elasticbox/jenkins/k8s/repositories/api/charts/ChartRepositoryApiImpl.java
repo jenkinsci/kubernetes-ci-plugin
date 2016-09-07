@@ -26,7 +26,6 @@ import hudson.Extension;
 
 import org.yaml.snakeyaml.Yaml;
 import rx.Observable;
-import rx.Subscription;
 import rx.exceptions.Exceptions;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -34,9 +33,6 @@ import rx.functions.Func1;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by serna on 4/13/16.
- */
 @Extension
 public class ChartRepositoryApiImpl implements ChartRepository {
 
@@ -210,20 +206,7 @@ public class ChartRepositoryApiImpl implements ChartRepository {
     private <T> T getClient(ChartRepo repo, String url, Class<T> serviceClass, GitHubApiResponseContentType resType)
         throws RepositoryException {
 
-        T client = null;
-        if (repo.needsAuthentication()) {
-            client = clientsFactory.getClient(
-                url,
-                repo.getAuthentication(),
-                serviceClass,
-                resType);
-        } else {
-            client = clientsFactory.getClient(
-                url,
-                serviceClass,
-                resType);
-        }
-        return client;
+        return clientsFactory.getClient(repo, serviceClass, resType);
     }
 
     public GitHubClientsFactory getClientsFactory() {

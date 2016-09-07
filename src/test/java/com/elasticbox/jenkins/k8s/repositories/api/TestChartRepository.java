@@ -27,11 +27,12 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,10 +40,12 @@ import java.util.List;
 
 public class TestChartRepository {
 
+    private MockWebServer mockWebserver = null;
+    private final ChartRepositoryApiImpl repository = new ChartRepositoryApiImpl();
+
     @Test
     public void testGetChartFromPublicRepo() throws RepositoryException, IOException {
 
-        ChartRepositoryApiImpl repository = new ChartRepositoryApiImpl();
         repository.setClientsFactory(TestUtils.getGitHubClientsFactoryMock() );
 
         ChartRepo fakeRepo = new ChartRepo("https://github.com/fakeOwner/fakeChartsRepo");
@@ -89,36 +92,50 @@ public class TestChartRepository {
     }
 
     @Test
-    public void testGetChartFromRepoRequiringUserAndPassword() throws IOException, RepositoryException,
-        InterruptedException {
-
-        final String rootChartsRepoContent = IOUtils.toString(this.getClass().getResourceAsStream("rootChartsRepoContent.json") );
-
-        MockWebServer server = new MockWebServer();
-        server.start(9999);
-
-        final HttpUrl url = server.url("http://127.0.0.1:9999/fakeOwner/fakeChartsRepo");
-        server.enqueue(new MockResponse().setResponseCode(200).setBody(rootChartsRepoContent));
+    public void testGetChartFromRepoRequiringUserAndPw() throws IOException, RepositoryException, InterruptedException {
+        mockWebserver = createMockWebServer();
 
         ChartRepo fakeRepo = new ChartRepo(
             "http://127.0.0.1:9999/fakeOwner/fakeChartsRepo",
             new UserAndPasswordAuthentication("user", "password"));
 
-        ChartRepositoryApiImpl repository = new ChartRepositoryApiImpl();
         repository.setClientsFactory(new GitHubClientsFactoryImpl());
-
         final List<String> charts = repository.chartNames(fakeRepo);
 
-        final RecordedRequest recordedRequest = server.takeRequest();
+        final RecordedRequest recordedRequest = mockWebserver.takeRequest();
         assertTrue("Basic dXNlcjpwYXNzd29yZA==".equals(recordedRequest.getHeader("Authorization")));
-
-        server.shutdown();
     }
 
     @Test
-    public void testGetChartFromRepoRequiringToken() throws IOException, RepositoryException,
-        InterruptedException {
+    public void testGetChartFromRepoRequiringToken() throws IOException, RepositoryException, InterruptedException {
+        mockWebserver = createMockWebServer();
 
+        ChartRepo fakeRepo = new ChartRepo(
+                "http://127.0.0.1:9999/fakeOwner/fakeChartsRepo",
+                new TokenAuthentication("fakeToken"));
+
+        repository.setClientsFactory(new GitHubClientsFactoryImpl());
+        final List<String> charts = repository.chartNames(fakeRepo);
+
+        final RecordedRequest recordedRequest = mockWebserver.takeRequest();
+        assertTrue("token fakeToken".equals(recordedRequest.getHeader("Authorization")));
+    }
+
+    @Test
+    public void testGetChartFromRepoRequiringProxy() throws IOException, RepositoryException, InterruptedException {
+        mockWebserver = createMockWebServer();
+
+        ChartRepo fakeRepo = new ChartRepo("http://fakehost/fakeOwner/fakeChartsRepo");
+        fakeRepo.setProxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 9999) ));
+
+        repository.setClientsFactory(new GitHubClientsFactoryImpl());
+        final List<String> charts = repository.chartNames(fakeRepo);
+
+        final RecordedRequest recordedRequest = mockWebserver.takeRequest();
+        assertTrue("fakehost".equals(recordedRequest.getHeader("Host") ));
+    }
+
+    private MockWebServer createMockWebServer() throws IOException {
         final String rootChartsRepoContent = IOUtils.toString(this.getClass().getResourceAsStream("rootChartsRepoContent.json") );
 
         MockWebServer server = new MockWebServer();
@@ -126,20 +143,13 @@ public class TestChartRepository {
 
         final HttpUrl url = server.url("http://127.0.0.1:9999/fakeOwner/fakeChartsRepo");
         server.enqueue(new MockResponse().setResponseCode(200).setBody(rootChartsRepoContent));
-
-        ChartRepo fakeRepo = new ChartRepo(
-            "http://127.0.0.1:9999/fakeOwner/fakeChartsRepo",
-            new TokenAuthentication("fakeToken"));
-
-        ChartRepositoryApiImpl repository = new ChartRepositoryApiImpl();
-        repository.setClientsFactory(new GitHubClientsFactoryImpl());
-
-        final List<String> charts = repository.chartNames(fakeRepo);
-
-        final RecordedRequest recordedRequest = server.takeRequest();
-        assertTrue("token fakeToken".equals(recordedRequest.getHeader("Authorization")));
-
-        server.shutdown();
+        return server;
     }
 
+    @After
+    public void shutdownMockWebServer() throws IOException {
+        if (mockWebserver != null) {
+            mockWebserver.shutdown();
+        }
+    }
 }
