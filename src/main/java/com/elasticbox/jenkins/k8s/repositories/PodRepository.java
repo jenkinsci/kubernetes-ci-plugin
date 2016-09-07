@@ -27,7 +27,9 @@ public interface PodRepository {
 
     Pod pod(String kubeName, String namespace, String yaml) throws RepositoryException;
 
-    List<Pod> getAllPods(String kubeName, String deploymentNamespace) throws RepositoryException;
+    List<Pod> getAllPods(String kubeName, String namespace) throws RepositoryException;
+
+    List<Pod> getRunningPods(String kubeName, String namespace) throws RepositoryException;
 
     Pod getPod(String kubeName, String namespace, String podName) throws RepositoryException;
 }

@@ -59,10 +59,13 @@ public class CheckProvisioningAllowed extends AbstractPodDeployment {
 
         try {
 
-            final List<Pod> pods = podRepository.getAllPods(cloudToDeployInto.getName(), deploymentNamespace);
+            final List<Pod> pods = podRepository.getRunningPods(cloudToDeployInto.getName(), deploymentNamespace);
 
+            if (LOGGER.isLoggable(Level.FINER) ) {
+                LOGGER.finer("Cloud defined max. capacity: " + cloudCapacity + ". Current capacity: " + pods.size() );
+            }
             if (pods.size() >= cloudCapacity) {
-                String message = "Not provisioning, max cloud capacity: " + cloudCapacity + "reached";
+                String message = "Not provisioning, max cloud capacity: " + cloudCapacity + " reached";
                 LOGGER.log(Level.SEVERE, message);
                 throw new ServiceException(message);
             }

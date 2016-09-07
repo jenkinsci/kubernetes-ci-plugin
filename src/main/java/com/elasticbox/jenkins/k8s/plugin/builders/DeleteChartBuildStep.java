@@ -46,7 +46,7 @@ public class DeleteChartBuildStep extends BaseChartBuildStep {
     protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, ChartRepo chartRepo)
         throws ServiceException {
 
-        taskLogger.info("Deleting chart: " + getChartName());
+        taskLogger.info("Deleting chart [" + getChartName() + "] from namespace: " + getNamespace() );
         deploymentService.deleteChart(getKubeName(), getNamespace(), chartRepo, getChartName() );
         taskLogger.info("Chart [" + getChartName() + "] deleted");
     }

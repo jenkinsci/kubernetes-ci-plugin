@@ -62,7 +62,7 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
     protected void doPerform(Run<?, ?> run, TaskLogger taskLogger, ChartRepo chartRepo)
         throws ServiceException {
 
-        taskLogger.info("Deploying chart: " + getChartName() );
+        taskLogger.info("Deploying chart [" + getChartName() + "] into namespace: " + getNamespace() );
 
         final String runName = (run != null) ? run.toString() : "<NO-RUN>";
 
@@ -114,7 +114,6 @@ public class DeployChartBuildStep extends BaseChartBuildStep {
             }
             return true;
         }
-
     }
 
     @Extension
