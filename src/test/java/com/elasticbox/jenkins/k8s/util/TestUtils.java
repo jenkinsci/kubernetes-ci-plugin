@@ -12,6 +12,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
+import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiContentsService;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiRawContentDownloadService;
 import com.elasticbox.jenkins.k8s.repositories.api.charts.github.GitHubApiResponseContentType;
@@ -23,8 +24,6 @@ import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
 import rx.Observable;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -32,9 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by serna on 4/20/16.
- */
 public final class TestUtils {
 
     public static GitHubContent getFakeChartDetails(){
@@ -144,10 +140,10 @@ public final class TestUtils {
                 .thenReturn(Observable.just(manifestsContent));
 
         final GitHubClientsFactory mockedClientFactory = Mockito.mock(GitHubClientsFactory.class);
-        when(mockedClientFactory.getClient(any(String.class), eq(GitHubApiContentsService.class), eq
+        when(mockedClientFactory.getClient(any(ChartRepo.class), eq(GitHubApiContentsService.class), eq
                 (GitHubApiResponseContentType.JSON)))
                 .thenReturn(gitHubApiContentsService);
-        when(mockedClientFactory.getClient(any(String.class), eq(GitHubApiRawContentDownloadService.class), eq
+        when(mockedClientFactory.getClient(any(ChartRepo.class), eq(GitHubApiRawContentDownloadService.class), eq
                 (GitHubApiResponseContentType.RAW_STRING)))
                 .thenReturn(gitHubApiRawContentDownloadService);
         return mockedClientFactory;

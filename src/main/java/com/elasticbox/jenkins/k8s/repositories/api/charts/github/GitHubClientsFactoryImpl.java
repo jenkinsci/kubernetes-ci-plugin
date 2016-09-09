@@ -15,12 +15,17 @@ import com.google.common.cache.LoadingCache;
 import com.elasticbox.jenkins.k8s.auth.Authentication;
 import com.elasticbox.jenkins.k8s.auth.TokenAuthentication;
 import com.elasticbox.jenkins.k8s.auth.UserAndPasswordAuthentication;
+import com.elasticbox.jenkins.k8s.chart.ChartRepo;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
+
 import hudson.Extension;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.Route;
 import okhttp3.logging.HttpLoggingInterceptor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -30,12 +35,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 @Extension
 public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
@@ -51,12 +56,12 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
         .expireAfterAccess(CACHED_HOURS, TimeUnit.HOURS)
         .build(new GithubClientCacheLoader());
 
-
     private static GitHubClientsFactoryPartBuilder [] partBuilders = new GitHubClientsFactoryPartBuilder[] {
         new AddBaseUrl(),
         new AddResponseConverters(),
         new AddAuthenticationTokenInterceptor(),
         new AddClientAndPasswordAuthenticationInterceptor(),
+        new AddProxyConfiguration(),
         new AddLoggingInterceptor()
     };
 
@@ -66,33 +71,45 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
         private String apiBaseUrl;
         private GitHubApiResponseContentType responseContentType;
         private Authentication authentication;
+        private Proxy proxy;
+        private UserAndPasswordAuthentication proxyAuthentication;
         private boolean debug = false;
-
 
         private Retrofit.Builder clientBuilder = new Retrofit.Builder();
         private OkHttpClient.Builder okHttpClientBuilder;
         private boolean atLeastOneAuthenticationMethodProvided = false;
 
-        public ClientsFactoryBuilderContext(String apiBaseUrl,
-                                            Class<T> serviceTypeInterfaceClass,
-                                            GitHubApiResponseContentType responseContentType) {
-            this.apiBaseUrl = apiBaseUrl;
-            this.serviceTypeInterfaceClass = serviceTypeInterfaceClass;
-            this.responseContentType = responseContentType;
-        }
+        public ClientsFactoryBuilderContext(ChartRepo chartRepo,
+                                            Class<T> serviceTypeInterface,
+                                            GitHubApiResponseContentType responseType) {
 
-        public ClientsFactoryBuilderContext(String apiBaseUrl,
-                                            Class<T> serviceTypeInterfaceClass,
-                                            GitHubApiResponseContentType responseContentType,
-                                            Authentication authentication) {
-            this.apiBaseUrl = apiBaseUrl;
-            this.serviceTypeInterfaceClass = serviceTypeInterfaceClass;
-            this.responseContentType = responseContentType;
-            this.authentication = authentication;
+            this.apiBaseUrl = GitHubApiType.findOrComposeApiBaseUrl(chartRepo.getUrl() );
+            this.serviceTypeInterfaceClass = serviceTypeInterface;
+            this.responseContentType = responseType;
+
+            if (chartRepo.needsAuthentication() ) {
+                this.authentication = chartRepo.getAuthentication();
+            }
+
+            if (chartRepo.needsProxy() ) {
+                this.proxy = chartRepo.getProxy();
+
+                if (chartRepo.needsProxyAuthentication() ) {
+                    this.proxyAuthentication = chartRepo.getProxyAuthentication();
+                }
+            }
         }
 
         public Authentication getAuthentication() {
             return authentication;
+        }
+
+        public Proxy getProxy() {
+            return proxy;
+        }
+
+        public UserAndPasswordAuthentication getProxyAuthentication() {
+            return proxyAuthentication;
         }
 
         public Class<T> getServiceTypeInterfaceClass() {
@@ -163,6 +180,14 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
             if (responseContentType != that.responseContentType) {
                 return false;
             }
+            if (proxy != null) {
+                if ( !proxy.equals(that.proxy) ) {
+                    return false;
+                }
+                if (proxyAuthentication != null && !proxyAuthentication.equals(that.proxyAuthentication)) {
+                    return false;
+                }
+            }
             return !(authentication != null
                 ? !authentication.equals(that.authentication)
                 : that.authentication != null);
@@ -175,6 +200,8 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
             result = 31 * result + (apiBaseUrl != null ? apiBaseUrl.hashCode() : 0);
             result = 31 * result + (responseContentType != null ? responseContentType.hashCode() : 0);
             result = 31 * result + (authentication != null ? authentication.hashCode() : 0);
+            result = 31 * result + (proxy != null ? proxy.hashCode() : 0);
+            result = 31 * result + (proxyAuthentication != null ? proxyAuthentication.hashCode() : 0);
             result = 31 * result + (debug ? 1 : 0);
             return result;
         }
@@ -183,7 +210,6 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
     public interface GitHubClientsFactoryPartBuilder {
 
         void buildPart(ClientsFactoryBuilderContext context);
-
     }
 
     private static class AddBaseUrl implements GitHubClientsFactoryPartBuilder {
@@ -234,7 +260,6 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
                 if (authentication instanceof TokenAuthentication) {
 
                     TokenAuthentication authenticationMethod = (TokenAuthentication) authentication;
-
                     String token = authenticationMethod.getAuthToken();
 
                     if (StringUtils.isNotBlank(token)) {
@@ -256,7 +281,6 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
                             });
 
                         context.setOkHttpClientBuilder(okBuilder);
-
                         context.setAtLeastOneAuthenticationMethodProvided(true);
                     }
                 }
@@ -264,7 +288,6 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
             }
         }
     }
-
 
     private static class AddLoggingInterceptor implements GitHubClientsFactoryPartBuilder {
 
@@ -284,14 +307,43 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
 
                 // set your desired log level
                 logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
                 okHttpClientBuilder.addInterceptor(logging);
             }
-
         }
     }
 
+    private static class AddProxyConfiguration implements GitHubClientsFactoryPartBuilder {
 
+        @Override
+        public void buildPart(ClientsFactoryBuilderContext context) {
+            final Proxy proxy = context.getProxy();
+            if (proxy == null) {
+                return;
+            }
+
+            if (context.getOkHttpClientBuilder() == null) {
+                final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+                context.setOkHttpClientBuilder(httpClient);
+            }
+
+            final OkHttpClient.Builder okHttpClientBuilder = context.getOkHttpClientBuilder();
+            okHttpClientBuilder.proxy(proxy);
+
+            final UserAndPasswordAuthentication authentication = context.getProxyAuthentication();
+            if (authentication != null) {
+                Authenticator proxyAuthenticator = new Authenticator() {
+                    @Override
+                    public Request authenticate(Route route, Response response) throws IOException {
+                        String credential = Credentials.basic(authentication.getUser(), authentication.getPassword() );
+                        return response.request().newBuilder()
+                                .header("Proxy-Authorization", credential)
+                                .build();
+                    }
+                };
+                okHttpClientBuilder.proxyAuthenticator(proxyAuthenticator);
+            }
+        }
+    }
 
     private static class AddClientAndPasswordAuthenticationInterceptor implements GitHubClientsFactoryPartBuilder {
 
@@ -337,15 +389,12 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
                             });
 
                         context.setOkHttpClientBuilder(okBuilder);
-
                         context.setAtLeastOneAuthenticationMethodProvided(true);
                     }
                 }
-
             }
         }
     }
-
 
     private static class GithubClientCacheLoader extends CacheLoader<ClientsFactoryBuilderContext, GitHubClient> {
 
@@ -364,49 +413,20 @@ public class GitHubClientsFactoryImpl implements GitHubClientsFactory {
                 clientBuilder = clientBuilder.client(okHttpClient);
             }
 
-
             return new GitHubClient<>(context.getApiBaseUrl(), clientBuilder
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .build()
                 .create(context.getServiceTypeInterfaceClass()));
-
         }
     }
 
-
     @Override
-    public <T> T getClient(String baseUrl,
-                       Authentication authentication,
-                       Class<T> serviceTypeInterface,
-                       GitHubApiResponseContentType responseType) throws RepositoryException {
-
-        final String apiBaseUrl = GitHubApiType.findOrComposeApiBaseUrl(baseUrl);
+    public <T> T getClient(ChartRepo chartRepo,
+                           Class<T> serviceTypeInterface,
+                           GitHubApiResponseContentType responseType) throws RepositoryException {
 
         ClientsFactoryBuilderContext<T> context =
-            new ClientsFactoryBuilderContext<>(apiBaseUrl, serviceTypeInterface, responseType, authentication);
-
-
-        final GitHubClient<T> client;
-        try {
-            client = cache.get(context);
-        } catch (ExecutionException e) {
-            LOGGER.log(Level.SEVERE, "Error getting the GitHub client object", e);
-            throw new RepositoryException(e);
-        }
-
-        return client.getClient();
-
-    }
-
-    @Override
-    public <T> T getClient(String baseUrl, Class<T> serviceTypeInterface, GitHubApiResponseContentType responseType)
-        throws RepositoryException {
-
-        final String apiBaseUrl = GitHubApiType.findOrComposeApiBaseUrl(baseUrl);
-
-        ClientsFactoryBuilderContext<T> context =
-            new ClientsFactoryBuilderContext<>(apiBaseUrl, serviceTypeInterface, responseType);
-
+                new ClientsFactoryBuilderContext<>(chartRepo, serviceTypeInterface, responseType);
 
         final GitHubClient<T> client;
         try {

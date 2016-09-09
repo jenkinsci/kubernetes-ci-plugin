@@ -146,8 +146,9 @@ public abstract class ChartBuildStepDescriptor extends BuildStepDescriptor<Build
                 ChartRepositoryConfig config = kubeCloud.getChartRepositoryConfiguration(chartsRepo);
 
                 if (config != null) {
-                    Authentication authData = PluginHelper.getAuthenticationData(config.getCredentialsId());
-                    ChartRepo chartRepo = new ChartRepo(config.getChartsRepoUrl(), authData);
+                    ChartRepo chartRepo =
+                            PluginHelper.getChartRepoData(config.getChartsRepoUrl(), config.getCredentialsId() );
+
                     try {
                         return PluginHelper.doFillChartItems(chartRepository.chartNames(chartRepo));
                     } catch (RepositoryException excep) {

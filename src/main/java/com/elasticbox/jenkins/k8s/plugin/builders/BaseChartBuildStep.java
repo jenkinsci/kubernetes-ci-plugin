@@ -84,8 +84,7 @@ public abstract class BaseChartBuildStep extends Builder implements SimpleBuildS
             ChartRepositoryConfig config = kubeCloud.getChartRepositoryConfiguration(getChartsRepo() );
             taskLogger.info("Using Chart repository config: " + config);
 
-            Authentication authData = PluginHelper.getAuthenticationData(config.getCredentialsId());
-            ChartRepo chartRepo = new ChartRepo(config.getChartsRepoUrl(), authData);
+            ChartRepo chartRepo = PluginHelper.getChartRepoData(config.getChartsRepoUrl(), config.getCredentialsId() );
 
             doPerform(run, taskLogger, chartRepo);
 

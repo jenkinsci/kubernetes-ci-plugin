@@ -79,13 +79,13 @@ public enum GitHubApiType implements GitHubApi {
 
 
     public static String findOrComposeApiBaseUrl(String url) {
-
-        GitHubUrl gitHubUrl = new GitHubUrl(url);
-        final GitHubApiType apiType = findBy(gitHubUrl);
-
-        return findOrComposeApiBaseUrl(apiType, gitHubUrl);
+        return findOrComposeApiBaseUrl(new GitHubUrl(url) );
     }
 
+    public static String findOrComposeApiBaseUrl(GitHubUrl gitHubUrl) {
+        final GitHubApiType apiType = findBy(gitHubUrl);
+        return findOrComposeApiBaseUrl(apiType, gitHubUrl);
+    }
 
     private static String findOrComposeApiBaseUrl(GitHubApiType gitHubApiType, GitHubUrl url) {
         switch (gitHubApiType) {
