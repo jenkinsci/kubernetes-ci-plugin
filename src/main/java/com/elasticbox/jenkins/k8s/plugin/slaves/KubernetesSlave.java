@@ -10,8 +10,6 @@ package com.elasticbox.jenkins.k8s.plugin.slaves;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.PodRepository;
-import hudson.Messages;
-import hudson.model.Computer;
 import hudson.model.Descriptor;
 import hudson.model.Label;
 import hudson.model.Node;
@@ -19,15 +17,11 @@ import hudson.model.TaskListener;
 import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.JNLPLauncher;
 import hudson.slaves.NodeProperty;
-import hudson.slaves.OfflineCause;
-import org.jvnet.localizer.Localizable;
-import org.jvnet.localizer.ResourceBundleHolder;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 public class KubernetesSlave extends AbstractCloudSlave {
 
@@ -63,26 +57,25 @@ public class KubernetesSlave extends AbstractCloudSlave {
 
     @Override
     protected void _terminate(TaskListener listener) throws IOException, InterruptedException {
-
+        if (podRepository == null) {
+            LOGGER.warning("Unable to terminate Kubernetes instance. Unknown reference: " + name);
+            return;
+        }
         LOGGER.info("Terminating Kubernetes instance for slave: " + name);
 
-        final Computer computer = toComputer();
-        if (computer != null && computer.isOnline() ) {
-
+        if (this.toComputer() != null ) {
             try {
                 podRepository.delete(kubernetesCloud.getName(), kubernetesCloud.getPredefinedNamespace(), name);
 
                 if (LOGGER.isLoggable(Level.FINE) ) {
                     LOGGER.fine("Terminated Kubernetes instance for slave: " + name);
                 }
-                return;
-
             } catch (Exception exception) {
                 LOGGER.log(Level.SEVERE, "Failure to terminate instance for slave: " + name, exception);
             }
+        } else {
+            LOGGER.warning("There is no computer for slave: " + name);
         }
-
-        LOGGER.warning("There is no computer for slave: " + name);
     }
 
     @Override

@@ -60,11 +60,9 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
             LOGGER.log(Level.INFO, "Jenkins slave: " + kubernetesSlave.getNodeName() + " is online");
 
         } catch (TaskException error) {
-
             LOGGER.log(Level.SEVERE, "Error waiting for the Jenkins slave to be online", error);
             throw new ServiceException("Error waiting for the Jenkins slave to be online", error);
         }
-
     }
 
 

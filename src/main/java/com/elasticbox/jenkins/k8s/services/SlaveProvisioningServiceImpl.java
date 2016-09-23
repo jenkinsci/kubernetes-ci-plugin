@@ -47,10 +47,10 @@ public class SlaveProvisioningServiceImpl implements SlaveProvisioningService {
         PodDeploymentContext deploymentContext =
             new PodDeploymentContext.JenkinsPodSlaveDeploymentContextBuilder()
                 .withJobLabel(label)
-                                                .withOneOfThesePodConfigurations(podConfigurations)
-                                                .intoKubernetesCloud(kubernetesCloud)
-                                                .withNamespace(kubernetesCloud.getPredefinedNamespace() )
-                                                .build();
+                .withOneOfThesePodConfigurations(podConfigurations)
+                .intoKubernetesCloud(kubernetesCloud)
+                .withNamespace(kubernetesCloud.getPredefinedNamespace() )
+                .build();
 
         try {
             for (SlaveProvisioningStep deploymentHandler: podCreationChainHandlers) {
