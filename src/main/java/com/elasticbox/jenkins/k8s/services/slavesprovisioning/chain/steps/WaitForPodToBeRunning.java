@@ -76,7 +76,7 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
             LOGGER.log(Level.INFO, "Pod is up and running");
 
         } catch (TaskException error) {
-            LOGGER.log(Level.SEVERE, "Error waiting for the Pod to be running: " + podName, error);
+            LOGGER.severe("Error waiting for the Pod to be running: " + podName);
             throw new ServiceException("Error waiting for the Pod to be running", error);
         }
     }

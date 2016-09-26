@@ -15,8 +15,6 @@ import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeploymen
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.SlaveProvisioningStep;
 import com.elasticbox.jenkins.k8s.plugin.clouds.PodSlaveConfigurationParams;
 import com.elasticbox.jenkins.k8s.plugin.slaves.KubernetesSlave;
-import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
-import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
 
@@ -62,8 +60,7 @@ public class SlaveProvisioningServiceImpl implements SlaveProvisioningService {
             return kubernetesSlave;
 
         } catch (ServiceException exception) {
-
-            LOGGER.log(Level.SEVERE, "Error provisioning Pod Jenkins slave ", exception);
+            LOGGER.severe("Error provisioning Pod Jenkins slave ");
             throw exception;
         }
     }
