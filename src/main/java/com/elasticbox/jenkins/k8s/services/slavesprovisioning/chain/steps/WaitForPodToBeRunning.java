@@ -35,7 +35,7 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
 
     private static final long DELAY_IN_SECONDS = 1;
     private static final long INITIAL_DELAY_IN_SECONDS = 1;
-    private static final long TIMEOUT_IN_SECONDS = 60;
+    private static final long TIMEOUT_IN_SECONDS = 90;
 
     private long initialDelay;
     private long delay;
