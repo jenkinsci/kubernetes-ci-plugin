@@ -11,7 +11,6 @@ package com.elasticbox.jenkins.k8s.plugin.auth;
 import com.cloudbees.plugins.credentials.CredentialsDescriptor;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
-import com.elasticbox.jenkins.k8s.plugin.auth.TokenCredentials;
 import hudson.Extension;
 import hudson.util.Secret;
 import org.kohsuke.stapler.DataBoundConstructor;

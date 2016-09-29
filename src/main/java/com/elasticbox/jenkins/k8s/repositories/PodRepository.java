@@ -8,7 +8,6 @@
 
 package com.elasticbox.jenkins.k8s.repositories;
 
-import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
 import io.fabric8.kubernetes.api.model.Pod;
 

@@ -40,13 +40,10 @@ public class PodDeployer extends AbstractPodDeployment {
     public void handle(PodDeploymentContext deploymentContext) throws ServiceException {
 
         final Pod podToDeploy = deploymentContext.getPodToDeploy();
-
         final KubernetesCloud cloudToDeployInto = deploymentContext.getCloudToDeployInto();
-
         final String deploymentNamespace = deploymentContext.getDeploymentNamespace();
 
         try {
-
             podRepository.create(cloudToDeployInto.getName(), deploymentNamespace, podToDeploy);
 
             String podName = podToDeploy.getMetadata().getName();
