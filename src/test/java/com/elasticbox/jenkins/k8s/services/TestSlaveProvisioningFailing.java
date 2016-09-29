@@ -17,7 +17,6 @@ import com.elasticbox.jenkins.k8s.repositories.PodRepository;
 import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFactory;
 import com.elasticbox.jenkins.k8s.repositories.api.kubeclient.KubernetesClientFactoryImpl;
 import com.elasticbox.jenkins.k8s.services.error.ServiceException;
-import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.PodDeploymentContext;
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.SlaveProvisioningStep;
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.AddSlaveToJenkinsCloud;
 import com.elasticbox.jenkins.k8s.services.slavesprovisioning.chain.steps.CheckProvisioningAllowed;
@@ -34,19 +33,20 @@ import com.google.inject.multibindings.Multibinder;
 import hudson.model.Label;
 import hudson.model.labels.LabelOperatorPrecedence;
 import hudson.model.labels.LabelVisitor;
+import hudson.slaves.AbstractCloudSlave;
 import hudson.slaves.SlaveComputer;
 import hudson.util.VariableResolver;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -60,6 +60,7 @@ import java.util.List;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -70,7 +71,9 @@ public class TestSlaveProvisioningFailing {
     private Injector injector;
 
     @Rule
-    JenkinsRule jenkins = new JenkinsRule();
+    private JenkinsRule jenkins = new JenkinsRule();
+
+    private PodRepository mockPodsRepository;
 
     @Before
     public void setUp() throws Exception {
@@ -80,22 +83,15 @@ public class TestSlaveProvisioningFailing {
             @Override
             protected void configure() {
 
-                bind(SlaveProvisioningService.class)
-                    .to(SlaveProvisioningServiceImpl.class)
-                    .in(Singleton.class);
+                bind(SlaveProvisioningService.class).to(SlaveProvisioningServiceImpl.class).in(Singleton.class);
 
                 final KubernetesRepository mockKubernetesRepository = Mockito.mock(KubernetesRepository.class);
-                bind(KubernetesRepository.class)
-                    .toInstance(mockKubernetesRepository);
+                bind(KubernetesRepository.class).toInstance(mockKubernetesRepository);
 
-                PodRepository mockPodsRepository = Mockito.mock(PodRepository.class);
-                bind(PodRepository.class)
-                    .toInstance(mockPodsRepository);
+                mockPodsRepository = Mockito.mock(PodRepository.class);
+                bind(PodRepository.class).toInstance(mockPodsRepository);
 
-                bind(KubernetesClientFactory.class)
-                    .to(KubernetesClientFactoryImpl.class)
-                    .in(Singleton.class);
-
+                bind(KubernetesClientFactory.class).to(KubernetesClientFactoryImpl.class).in(Singleton.class);
 
                 Multibinder<SlaveProvisioningStep> podCreationChainHandlers =
                     Multibinder.newSetBinder(binder(), SlaveProvisioningStep.class);
@@ -107,10 +103,19 @@ public class TestSlaveProvisioningFailing {
                 podCreationChainHandlers.addBinding().to(PodDeployer.class);
                 podCreationChainHandlers.addBinding().toInstance(new WaitForPodToBeRunning(0, 1, 5));
                 podCreationChainHandlers.addBinding().toInstance(new WaitForSlaveToBeOnline(0, 1, 5));
-
             }
         });
     }
+
+    @After
+    public void ensurePodIsDeletedWhenRemovingJenkinsNode() throws Exception {
+        AbstractCloudSlave slave = (AbstractCloudSlave)jenkins.getInstance().getNodes().get(0);
+        slave.terminate();
+        jenkins.getInstance().removeNode(slave);
+
+        verify(mockPodsRepository).delete(anyString(), anyString(), anyString() );
+    }
+
     @Test(expected=ServiceException.class)
     public void testSlaveProvisioningWithoutLabelAndItNeverGetsOnline() throws Exception {
 
@@ -145,9 +150,6 @@ public class TestSlaveProvisioningFailing {
 
         final SlaveProvisioningService slaveProvisioningService = injector.getInstance(SlaveProvisioningService.class);
         slaveProvisioningService.slaveProvision(mockKubernetesCloud, podSlaveConfigurationParams, null);
-
-
-
     }
 
     @Test(expected=ServiceException.class)
@@ -184,11 +186,7 @@ public class TestSlaveProvisioningFailing {
 
         final SlaveProvisioningService slaveProvisioningService = injector.getInstance(SlaveProvisioningService.class);
         slaveProvisioningService.slaveProvision(mockKubernetesCloud, podSlaveConfigurationParams, null);
-
-
-
     }
-
 
     public String getPodYamlDefault() throws IOException {
         final String podYaml = IOUtils.toString(new FileInputStream(new File
@@ -198,12 +196,7 @@ public class TestSlaveProvisioningFailing {
     }
 
     public PodSlaveConfig getFakePodSlaveConfig(String podYaml) {
-
-        PodSlaveConfig podParams = new PodSlaveConfig("fakeId","fakePodDescription", podYaml,
-            "fakeLabel");
-
-        return podParams;
-
+        return new PodSlaveConfig("fakeId", "fakePodDescription", podYaml, "fakeLabel");
     }
 
     public Label getFakeLabel(String name) {
@@ -230,5 +223,4 @@ public class TestSlaveProvisioningFailing {
         };
         return fakeLabel;
     }
-
 }
