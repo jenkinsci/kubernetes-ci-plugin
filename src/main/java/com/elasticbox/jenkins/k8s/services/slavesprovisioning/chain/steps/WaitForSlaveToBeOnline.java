@@ -92,7 +92,7 @@ public class WaitForSlaveToBeOnline extends AbstractPodDeployment {
 
             this.result = computer.isOnline();
 
-            LOGGER.log(Level.INFO, "Jenkins slave is online: " + this.result);
+            LOGGER.config("Jenkins slave is online: " + this.result);
         }
 
         @Override

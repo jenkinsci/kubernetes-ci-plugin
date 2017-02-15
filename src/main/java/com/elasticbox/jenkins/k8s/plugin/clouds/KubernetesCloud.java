@@ -153,7 +153,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
     @Override
     public Collection<NodeProvisioner.PlannedNode> provision(final Label label, int excessWorkload) {
 
-        LOGGER.info("Slave provisioning requested, excess workload: " + excessWorkload);
+        LOGGER.info("Slave provisioning requested for label '" + label + "', excess workload: " + excessWorkload);
 
         final List<PodSlaveConfigurationParams> podSlaveConfigurationParams = new ArrayList<>();
         for (PodSlaveConfig config: podSlaveConfigurations) {
