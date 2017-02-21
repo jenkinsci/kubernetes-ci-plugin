@@ -3,14 +3,12 @@ package com.elasticbox.jenkins.k8s.plugin.slaves;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
 
 import com.elasticbox.jenkins.k8s.plugin.clouds.KubernetesCloud;
-import com.elasticbox.jenkins.k8s.repositories.ChartRepository;
 import hudson.model.Label;
-import hudson.model.LoadStatistics;
 import hudson.model.Node;
-import hudson.model.OverallLoadStatistics;
 import hudson.model.labels.LabelAtom;
 import hudson.remoting.Future;
 import hudson.slaves.NodeProvisioner;
@@ -35,19 +33,26 @@ import java.util.concurrent.TimeoutException;
 public class TestSlaveProvisioningStrategy {
 
     @Mock
-    private KubernetesCloud kubeCloudMock;
+    private KubernetesCloud kubeCloudMock1, kubeCloudMock2;
 
     @Before
     public void setupMocks() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         PowerMockito.mockStatic(KubernetesCloud.class);
-        PowerMockito.when(KubernetesCloud.getKubernetesClouds()).thenReturn(Collections.singletonList(kubeCloudMock) );
+        PowerMockito.when(KubernetesCloud.getKubernetesClouds()).thenReturn(Arrays.asList(kubeCloudMock1, kubeCloudMock2) );
 
-        when(kubeCloudMock.getDisplayName() ).thenReturn("fakeKubeCloud");
-        when(kubeCloudMock.canProvision(any(Label.class))).thenReturn(true);
         NodeProvisioner.PlannedNode node = new NodeProvisioner.PlannedNode("fakeNode", getFakeFuture(), 1);
-        when(kubeCloudMock.provision(any(Label.class), anyInt() )).thenReturn(Collections.<NodeProvisioner.PlannedNode>singleton(node) );
+
+        when(kubeCloudMock1.getDisplayName() ).thenReturn("fakeKubeCloud1");
+        when(kubeCloudMock1.canProvision(null)).thenReturn(false);
+        when(kubeCloudMock1.canProvision((Label) notNull())).thenReturn(true);
+        when(kubeCloudMock1.provision(any(Label.class), anyInt() )).thenReturn(Collections.<NodeProvisioner.PlannedNode>singleton(node) );
+
+        when(kubeCloudMock2.getDisplayName() ).thenReturn("fakeKubeCloud2");
+        when(kubeCloudMock2.canProvision(any(Label.class))).thenReturn(true);
+        when(kubeCloudMock2.provision(any(Label.class), anyInt() )).thenReturn(Collections.<NodeProvisioner.PlannedNode>singleton(node) );
+
     }
 
     @Test
@@ -55,26 +60,37 @@ public class TestSlaveProvisioningStrategy {
         KubernetesSlaveProvisioningStrategy strategy = new KubernetesSlaveProvisioningStrategy();
         NodeProvisioner.StrategyDecision decision = strategy.apply(new LabelAtom("fakeLabel"), 0);
 
-        assertEquals(decision, NodeProvisioner.StrategyDecision.PROVISIONING_COMPLETED);
-        Mockito.verify(kubeCloudMock, Mockito.never() ).provision(any(Label.class), anyInt() );
+        assertEquals("Strategy decision not expected", NodeProvisioner.StrategyDecision.PROVISIONING_COMPLETED, decision);
+        Mockito.verify(kubeCloudMock1, Mockito.never() ).provision(any(Label.class), anyInt() );
     }
 
     @Test
     public void testProvisioningStrategy_withEnoughCapacity() {
         KubernetesSlaveProvisioningStrategy strategy = new KubernetesSlaveProvisioningStrategy();
-        NodeProvisioner.StrategyDecision decision = strategy.apply(new LabelAtom("fakeLabel"), 1);
+        NodeProvisioner.StrategyDecision decision = strategy.apply(new LabelAtom("fakeLabel"), 2);
 
-        assertEquals(decision, NodeProvisioner.StrategyDecision.PROVISIONING_COMPLETED);
-        Mockito.verify(kubeCloudMock).provision(any(Label.class), anyInt());
+        assertEquals("Strategy decision not expected", NodeProvisioner.StrategyDecision.PROVISIONING_COMPLETED, decision);
+        Mockito.verify(kubeCloudMock1).provision(any(Label.class), anyInt());
     }
 
     @Test
     public void testProvisioningStrategy_withoutEnoughCapacity() {
         KubernetesSlaveProvisioningStrategy strategy = new KubernetesSlaveProvisioningStrategy();
-        NodeProvisioner.StrategyDecision decision = strategy.apply(new LabelAtom("fakeLabel"), 2);
+        NodeProvisioner.StrategyDecision decision = strategy.apply(new LabelAtom("fakeLabel"), 3);
 
-        assertEquals(decision, NodeProvisioner.StrategyDecision.CONSULT_REMAINING_STRATEGIES);
-        Mockito.verify(kubeCloudMock).provision(any(Label.class), anyInt() );
+        assertEquals("Strategy decision not expected", NodeProvisioner.StrategyDecision.CONSULT_REMAINING_STRATEGIES, decision);
+        Mockito.verify(kubeCloudMock1).provision(any(Label.class), anyInt() );
+        Mockito.verify(kubeCloudMock2).provision(any(Label.class), anyInt() );
+    }
+
+    @Test
+    public void testProvisioningStrategy_withNoProvisionableLabelOnFirstCloud() {
+        KubernetesSlaveProvisioningStrategy strategy = new KubernetesSlaveProvisioningStrategy();
+        NodeProvisioner.StrategyDecision decision = strategy.apply(null, 2);
+
+        assertEquals("Strategy decision not expected", NodeProvisioner.StrategyDecision.CONSULT_REMAINING_STRATEGIES, decision);
+        Mockito.verify(kubeCloudMock1, Mockito.never() ).provision(any(Label.class), anyInt() );
+        Mockito.verify(kubeCloudMock2).provision(any(Label.class), anyInt() );
     }
 
     private Future<Node> getFakeFuture() {
