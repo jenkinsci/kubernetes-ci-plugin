@@ -196,6 +196,14 @@ public class KubernetesCloud extends AbstractCloudImpl {
         }
 
         try {
+            FormValidation testConnection = ((DescriptorImpl) getDescriptor()).doTestConnection(
+                    getEndpointUrl(), getPredefinedNamespace(), getCredentialsId(), null);
+
+            if (testConnection.kind == FormValidation.Kind.ERROR) {
+                LOGGER.warning("Unable to connect to: " + this + testConnection.getMessage() );
+                return false;
+            }
+
             return slaveProvisioningService.canProvision(KubernetesCloud.this, podSlaveConfigurationParams, label);
 
         } catch (ServiceException exception) {
