@@ -8,8 +8,14 @@
 
 package com.elasticbox.jenkins.k8s.plugin.clouds;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+
 import com.elasticbox.jenkins.k8s.repositories.KubernetesRepository;
 import com.elasticbox.jenkins.k8s.repositories.error.RepositoryException;
+import com.elasticbox.jenkins.k8s.services.SlaveProvisioningService;
+import com.elasticbox.jenkins.k8s.services.error.ServiceException;
+import hudson.model.Label;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import org.junit.Assert;
@@ -18,18 +24,17 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import javax.net.ssl.SSLHandshakeException;
 import java.util.Arrays;
 import java.util.List;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-
-import javax.net.ssl.SSLHandshakeException;
 
 public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestBaseKubernetes {
 
     @Mock
     protected KubernetesRepository kubernetesRepositoryMock;
+
+    @Mock
+    protected SlaveProvisioningService slaveProvisioningServiceMock;
 
     @Test
     public void testGetKubernetesClouds() {
@@ -60,7 +65,7 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
     }
 
     @Test
-    public void testDescriptorFillNamespaceItems() throws RepositoryException {
+    public void testDescriptorFillNamespaceItems() throws RepositoryException, ServiceException {
         final KubernetesCloud.DescriptorImpl cloudDescriptor = (KubernetesCloud.DescriptorImpl) cloud.getDescriptor();
         Assert.assertNotNull("Injection failed", cloudDescriptor.kubeRepository);
         Assert.assertNotNull("Injection failed", cloudDescriptor.getInjector() );
@@ -77,8 +82,7 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
         Assert.assertTrue("Required fields message was expected", formValidation.getMessage().contains("Required"));
 
         // Now mocking the repository will return some data:
-        initMock();
-        cloudDescriptor.kubeRepository = kubernetesRepositoryMock;
+        initRepositoryMock(cloudDescriptor);
 
         namespaceItems = cloudDescriptor.doFillPredefinedNamespaceItems(FAKE_URL, EMPTY, EMPTY);
         Assert.assertEquals("Error filling namespace list with 3 items", 3, namespaceItems.size() );
@@ -95,19 +99,51 @@ public class TestKubernetesCloud extends com.elasticbox.jenkins.k8s.plugin.TestB
         Assert.assertTrue("'Not trusted' message was expected", formValidation.getMessage().contains("not trusted"));
     }
 
-    private void initMock() throws RepositoryException {
-        if (kubernetesRepositoryMock == null) {
-            MockitoAnnotations.initMocks(this);
+    @Test
+    public void testCanProvision() throws RepositoryException, ServiceException {
+        initCanProvisionMocks();
 
-            Mockito.when(kubernetesRepositoryMock.namespaceExists(anyString(), anyString())).thenReturn(Boolean.TRUE);
-            Mockito.when(kubernetesRepositoryMock.getNamespaces(any(KubernetesCloudParams.class)))
+        boolean provision = cloud.canProvision(null);
+        Mockito.verify(kubernetesRepositoryMock).testConnection(any(KubernetesCloudParams.class));
+        Mockito.verify(slaveProvisioningServiceMock).canProvision(any(KubernetesCloud.class), any(List.class), any(Label.class));
+        Assert.assertTrue("Expected provisioning allowed", provision);
+
+
+        provision = cloud.canProvision(null);
+        Mockito.verify(kubernetesRepositoryMock, Mockito.times(2)).testConnection(any(KubernetesCloudParams.class));
+        Mockito.verify(slaveProvisioningServiceMock).canProvision(any(KubernetesCloud.class), any(List.class), any(Label.class));
+        Assert.assertFalse("Expected provisioning declined", provision);
+
+        provision = cloud.canProvision(null);
+        Mockito.verify(kubernetesRepositoryMock, Mockito.times(4)).testConnection(any(KubernetesCloudParams.class));
+        Mockito.verify(slaveProvisioningServiceMock, Mockito.times(2)).canProvision(any(KubernetesCloud.class), any(List.class), any(Label.class));
+        Assert.assertFalse("Expected provisioning declined", provision);
+    }
+
+
+    private void initRepositoryMock(KubernetesCloud.DescriptorImpl cloudDescriptor) throws RepositoryException, ServiceException {
+        MockitoAnnotations.initMocks(this);
+
+        Mockito.when(kubernetesRepositoryMock.namespaceExists(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        Mockito.when(kubernetesRepositoryMock.getNamespaces(any(KubernetesCloudParams.class)))
                 .thenReturn(Arrays.asList("default", FAKE_NS));
-            Mockito.when(kubernetesRepositoryMock.testConnection(any(KubernetesCloudParams.class)))
+        Mockito.when(kubernetesRepositoryMock.testConnection(any(KubernetesCloudParams.class)))
                 .thenReturn(true)
                 .thenThrow(new RepositoryException(FAKE_MOCK_EXCEPTION))
                 .thenThrow(new RepositoryException("Wrapper", new RepositoryException(
-                    "MidCause", new SSLHandshakeException("InitialCause") )))
+                        "MidCause", new SSLHandshakeException("InitialCause"))))
                 .thenReturn(true);
-        }
+
+        cloudDescriptor.kubeRepository = kubernetesRepositoryMock;
+    }
+
+    private void initCanProvisionMocks() throws RepositoryException, ServiceException {
+        initRepositoryMock( (KubernetesCloud.DescriptorImpl) cloud.getDescriptor() );
+
+        Mockito.when(slaveProvisioningServiceMock.canProvision(any(KubernetesCloud.class), any(List.class), any(Label.class)))
+                .thenReturn(Boolean.TRUE)
+                .thenThrow(new ServiceException(FAKE_MOCK_EXCEPTION));
+
+        cloud.slaveProvisioningService = slaveProvisioningServiceMock;
     }
 }

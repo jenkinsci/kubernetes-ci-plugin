@@ -144,13 +144,13 @@ public class WaitForPodToBeRunning extends AbstractPodDeployment {
                 final PodState podStatus = PodState.findByDescription(phase);
 
                 if (podStatus == PodState.FAILED) {
-                    LOGGER.log(Level.INFO, "Pod is at the Failed stage");
+                    LOGGER.info("Pod is at the Failed stage");
                     throw new TaskException("Pod deployment failed");
                 }
 
                 this.result = podStatus;
 
-                LOGGER.info("Pod: " + pod.getMetadata().getName() + " is at the " + result.getStatus() + "stage");
+                LOGGER.config("Pod: " + pod.getMetadata().getName() + " is at the " + result.getStatus() + "stage");
 
             } catch (RepositoryException exception) {
                 String message = "Error getting pod in cloud: " + kubeName + " in namespace: " + namespace

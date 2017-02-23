@@ -153,7 +153,7 @@ public class KubernetesCloud extends AbstractCloudImpl {
     @Override
     public Collection<NodeProvisioner.PlannedNode> provision(final Label label, int excessWorkload) {
 
-        LOGGER.info("Slave provisioning requested, excess workload: " + excessWorkload);
+        LOGGER.info("Slave provisioning requested for label '" + label + "', excess workload: " + excessWorkload);
 
         final List<PodSlaveConfigurationParams> podSlaveConfigurationParams = new ArrayList<>();
         for (PodSlaveConfig config: podSlaveConfigurations) {
@@ -196,6 +196,14 @@ public class KubernetesCloud extends AbstractCloudImpl {
         }
 
         try {
+            FormValidation testConnection = ((DescriptorImpl) getDescriptor()).doTestConnection(
+                    getEndpointUrl(), getPredefinedNamespace(), getCredentialsId(), null);
+
+            if (testConnection.kind == FormValidation.Kind.ERROR) {
+                LOGGER.warning("Unable to connect to: " + this + testConnection.getMessage() );
+                return false;
+            }
+
             return slaveProvisioningService.canProvision(KubernetesCloud.this, podSlaveConfigurationParams, label);
 
         } catch (ServiceException exception) {
