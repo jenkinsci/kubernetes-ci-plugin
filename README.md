@@ -11,8 +11,8 @@ Users can add additional slave configurations or chart repositories, as well as 
 The plugin enables the deployment of charts from any chart repository configured (and its further deletion) to the local Kubernetes cloud, or to any configured Kubernetes cluster.
 
 ## Screenshots
-###Cloud configuration:
+### Cloud configuration:
 ![Cloud configuration screenshot](img/cloudConfig.png)
 
-###Deploy Chart build step configuration:
+### Deploy Chart build step configuration:
 ![Deploy Chart build step screenshot](img/deployChartBuildStep.png)
