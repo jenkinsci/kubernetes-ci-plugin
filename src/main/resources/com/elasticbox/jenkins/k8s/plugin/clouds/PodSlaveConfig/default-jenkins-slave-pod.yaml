@@ -7,7 +7,7 @@ metadata:
 spec:
     containers:
       - name: "jenkins-slave"
-        image: "jenkinsci/jnlp-slave"
+        image: "jenkins/inbound-agent"
         env:
           - name: "JENKINS_URL"
             value: "${JENKINS_URL}"
