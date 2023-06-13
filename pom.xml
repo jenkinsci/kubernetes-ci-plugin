@@ -30,7 +30,7 @@
     <maven.javadoc.skip>true</maven.javadoc.skip>
     <skipTests>false</skipTests>
     <findbugs.skip>true</findbugs.skip>
-    <hamcrest.version>1.3</hamcrest.version>
+    <hamcrest.version>2.2</hamcrest.version>
     <powermock.version>1.6.2</powermock.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <checkstyle.version>6.14.1</checkstyle.version>
@@ -156,13 +156,7 @@
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-core</artifactId>
-      <version>${hamcrest.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.hamcrest</groupId>
-      <artifactId>hamcrest-library</artifactId>
+      <artifactId>hamcrest</artifactId>
       <version>${hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
